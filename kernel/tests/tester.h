@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace tester {
 
   void main();
@@ -12,6 +14,7 @@ namespace tester {
     };
 
     void invoke_test_failure();
+    void invoke_test_success();
     void register_test(test_function test);
     void continue_tests();
   }

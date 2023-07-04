@@ -3,6 +3,8 @@
 #include "../lib//itoa.h"
 #include "../vga/vga.h"
 
+#include <type_traits>
+
 using tester::internal::test_function;
 
 static test_function tests[100];
@@ -49,8 +51,13 @@ void tester::internal::continue_tests() {
 
 }
 
+
 void tester::internal::invoke_test_failure() {
   current_test_did_pass = false;
+}
+
+void tester::internal::invoke_test_success() {
+  current_test_did_pass = true;
 }
 
 void tester::internal::register_test(test_function test) {
