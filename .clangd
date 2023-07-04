@@ -5,3 +5,4 @@ CompileFlags:
     - "-I../lib/libc++/include"
     - "-I../lib/fmt/include"
     - "-I../lib/"
+    - "-std=c++20"

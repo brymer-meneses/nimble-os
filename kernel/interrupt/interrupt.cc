@@ -4,6 +4,8 @@
 #include "../lib/itoa.h"
 #include "../vga/vga.h"
 
+#include <optional>
+
 constexpr uint8_t IDT_MAX_DESCRIPTIONS = 32;
 
 struct idt_register {
@@ -21,31 +23,6 @@ struct idt_descriptor {
   uint32_t reserved;
 } __attribute__((packed));
 
-struct cpu_status {
-  uint64_t r15;
-  uint64_t r14;
-  uint64_t r13;
-  uint64_t r12;
-  uint64_t r11;
-  uint64_t r10;
-  uint64_t r9;
-  uint64_t r8;
-  uint64_t rdi;
-  uint64_t rsi;
-  uint64_t rdx;
-  uint64_t rcx;
-  uint64_t rbx;
-  uint64_t rax;
-
-  uint64_t vector_number;
-  uint64_t error_code;
-
-  uint64_t iret_rip;
-  uint64_t iret_cs;
-  uint64_t iret_flags;
-  uint64_t iret_rsp;
-  uint64_t iret_ss;
-} __attribute__((packed));
 
 __attribute__((aligned(0x10)))
 static idt_descriptor IDT[256];
@@ -84,19 +61,28 @@ void interrupt::initialize_idt() {
   asm volatile ("sti");                        // set the interrupt flag
 }
 
-extern "C" void interrupt_handler(cpu_status* context) {
+#ifdef ENABLE_TESTS
+  #include "../tests/tester.h"
+#endif
+
+static std::optional<interrupt::cpu_status> current_cpu_status = std::nullopt;
+
+std::optional<interrupt::cpu_status> interrupt::get_context_on_last_interrupt() {
+  return current_cpu_status;
+}
+
+extern "C" void interrupt_handler(interrupt::cpu_status context) {
   char buffer[3];
 
-  std::itoa(context->vector_number, buffer, 10);
+  std::itoa(context.vector_number, buffer, 10);
 
   vga::set_foreground(vga::color::LightRed);
   vga::print("EXCEPTION ");
   vga::print(buffer);
   vga::print(" ");
-  vga::set_foreground(vga::color::White);
+  vga::set_foreground(vga::color::Yellow);
 
-
-  switch (context->vector_number) {
+  switch (context.vector_number) {
     case 0:
       vga::println("Division by zero.");  
       break;
@@ -111,8 +97,11 @@ extern "C" void interrupt_handler(cpu_status* context) {
       break;
   }
 
-  vga::set_foreground(vga::color::Yellow);
+  current_cpu_status = context;
 
+  #ifdef ENABLE_TESTS
+    tester::internal::continue_tests();
+  #endif
 
   asm volatile ("cli");
   asm volatile ("hlt");

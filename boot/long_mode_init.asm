@@ -1,5 +1,9 @@
 global long_mode_start
 
+extern kmain
+extern _init
+extern _fini
+
 section .text
 bits 64
 
@@ -12,8 +16,11 @@ long_mode_start:
   mov fs, ax
   mov gs, ax
 
-  extern kmain
+  call _init
+
   call kmain
+
+  call _fini
   
   ; print `OKAY` to screen
   mov rax, 0x2f592f412f4b2f4f

@@ -1,41 +1,47 @@
 
 KERNEL_CC_SOURCE_FILES 	:= $(wildcard kernel/**/*.cc kernel/*.cc) 
 KERNEL_ASM_SOURCE_FILES := $(wildcard kernel/**/*.asm kernel/*.asm) 
+
 BOOT_SOURCE_FILES 	:= $(wildcard boot/*.asm)
 
 OBJECT_FILES := $(patsubst kernel/%.cc,  	build/kernel/%.cc.o, 			$(KERNEL_CC_SOURCE_FILES)) \
 								$(patsubst kernel/%.asm, 	build/kernel/%.asm.o, 		$(KERNEL_ASM_SOURCE_FILES)) \
 								$(patsubst boot/%.asm, 	 	build/boot/%.asm.o, 			$(BOOT_SOURCE_FILES))
 
-CC 	:= x86_64-elf-gcc
+OBJECT_FILES := $(filter-out build/boot/crti.asm.o build/boot/crtn.asm.o, $(OBJECT_FILES))
+
+CXX 	:= x86_64-elf-gcc
 LD	:= x86_64-elf-ld
 
 LIBCPP := lib/libc++/include/
 LIB := lib/
 
 CXXFLAGS := \
-    -Wall \
-    -Wextra \
-    -std=c++23\
+		-Wall \
+		-Wextra \
+		-std=c++20\
+		-O3 \
 		-g \
+		-masm=intel \
 		-lgcc \
+		-lc \
 		-ffreestanding \
-    -fno-stack-protector \
+		-fno-stack-protector \
 		-fno-threadsafe-statics \
-    -fno-stack-check \
+		-fno-stack-check \
 		-fno-exceptions \
 		-fno-unwind-tables \
 		-fno-rtti \
-    -fno-lto \
-    -fPIE \
-    -m64 \
-    -march=x86-64 \
-    -mabi=sysv \
-    -mno-80387 \
-    -mno-mmx \
-    -mno-sse \
-    -mno-sse2 \
-    -mno-red-zone \
+		-fno-lto \
+		-fPIE \
+		-m64 \
+		-march=x86-64 \
+		-mabi=sysv \
+		-mno-80387 \
+		-mno-mmx \
+		-mno-sse \
+		-mno-sse2 \
+		-mno-red-zone \
 		-I $(LIBCPP) \
 		-I $(LIB) \
  
@@ -47,6 +53,14 @@ LDFLAGS := \
     -z text \
     -z max-page-size=0x1000 \
     -T linker.ld
+
+CRTI_OBJ		 := build/boot/crti.asm.o
+CRTBEGIN_OBJ := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
+
+CRTEND_OBJ 	 := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
+CRTN_OBJ		 := build/boot/crtn.asm.o
+
+OBJ_LINK_LIST := $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECT_FILES) $(CRTEND_OBJ) $(CRTN_OBJ)
 
 .PHONY: all clean
 
@@ -64,6 +78,10 @@ clean:
 run: iso
 	qemu-system-x86_64 -cdrom build/nimble-os.iso
 
+test: CXXFLAGS += -DENABLE_TESTS
+test: clean iso
+	qemu-system-x86_64 -cdrom build/nimble-os.iso
+
 iso: nimble-os 
 	mkdir -p build/iso/boot/grub
 	cp build/nimble-os.bin build/iso/boot/nimble-os.bin
@@ -73,12 +91,12 @@ iso: nimble-os
 
 nimble-os: build/nimble-os.bin
 
-build/nimble-os.bin: $(OBJECT_FILES)
-	$(LD) $(LDFLAGS) $(OBJECT_FILES) -o $@
+build/nimble-os.bin: $(OBJECT_FILES) $(CRTI_OBJ) $(CRTN_OBJ)
+	$(LD) $(LDFLAGS) $(OBJ_LINK_LIST) -o $@
 	
 build/kernel/%.cc.o: kernel/%.cc
 	@mkdir -p $(dir $@)
-	$(CC) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 build/kernel/%.asm.o: kernel/%.asm
 	@mkdir -p $(dir $@)

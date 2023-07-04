@@ -101,8 +101,7 @@ public:
   }
 };
 
-
-static volatile writer WRITER{};
+static volatile writer WRITER;
 
 void vga::clear_screen() {
   WRITER.clear_screen();
