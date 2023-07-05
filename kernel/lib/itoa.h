@@ -1,7 +1,6 @@
 #pragma once
 
-// https://stackoverflow.com/a/12386915
 
-namespace std {
+namespace lib {
   int itoa(int value, char *sp, int radix);
 }

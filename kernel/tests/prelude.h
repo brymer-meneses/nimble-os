@@ -1,12 +1,22 @@
 #pragma once
 #include "tester.h"
 #include "../vga/vga.h"
+#include "../lib/libc.h"
 
 template<typename Arg1, typename Arg2>
 void assert_eq(Arg1 arg1, Arg2 arg2) {
   if (!std::is_same<Arg1, Arg2>::value) {
     tester::internal::invoke_test_failure();
   }
+
+
+  if (std::is_same<Arg1, const char*>::value) {
+    if (std::strcmp(arg1, arg2) == 0) {
+      tester::internal::invoke_test_success();
+      return;
+    }
+  }
+
   if (arg1 != arg2) {
     tester::internal::invoke_test_failure();
   }
@@ -14,7 +24,7 @@ void assert_eq(Arg1 arg1, Arg2 arg2) {
 
 template<typename Arg1, typename Arg2>
 void assert_neq(Arg1 arg1, Arg2 arg2) {
-  if (std::is_same<Arg1, Arg2>::value) {
+  if constexpr (std::is_same<Arg1, Arg2>::value) {
     tester::internal::invoke_test_failure();
   }
   if (arg1 == arg2) {

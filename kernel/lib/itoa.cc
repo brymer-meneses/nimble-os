@@ -1,7 +1,8 @@
 #include "itoa.h"
 
-int std::itoa(int value, char *sp, int radix) {
-  char tmp[16];// be careful with the length of the buffer
+// https://stackoverflow.com/a/12386915
+int lib::itoa(int value, char *sp, int radix) {
+  char tmp[16];
   char *tp = tmp;
   int i;
   unsigned v;
@@ -12,8 +13,7 @@ int std::itoa(int value, char *sp, int radix) {
   else
       v = (unsigned)value;
 
-  while (v || tp == tmp)
-  {
+  while (v || tp == tmp) {
       i = v % radix;
       v /= radix;
       if (i < 10)
@@ -24,14 +24,16 @@ int std::itoa(int value, char *sp, int radix) {
 
   int len = tp - tmp;
 
-  if (sign) 
-  {
+  if (sign) {
       *sp++ = '-';
       len++;
   }
 
   while (tp > tmp)
       *sp++ = *--tp;
+
+  // add null termination
+  *sp = '\0';
 
   return len;
 }

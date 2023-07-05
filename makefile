@@ -23,7 +23,6 @@ CXXFLAGS := \
 		-Wall \
 		-Wextra \
 		-std=c++20\
-		-O3 \
 		-g \
 		-masm=intel \
 		-lgcc \
@@ -81,7 +80,7 @@ clean:
 run: iso
 	qemu-system-x86_64 -cdrom build/nimble-os.iso
 
-test: CXXFLAGS += -DENABLE_TESTS
+test: CXXFLAGS += $(TESTFLAGS)
 test: clean iso
 	qemu-system-x86_64 -cdrom build/nimble-os.iso
 

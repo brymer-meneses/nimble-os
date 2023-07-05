@@ -2,6 +2,7 @@
 #include "stdint.h"
 #include "../lib//itoa.h"
 #include "../vga/vga.h"
+#include "../lib/format.h"
 
 #include <type_traits>
 
@@ -12,11 +13,10 @@ static uint16_t test_count = 0;
 static bool current_test_did_pass = true;
 
 void tester::main() {
-  char buffer[4];
-  std::itoa(test_count, buffer, 10);
-  vga::print("Running ");
-  vga::print(buffer);
-  vga::println(" tests...");
+  char buffer[256];
+
+  lib::format(buffer, "Running {i} tests...", test_count);
+  vga::println(buffer);
 
   tester::internal::continue_tests();
 }

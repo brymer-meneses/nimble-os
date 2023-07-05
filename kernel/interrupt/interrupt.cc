@@ -74,7 +74,7 @@ std::optional<interrupt::cpu_status> interrupt::get_context_on_last_interrupt() 
 extern "C" void interrupt_handler(interrupt::cpu_status context) {
   char buffer[3];
 
-  std::itoa(context.vector_number, buffer, 10);
+  lib::itoa(context.vector_number, buffer, 10);
 
   vga::set_foreground(vga::color::LightRed);
   vga::print("EXCEPTION ");

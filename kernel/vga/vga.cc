@@ -1,6 +1,5 @@
 #include "vga.h"
 
-
 using vga::color;
 
 constexpr uint8_t SCREEN_HEIGHT = 20;
@@ -101,7 +100,8 @@ public:
   }
 };
 
-static volatile writer WRITER;
+
+static volatile writer WRITER{};
 
 void vga::clear_screen() {
   WRITER.clear_screen();
