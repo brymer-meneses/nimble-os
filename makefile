@@ -10,11 +10,13 @@ OBJECT_FILES := $(patsubst kernel/%.cc,  	build/kernel/%.cc.o, 			$(KERNEL_CC_SO
 
 OBJECT_FILES := $(filter-out build/boot/crti.asm.o build/boot/crtn.asm.o, $(OBJECT_FILES))
 
+# TODO:
+# filter out test files so that it won't get linked when building the iso
+
 CXX 	:= x86_64-elf-gcc
 LD	:= x86_64-elf-ld
 
-LIBCPP := lib/libc++/include/
-LIB := lib/
+LIBCXX_FREESTANDING := deps/libc++/include/
 
 TESTFLAGS := \
 		-DENABLE_TESTS
@@ -44,8 +46,8 @@ CXXFLAGS := \
 		-mno-sse \
 		-mno-sse2 \
 		-mno-red-zone \
-		-I $(LIBCPP) \
-		-I $(LIB) \
+		-I $(LIBCXX_FREESTANDING) \
+		-I deps \
  
 LDFLAGS := \
     -m elf_x86_64 \
@@ -68,11 +70,8 @@ OBJ_LINK_LIST := $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECT_FILES) $(CRTEND_OBJ) $(CRT
 
 all: iso
 
-debug:
-	echo $(OBJECT_FILES)
-
 install-deps:
-	-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/libc++
+	-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 deps/libc++
 
 clean:
 	$(RM) -rf build
@@ -91,7 +90,7 @@ iso: nimble-os
 	grub-mkrescue -o build/nimble-os.iso	build/iso 2> /dev/null
 	rm -r build/iso
 
-nimble-os: build/nimble-os.bin
+nimble-os: build/nimble-os.bin install-deps
 
 build/nimble-os.bin: $(OBJECT_FILES) $(CRTI_OBJ) $(CRTN_OBJ)
 	$(LD) $(LDFLAGS) $(OBJ_LINK_LIST) -o $@
