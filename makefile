@@ -24,6 +24,9 @@ TESTFLAGS := \
 CXXFLAGS := \
 		-Wall \
 		-Wextra \
+		-Wpedantic \
+		-Wconversion \
+		-pedantic-errors \
 		-O0 \
 		-std=c++20\
 		-g \

@@ -50,7 +50,7 @@ void lib::internal::format_impl(char* buffer, const char* string, va_list args) 
 
     // if we encounter "\{"
     if (c == '\\' && match('{')) {
-      append_string("\{");
+      append_string("\\{");
       continue;
     };
 
