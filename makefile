@@ -16,6 +16,9 @@ LD	:= x86_64-elf-ld
 LIBCPP := lib/libc++/include/
 LIB := lib/
 
+TESTFLAGS := \
+		-DENABLE_TESTS
+
 CXXFLAGS := \
 		-Wall \
 		-Wextra \
