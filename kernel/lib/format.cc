@@ -7,22 +7,7 @@
 #include "libc.h"
 #include "itoa.h"
 
-
-/// lib::format
-///   an easy api to format string
-///
-/// Example:
-///   char buffer[256];
-///   format(buffer, "Hello {s} -- {i}", "world", 42);
-///
-///   ASSERT_EQ("Hello world -- 42", buffer);
-///
-/// TODO:
-///   Implement float and other type support
-void lib::format(char* buffer, const char* string, ...) {
-  va_list args;
-  va_start(args, string);
-
+void lib::internal::format_impl(char* buffer, const char* string, va_list args) {
   size_t string_len = std::strlen(string);
   size_t string_pos = 0;
   size_t buffer_pos = 0;
@@ -96,8 +81,14 @@ void lib::format(char* buffer, const char* string, ...) {
 
     append_char(c);
   }
-  va_end(args);
-
   append_char('\0');
+}
+
+
+void lib::format(char* buffer, const char* string, ...) {
+  va_list args;
+  va_start(args, string);
+  lib::internal::format_impl(buffer, string, args);
+  va_end(args);
   return;
 }

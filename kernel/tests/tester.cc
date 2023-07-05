@@ -1,9 +1,10 @@
 #include "tester.h"
-#include "stdint.h"
-#include "../lib//itoa.h"
-#include "../vga/vga.h"
-#include "../lib/format.h"
 
+#include "lib/itoa.h"
+#include "lib/format.h"
+#include "vga/vga.h"
+
+#include <stdint.h>
 #include <type_traits>
 
 using tester::internal::test_function;

@@ -1,8 +1,8 @@
 
 #include "interrupt.h"
 
-#include "../lib/itoa.h"
-#include "../vga/vga.h"
+#include "lib/itoa.h"
+#include "vga/vga.h"
 
 #include <optional>
 
@@ -72,15 +72,7 @@ std::optional<interrupt::cpu_status> interrupt::get_context_on_last_interrupt() 
 }
 
 extern "C" void interrupt_handler(interrupt::cpu_status context) {
-  char buffer[3];
-
-  lib::itoa(context.vector_number, buffer, 10);
-
-  vga::set_foreground(vga::color::LightRed);
-  vga::print("EXCEPTION ");
-  vga::print(buffer);
-  vga::print(" ");
-  vga::set_foreground(vga::color::Yellow);
+  vga::print("Exception {i} ", context.vector_number);
 
   switch (context.vector_number) {
     case 0:

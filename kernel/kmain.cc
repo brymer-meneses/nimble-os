@@ -13,8 +13,10 @@ inline void halt() {
 
 extern "C" void kmain(void) {
   vga::clear_screen();
+  vga::println("Hello, {s}!", "world");
 
   interrupt::initialize_idt();
+
 
 #ifdef ENABLE_TESTS
   tester::main();

@@ -1,4 +1,7 @@
 #include "vga.h"
+#include "lib/format.h"
+
+#include <stdarg.h>
 
 using vga::color;
 
@@ -107,13 +110,27 @@ void vga::clear_screen() {
   WRITER.clear_screen();
 }
 
-void vga::print(const char* string) {
-  WRITER.write_string(string);
+void vga::print(const char* string, ...) {
+  va_list args;
+  va_start(args, string);
+
+  char buffer[256];
+  lib::internal::format_impl(buffer, string, args);
+  WRITER.write_string(buffer);
+
+  va_end(args);
 }
 
-void vga::println(const char* string) {
-  WRITER.write_string(string);
-  WRITER.write_character('\n');
+void vga::println(const char* string, ...) {
+  va_list args;
+  va_start(args, string);
+
+  char buffer[256];
+  lib::internal::format_impl(buffer, string, args);
+  WRITER.write_string(buffer);
+  WRITER.write_new_line();
+
+  va_end(args);
 }
 
 void vga::set_color(color fg, color bg) {

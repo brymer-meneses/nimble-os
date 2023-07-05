@@ -1,7 +1,20 @@
 #pragma once
 #include "tester.h"
-#include "../vga/vga.h"
-#include "../lib/libc.h"
+#include "vga/vga.h"
+#include "lib/libc.h"
+
+
+#define TEST(test_suite, test_name) \
+void test_##test_suite##_##test_name(); \
+__attribute__((constructor)) \
+void register_##test_suite##_##test_name() { \
+  tester::internal::test_function test; \
+  test.suite_name = #test_suite; \
+  test.function_name = #test_name; \
+  test.function = test_##test_suite##_##test_name; \
+  tester::internal::register_test(test); \
+}; \
+void test_##test_suite##_##test_name()
 
 template<typename Arg1, typename Arg2>
 void assert_eq(Arg1 arg1, Arg2 arg2) {
@@ -40,26 +53,3 @@ void assert(Arg1 arg1) {
     tester::internal::invoke_test_failure();
   }
 }
-
-#define TEST(test_suite, test_name) \
-void test_##test_suite##_##test_name(); \
-__attribute__((constructor)) \
-void register_##test_suite##_##test_name() { \
-  tester::internal::test_function test; \
-  test.suite_name = #test_suite; \
-  test.function_name = #test_name; \
-  test.function = test_##test_suite##_##test_name; \
-  tester::internal::register_test(test); \
-}; \
-void test_##test_suite##_##test_name()
-
-#define ASSERT_EQ(left, right) \
-  assert_eq(left, right);
-
-#define ASSERT_NEQ(left, right) \
-  assert_neq(left, right);
-
-#define ASSERT(value) \
-  assert(left, right);
-
-

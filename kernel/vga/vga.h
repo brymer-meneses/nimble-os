@@ -24,8 +24,8 @@ enum class color : uint8_t {
 };
 
 
-void print(const char* string);
-void println(const char* string);
+void print(const char* string, ...);
+void println(const char* string, ...);
 void clear_screen();
 
 void set_color(color fg, color bg);

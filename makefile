@@ -24,6 +24,7 @@ TESTFLAGS := \
 CXXFLAGS := \
 		-Wall \
 		-Wextra \
+		-O0 \
 		-std=c++20\
 		-g \
 		-masm=intel \
@@ -46,6 +47,7 @@ CXXFLAGS := \
 		-mno-sse \
 		-mno-sse2 \
 		-mno-red-zone \
+		-I kernel \
 		-I $(LIBCXX_FREESTANDING) \
 		-I deps \
  
