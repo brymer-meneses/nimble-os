@@ -2,8 +2,7 @@
 # NOTE: this should be relative to main.cpp
 CompileFlags:
   Add:
-    - "-I../lib/libc++/include"
-    - "-I../lib/fmt/include"
-    - "-I../lib/"
+    - "-I../deps/libc++/include/"
+    - "-I../deps/"
     - "-I../"
     - "-std=c++20"

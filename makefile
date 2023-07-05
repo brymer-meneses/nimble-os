@@ -79,7 +79,7 @@ clean:
 	$(RM) -rf build
 
 run: iso
-	qemu-system-x86_64 -cdrom build/nimble-os.iso
+	qemu-system-x86_64 -serial stdio -cdrom build/nimble-os.iso
 
 test: CXXFLAGS += $(TESTFLAGS)
 test: clean iso
