@@ -1,5 +1,5 @@
-#include "prelude.h"
-#include "../lib/format.h"
+#include "tests/prelude.h"
+#include "lib/format.h"
 
 TEST(format, test_mixed_format) {
   char buffer[256];

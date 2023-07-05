@@ -2,9 +2,10 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#include "drivers/serial.h"
+#include "drivers/io.h"
+
 #include "lib/format.h"
-#include "lib/serial.h"
-#include "lib/io.h"
 #include "lib/libc.h"
 
 constexpr uint16_t PORT = 0x3f8; // COM1

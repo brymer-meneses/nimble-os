@@ -1,6 +1,6 @@
 #include "vga/vga.h"
 #include "interrupt/interrupt.h"
-#include "lib/serial.h"
+#include "drivers/serial.h"
 
 #ifdef ENABLE_TESTS
   #include "tests/tester.h"

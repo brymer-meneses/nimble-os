@@ -3,6 +3,7 @@
 #include "vga/vga.h"
 #include "lib/libc.h"
 
+#include <type_traits>
 
 #define TEST(test_suite, test_name) \
 void test_##test_suite##_##test_name(); \

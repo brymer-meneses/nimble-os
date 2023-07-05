@@ -1,7 +1,8 @@
-#include "tester.h"
 
 #include "lib/itoa.h"
 #include "lib/format.h"
+
+#include "tests/tester.h"
 #include "vga/vga.h"
 
 #include <stdint.h>
