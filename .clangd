@@ -6,3 +6,4 @@ CompileFlags:
     - "-I../deps/"
     - "-I../"
     - "-std=c++20"
+    - "-DARCH=x86_64"

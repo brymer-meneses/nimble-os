@@ -1,24 +1,19 @@
 
-KERNEL_CC_SOURCE_FILES 	:= $(wildcard kernel/**/*.cc kernel/*.cc) 
-KERNEL_ASM_SOURCE_FILES := $(wildcard kernel/**/*.asm kernel/*.asm) 
+BUILD_DIR := $(abspath build)
 
-BOOT_SOURCE_FILES 	:= $(wildcard boot/*.asm)
+ARCH := x86_64
 
-OBJECT_FILES := $(patsubst kernel/%.cc,  	build/kernel/%.cc.o, 			$(KERNEL_CC_SOURCE_FILES)) \
-								$(patsubst kernel/%.asm, 	build/kernel/%.asm.o, 		$(KERNEL_ASM_SOURCE_FILES)) \
-								$(patsubst boot/%.asm, 	 	build/boot/%.asm.o, 			$(BOOT_SOURCE_FILES))
+CXX := $(ARCH)-elf-gcc
+LD	:= $(ARCH)-elf-ld
 
-OBJECT_FILES := $(filter-out build/boot/crti.asm.o build/boot/crtn.asm.o, $(OBJECT_FILES))
+BOOTLOADER := grub
+CXX := x86_64-elf-gcc
+LD := x86_64-elf-ld
 
-# TODO:
-# filter out test files so that it won't get linked when building the iso
+DEPS_DIR := $(abspath deps)
+LIBCXX_FREESTANDING := $(DEPS_DIR)/libc++/include/
 
-CXX 	:= x86_64-elf-gcc
-LD	:= x86_64-elf-ld
-
-LIBCXX_FREESTANDING := deps/libc++/include/
-
-TESTFLAGS := \
+CXX_TESTFLAGS := \
 		-DENABLE_TESTS
 
 CXXFLAGS := \
@@ -50,10 +45,11 @@ CXXFLAGS := \
 		-mno-sse \
 		-mno-sse2 \
 		-mno-red-zone \
-		-I kernel \
+		-DARCH=$(ARCH) \
+		-I $(abspath kernel) \
 		-I $(LIBCXX_FREESTANDING) \
-		-I deps \
- 
+		-I $(DEPS_DIR) \
+
 LDFLAGS := \
     -m elf_x86_64 \
     -nostdlib \
@@ -61,56 +57,95 @@ LDFLAGS := \
     --no-dynamic-linker \
     -z text \
     -z max-page-size=0x1000 \
-    -T linker.ld
+		-T boot/$(BOOTLOADER)/linker.ld \
 
-CRTI_OBJ		 := build/boot/crti.asm.o
-CRTBEGIN_OBJ := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
+QEMUFLAGS := \
+		-D qemu-log.txt \
+		-d int -M smm=off \
+		-serial stdio 
 
-CRTEND_OBJ 	 := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
-CRTN_OBJ		 := build/boot/crtn.asm.o
+NASM := nasm
+NASMFLAGS := -f elf64
 
-OBJ_LINK_LIST := $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECT_FILES) $(CRTEND_OBJ) $(CRTN_OBJ)
+ifeq ($(ARCH),x86_64)
+    NASM_FLAGS := -f elf64
+else
+    NASM_FLAGS := -f elf32
+endif
 
-.PHONY: all clean
+MAKE_FLAGS := \
+	ARCH=$(ARCH) \
+	BUILD_DIR=$(BUILD_DIR) \
+	BOOTLOADER=$(BOOTLOADER) \
+	NASM=$(NASM) \
+	CXX=$(CXX) \
+	LD=$(LD) \
+	NASMFLAGS="$(NASMFLAGS)" \
+	CXXFLAGS="$(CXXFLAGS)" \
+	LDFLAGS="$(LDFLAGS)" \
+
+OBJECTS 			  := 	$(shell find 	$(BUILD_DIR)   -type f -name '*.o')
+
+crti.o 					:= $(filter %/crti.asm.o, $(OBJECTS))
+crtn.o 					:= $(filter %/crtn.asm.o, $(OBJECTS))
+
+crtbegin.o 				:= $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
+crtend.o	 				:= $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
+
+OBJECTS 			:= 	$(filter-out %/crti.asm.o %/crtin.asm.o, $(OBJECTS))
+
+OBJECTS_LINK_LIST := $(crti.o) $(crtbegin.o) \
+										 $(sort $(OBJECTS)) \
+										 $(crtn.o) $(crtend.o) \
+
+.PHONY: arch kernel clean
 
 all: iso
+
+#################################
+# Useful Functions
+#################################
+
+debug:
+	@echo $(OBJECTS_LINK_LIST) | grep "boot.asm.o"
+
+clean:
+	@rm -rf $(BUILD_DIR)
 
 install-deps:
 	-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 deps/libc++
 
-clean:
-	$(RM) -rf build
-
 run: iso
-	qemu-system-x86_64 -serial stdio -cdrom build/nimble-os.iso
+	qemu-system-x86_64 $(QEMUFLAGS) -cdrom build/nimble-os.iso
 
-test: CXXFLAGS += $(TESTFLAGS)
+test: CXXFLAGS += $(CXX_TESTFLAGS)
 test: clean iso
-	qemu-system-x86_64 -cdrom build/nimble-os.iso
+	qemu-system-x86_64 $(QEMUFLAGS) -cdrom build/nimble-os.iso
 
-iso: nimble-os 
+
+#################################
+# Build Process
+#################################
+
+
+arch-objects:
+	@$(MAKE) -C arch/ $(MAKE_FLAGS)
+
+kernel-objects:
+	@$(MAKE) -C kernel/ $(MAKE_FLAGS)
+
+boot-objects:
+	@$(MAKE) -C boot/ $(MAKE_FLAGS)
+
+kernel: kernel-objects boot-objects arch-objects
+	@$(LD) $(LDFLAGS) $(OBJECTS_LINK_LIST) -o $(BUILD_DIR)/kernel-$(ARCH).elf
+
+iso: kernel
 	mkdir -p build/iso/boot/grub
-	cp build/nimble-os.bin build/iso/boot/nimble-os.bin
-	cp boot/grub.cfg build/iso/boot/grub
+	cp build/kernel-$(ARCH).elf build/iso/boot/nimble-os.elf
+	cp boot/grub/grub.cfg build/iso/boot/grub
 	grub-mkrescue -o build/nimble-os.iso	build/iso 2> /dev/null
 	rm -r build/iso
-
-nimble-os: build/nimble-os.bin install-deps
-
-build/nimble-os.bin: $(OBJECT_FILES) $(CRTI_OBJ) $(CRTN_OBJ)
-	$(LD) $(LDFLAGS) $(OBJ_LINK_LIST) -o $@
-	
-build/kernel/%.cc.o: kernel/%.cc
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-build/kernel/%.asm.o: kernel/%.asm
-	@mkdir -p $(dir $@)
-	nasm -f elf64 $< -o $@
-
-build/boot/%.asm.o: boot/%.asm
-	@mkdir -p $(dir $@)
-	nasm -f elf64 $< -o $@
 
 
 

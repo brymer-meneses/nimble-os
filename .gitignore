@@ -4,3 +4,4 @@
 .vscode
 
 /deps/**/
+qemu-log.txt

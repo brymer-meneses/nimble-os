@@ -1,25 +1,31 @@
 #include "vga/vga.h"
 #include "interrupt/interrupt.h"
+#include "drivers/pic.h"
+#include "../arch/prelude.h"
 #include "drivers/serial.h"
+#include "devices/keyboard.h"
 
 #ifdef ENABLE_TESTS
   #include "tests/tester.h"
 #endif
 
 inline void halt() {
-  asm("cli");
-  asm("hlt");
+  asm volatile ("hlt");
 }
 
 
 extern "C" void kmain(void) {
   vga::clear_screen();
-  vga::println("Hello, {s}!", "world");
 
   interrupt::initialize_idt();
-  serial::initialize();
+  pic::initialize();
 
+  serial::initialize();
+  vga::println("Hello, {s}!", "world");
   serial::println("Hello {s}!", "serial");
+
+
+  keyboard::initialize();
 
 
 #ifdef ENABLE_TESTS
@@ -28,6 +34,6 @@ extern "C" void kmain(void) {
 
 
   while (true) {
-    halt();
+    asm volatile ("hlt");
   }
 }

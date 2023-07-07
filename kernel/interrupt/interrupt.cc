@@ -1,12 +1,12 @@
 
 #include "interrupt.h"
 
-#include "lib/itoa.h"
-#include "vga/vga.h"
+#include "../lib/itoa.h"
+#include "../vga/vga.h"
 
 #include <optional>
 
-constexpr uint8_t IDT_MAX_DESCRIPTIONS = 32;
+constexpr uint8_t IDT_MAX_DESCRIPTIONS = 48;
 
 struct idt_register {
   uint16_t limit;
@@ -49,7 +49,7 @@ void interrupt::initialize_idt() {
   idtr.base = (uintptr_t) &IDT[0];
   idtr.limit = 0xFFF;
 
-  for (uint8_t vector = 0; vector < 32; vector++) {
+  for (uint8_t vector = 0; vector < 48; vector++) {
     interrupt::set_descriptor(vector, (uint64_t) isr_stub_table[vector], 0x8E);
   }
 

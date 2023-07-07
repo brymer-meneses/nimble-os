@@ -13,4 +13,9 @@ namespace io {
     asm volatile("outb %1, %0" ::"a" (data), "Nd"(portnum));
   }
 
+  /// used for waiting a very small amount of time.
+  extern inline void wait() {
+    outb(0x80, 0);
+  }
+
 }
