@@ -3,5 +3,7 @@
 .DS_Store
 .vscode
 
-/deps/**/
+lib/libc++/
+lib/limine.h
+
 qemu-log.txt

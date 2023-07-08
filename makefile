@@ -1,151 +1,118 @@
+BUILD_DIR := build
+LIBS_DIR := lib
 
-BUILD_DIR := $(abspath build)
+CXX_SOURCES  := $(shell find . -type f -name '*.cc')
+NASM_SOURCES := $(shell find . -type f -name '*.asm')
+
+OBJECTS := $(patsubst ./%.cc,  $(BUILD_DIR)/%.cc.o,  $(CXX_SOURCES)) \
+           $(patsubst ./%.asm, $(BUILD_DIR)/%.asm.o, $(NASM_SOURCES))
+
+OBJECTS := $(filter-out $(BUILD_DIR)/crti.asm.o $(BUILD_DIR)/crtn.asm.o, $(OBJECTS))
 
 ARCH := x86_64
-
-CXX := $(ARCH)-elf-gcc
-LD	:= $(ARCH)-elf-ld
-
-BOOTLOADER := grub
-CXX := x86_64-elf-gcc
-LD := x86_64-elf-ld
-
-DEPS_DIR := $(abspath deps)
-LIBCXX_FREESTANDING := $(DEPS_DIR)/libc++/include/
-
-CXX_TESTFLAGS := \
-		-DENABLE_TESTS
+CXX  := clang++
+LD	 := $(ARCH)-elf-ld
+NASM := nasm
+QEMU := qemu-system-x86_64
 
 CXXFLAGS := \
-		-Wall \
-		-Wextra \
-		-Wpedantic \
-		-Wconversion \
-		-pedantic-errors \
-		-O0 \
-		-std=c++20\
-		-g \
-		-masm=intel \
-		-lgcc \
-		-lc \
-		-ffreestanding \
-		-fno-stack-protector \
-		-fno-threadsafe-statics \
-		-fno-stack-check \
-		-fno-exceptions \
-		-fno-unwind-tables \
-		-fno-rtti \
-		-fno-lto \
-		-fPIE \
-		-m64 \
-		-march=x86-64 \
-		-mabi=sysv \
-		-mno-80387 \
-		-mno-mmx \
-		-mno-sse \
-		-mno-sse2 \
-		-mno-red-zone \
-		-DARCH=$(ARCH) \
-		-I $(abspath kernel) \
-		-I $(LIBCXX_FREESTANDING) \
-		-I $(DEPS_DIR) \
+	--target=x86_64-unknown-elf \
+	-g \
+	-O3 \
+	-std=c++20 \
+	-Wall \
+	-Wextra \
+	-Wpedantic \
+	-ffreestanding \
+	-fno-stack-protector \
+	-fno-rtti \
+	-fno-exceptions \
+	-fno-lto \
+	-m64 \
+	-mabi=sysv \
+	-mno-80387 \
+	-mcmodel=kernel \
+	-mno-mmx \
+	-mno-sse \
+	-mno-sse2 \
+	-mno-red-zone \
+	-I lib/libc++/include \
+	-I lib \
+	-I kernel \
+	-I . \
+
+NASMFLAGS := \
+	-Wall \
+	-g \
+	-dwarf \
+	-f elf64 \
 
 LDFLAGS := \
-    -m elf_x86_64 \
-    -nostdlib \
-    -static \
-    --no-dynamic-linker \
-    -z text \
-    -z max-page-size=0x1000 \
-		-T boot/$(BOOTLOADER)/linker.ld \
+	-m elf_${ARCH} \
+	-nostdlib \
+	-static \
+	--no-dynamic-linker \
+	-z max-page-size=0x1000 \
+	-T linker.ld 
 
 QEMUFLAGS := \
-		-D qemu-log.txt \
-		-d int -M smm=off \
-		-serial stdio 
+	-serial stdio \
 
-NASM := nasm
-NASMFLAGS := -f elf64
-
-ifeq ($(ARCH),x86_64)
-    NASM_FLAGS := -f elf64
-else
-    NASM_FLAGS := -f elf32
-endif
-
-MAKE_FLAGS := \
-	ARCH=$(ARCH) \
-	BUILD_DIR=$(BUILD_DIR) \
-	BOOTLOADER=$(BOOTLOADER) \
-	NASM=$(NASM) \
-	CXX=$(CXX) \
-	LD=$(LD) \
-	NASMFLAGS="$(NASMFLAGS)" \
-	CXXFLAGS="$(CXXFLAGS)" \
-	LDFLAGS="$(LDFLAGS)" \
-
-OBJECTS 			  := 	$(shell find 	$(BUILD_DIR)   -type f -name '*.o')
-
-crti.o 					:= $(filter %/crti.asm.o, $(OBJECTS))
-crtn.o 					:= $(filter %/crtn.asm.o, $(OBJECTS))
-
-crtbegin.o 				:= $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
-crtend.o	 				:= $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
-
-OBJECTS 			:= 	$(filter-out %/crti.asm.o %/crtin.asm.o, $(OBJECTS))
-
-OBJECTS_LINK_LIST := $(crti.o) $(crtbegin.o) \
-										 $(sort $(OBJECTS)) \
-										 $(crtn.o) $(crtend.o) \
-
-.PHONY: arch kernel clean
+.PHONY: clean
 
 all: iso
 
-#################################
-# Useful Functions
-#################################
-
-debug:
-	@echo $(OBJECTS_LINK_LIST) | grep "boot.asm.o"
-
 clean:
-	@rm -rf $(BUILD_DIR)
+	$(RM) -r $(OBJECTS)
+
+distclean:
+	$(RM) -r $(BUILD_DIR)/limine
+	$(RM) -r lib/limine.h
+	$(RM) -r lib/libc++/
 
 install-deps:
-	-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 deps/libc++
+	@mkdir -p $(BUILD_DIR)/limine
+	@echo "Downloading Limine ..."
+	@-git clone https://github.com/limine-bootloader/limine --depth=1 --branch=v5.x-branch-binary $(BUILD_DIR)/limine
+	@$(MAKE) -C $(BUILD_DIR)/limine
+	@cp $(BUILD_DIR)/limine/limine.h lib/limine.h
+	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/libc++
 
-run: iso
-	qemu-system-x86_64 $(QEMUFLAGS) -cdrom build/nimble-os.iso
+crti.o 		 := $(BUILD_DIR)/arch/$(ARCH)/runtime/crti.asm.o
+crtn.o 		 := $(BUILD_DIR)/arch/$(ARCH)/runtime/crtn.asm.o
+crtend.o   := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
+crtbegin.o := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
 
-test: CXXFLAGS += $(CXX_TESTFLAGS)
-test: clean iso
-	qemu-system-x86_64 $(QEMUFLAGS) -cdrom build/nimble-os.iso
-
-
-#################################
-# Build Process
-#################################
-
-
-arch-objects:
-	@$(MAKE) -C arch/ $(MAKE_FLAGS)
-
-kernel-objects:
-	@$(MAKE) -C kernel/ $(MAKE_FLAGS)
-
-boot-objects:
-	@$(MAKE) -C boot/ $(MAKE_FLAGS)
-
-kernel: kernel-objects boot-objects arch-objects
-	@$(LD) $(LDFLAGS) $(OBJECTS_LINK_LIST) -o $(BUILD_DIR)/kernel-$(ARCH).elf
+kernel: install-deps $(OBJECTS) 
 
 iso: kernel
-	mkdir -p build/iso/boot/grub
-	cp build/kernel-$(ARCH).elf build/iso/boot/nimble-os.elf
-	cp boot/grub/grub.cfg build/iso/boot/grub
-	grub-mkrescue -o build/nimble-os.iso	build/iso 2> /dev/null
-	rm -r build/iso
+	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf
+	@mkdir -p $(BUILD_DIR)/isoroot
+	@cp $(BUILD_DIR)/kernel.elf \
+		limine.cfg \
+		$(BUILD_DIR)/limine/limine-bios.sys \
+		$(BUILD_DIR)/limine/limine-bios-cd.bin \
+		$(BUILD_DIR)/limine/limine-uefi-cd.bin \
+		$(BUILD_DIR)/isoroot
+	@mkdir -p $(BUILD_DIR)/isoroot/EFI/BOOT
+	@cp $(BUILD_DIR)/limine/BOOT*.EFI $(BUILD_DIR)/isoroot/EFI/BOOT/
+	@xorriso -as mkisofs -b limine-bios-cd.bin \
+		-no-emul-boot -boot-load-size 4 -boot-info-table \
+		--efi-boot limine-uefi-cd.bin \
+		-efi-boot-part --efi-boot-image --protective-msdos-label \
+		$(BUILD_DIR)/isoroot -o $(BUILD_DIR)/nimble-os.iso
+	@$(BUILD_DIR)/limine/limine bios-install $(BUILD_DIR)/nimble-os.iso
+	@$(RM) -r $(BUILD_DIR)/isoroot
 
+run: iso
+	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
+$(BUILD_DIR)/%.cc.o: %.cc
+	@mkdir -p $(dir $@)
+	@echo "Compiling $< -> $@"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/%.asm.o: %.asm
+	@mkdir -p $(dir $@)
+	@echo "Compiling $< -> $@"
+	@$(NASM) $(NASMFLAGS) $< -o $@

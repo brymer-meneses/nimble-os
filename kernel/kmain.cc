@@ -1,39 +1,14 @@
-#include "vga/vga.h"
-#include "interrupt/interrupt.h"
-#include "drivers/pic.h"
-#include "../arch/prelude.h"
-#include "drivers/serial.h"
-#include "devices/keyboard.h"
-
-#ifdef ENABLE_TESTS
-  #include "tests/tester.h"
-#endif
-
-inline void halt() {
-  asm volatile ("hlt");
-}
-
+#include <lib/kernel.h>
+#include <lib/color.h>
+#include <drivers/framebuffer.h>
 
 extern "C" void kmain(void) {
-  vga::clear_screen();
 
-  interrupt::initialize_idt();
-  pic::initialize();
+  Framebuffer::clearScreen();
 
-  serial::initialize();
-  vga::println("Hello, {s}!", "world");
-  serial::println("Hello {s}!", "serial");
+  Framebuffer::writeString("Hello Kernel!\n");
+  Framebuffer::writeString("Hello Kernel!\n");
 
 
-  keyboard::initialize();
-
-
-#ifdef ENABLE_TESTS
-  tester::main();
-#endif
-
-
-  while (true) {
-    asm volatile ("hlt");
-  }
+  Kernel::halt();
 }
