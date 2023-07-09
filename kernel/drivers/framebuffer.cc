@@ -95,6 +95,29 @@ void Framebuffer::clearScreen() {
   }
 }
 
+void Framebuffer::withColor(uint32_t foreground, uint32_t background, void (*function)()) {
+  uint32_t oldBackground = g_backgroundColor;
+  uint32_t oldForeground = g_foregroundColor;
+  function();
+  g_backgroundColor = oldBackground;
+  g_foregroundColor = oldForeground;
+}
+
+void Framebuffer::withForeground(uint32_t foreground, void (*function)()) {
+  uint32_t oldForeground = g_foregroundColor;
+  g_foregroundColor = Color::encodeHEX(foreground);
+  function();
+  g_foregroundColor = oldForeground;
+}
+
+void Framebuffer::withBackground(uint32_t background, void (*function)()) {
+  uint32_t oldBackground = g_backgroundColor;
+  g_backgroundColor = Color::encodeHEX(background);
+  function();
+  g_backgroundColor = oldBackground;
+}
+
+
 
 void Framebuffer::setForeground(uint32_t color) {
   g_foregroundColor = Color::encodeHEX(color);

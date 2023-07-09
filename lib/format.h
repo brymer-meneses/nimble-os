@@ -1,71 +1,47 @@
 #pragma once
 #include <type_traits>
 #include <stddef.h>
+#include "string_helpers.h"
 
 namespace Format {
 
-template<typename T>
-constexpr int convert_int_to_string(T value, char* buffer, int radix) {
-  bool negative = false;
-  
-  if (value < 0) {
-    negative = true;
-    value = -value;
+// This will be useful if we want to print custom structs
+struct FormatArgument {
+  virtual const char* toString() const = 0;
+};
+
+static constexpr auto appendToString(char* buffer, size_t bpos, const char* string) -> size_t {
+  size_t i=0;
+  while (string[i] != '\0') {
+    buffer[bpos] = string[i];
+    bpos += 1;
+    i++;
   }
-  
-  int length = 0;
-  
-  do {
-    int remainder = value % radix;
-    buffer[length++] = static_cast<char>((remainder < 10) ? ('0' + remainder) : ('A' + remainder - 10));
-    value /= radix;
-  } while (value != 0);
-  
-  if (negative) {
-      buffer[length++] = '-';
-  }
-  
-  // Reverse the string in the buffer
-  for (int i = 0, j = length - 1; i < j; i++, j--) {
-    char temp = buffer[i];
-    buffer[i] = buffer[j];
-    buffer[j] = temp;
-  }
-  
-  return length;
+  return i;
 }
 
 template<typename T>
 [[nodiscard]] 
-static constexpr auto append_value(char* buffer, size_t bpos, T value) -> int {
+static constexpr auto appendArgument(char* buffer, size_t bpos, T value) -> int {
   if constexpr (std::is_same<const char*, T>::value) {
-    int i=0;
-    while (value[i] != '\0') {
-      buffer[bpos] = value[i];
-      bpos += 1;
-      i++;
-    }
-    return i;
+    return appendToString(buffer, bpos, value);
   }
 
-  if constexpr (std::is_same<int, T>::value) {
-    constexpr size_t MAX_INT_LENGTH = 11;  // Maximum length of an integer (including sign)
-    char temp_buffer[MAX_INT_LENGTH];
-    int length = convert_int_to_string(value, temp_buffer, 10); // Use base 10 as default
-    
-    // Copy the characters to the buffer
-    for (int i = 0; i < length; i++) {
-        buffer[bpos] = temp_buffer[i];
-        bpos += 1;
-    }
-    
-    return length;
+  if constexpr (std::is_integral_v<T>) {
+    char temp_buffer[64]; // should be sufficient
+    int length = StringHelpers::integralToString(value, temp_buffer); // Use base 10 as default
+    return appendToString(buffer, bpos, temp_buffer);
+  }
+
+  if constexpr (std::is_base_of<FormatArgument, T>::value) {
+    const char* result = value.toString();
+    return appendToString(buffer, bpos, result);
   }
 
   return 0;
 }
 
-static constexpr void format_impl(char* buffer, const char* string, size_t bpos, size_t spos) {  
+static constexpr void formatImpl(char* buffer, const char* string, size_t bpos, size_t spos) {  
 
   while (string[spos] != '\0') {
     buffer[bpos] = string[spos];
@@ -80,13 +56,13 @@ static constexpr void format_impl(char* buffer, const char* string, size_t bpos,
 }
 
 template<typename Arg, typename ...Args>
-static constexpr void format_impl(char* buffer, const char* string, size_t bpos, size_t spos, Arg arg, Args ...args) {
+static constexpr void formatImpl(char* buffer, const char* string, size_t bpos, size_t spos, Arg arg, Args ...args) {
 
   while (string[spos] != '\0') {
     if (string[spos] == '{' && string[spos + 1] == '}') {
       spos += 2;
-      bpos += append_value(buffer, bpos, arg);
-      format_impl(buffer, string, bpos, spos, args...);
+      bpos += appendArgument(buffer, bpos, arg);
+      formatImpl(buffer, string, bpos, spos, args...);
       return;
     }
 
@@ -103,7 +79,7 @@ static constexpr void format_impl(char* buffer, const char* string, size_t bpos,
 
 template<typename Arg, typename ...Args>
 constexpr void format(char* buffer, const char* string, Arg arg, Args ...args) {
-  format_impl(buffer, string, 0, 0, arg, args...);
+  formatImpl(buffer, string, 0, 0, arg, args...);
 }
 
 }

@@ -24,10 +24,17 @@ void assertEq(Arg1 arg1, Arg2 arg2) {
 
 
   if constexpr (std::is_same<Arg1, const char*>::value) {
-    // if (std::strcmp(arg1, arg2) == 0) {
-    //   Tester::Internal::invokeTestSuccess();
-    //   return;
-    // }
+    if (std::strcmp(arg1, arg2) == 0) {
+      Tester::Internal::invokeTestSuccess();
+      return;
+    }
+  }
+
+  if constexpr (std::is_same<Arg1, char*>::value) {
+    if (std::strcmp(arg1, arg2) == 0) {
+      Tester::Internal::invokeTestSuccess();
+      return;
+    }
   }
 
   if (arg1 != arg2) {

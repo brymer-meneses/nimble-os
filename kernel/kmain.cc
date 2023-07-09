@@ -21,8 +21,8 @@ extern "C" void kmain(void) {
   callConstructors();
 
   Framebuffer::clearScreen();
-  Kernel::print("Hello there, {}\n", 42);
-  Kernel::print("The quick brown fox jumped over the lazy cat");
+  Kernel::println("Hello there, {}", 42);
+  Kernel::println("The quick brown fox jumped over the lazy cat");
 
 #ifdef ENABLE_TESTS
   Tester::main();
