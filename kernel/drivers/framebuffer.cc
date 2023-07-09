@@ -2,7 +2,6 @@
 
 #include "framebuffer.h"
 #include "../lib/limine.h"
-#include "../lib/kernel.h"
 #include "../lib/color.h"
 #include "../assets/fonts/fonts.h"
 
@@ -17,11 +16,11 @@ static uint32_t g_backgroundColor = Color::encodeRGB(46, 52, 64);
 static uint32_t g_foregroundColor = Color::encodeRGB(236, 239, 244);
 
 static constexpr uint8_t offset = 10;
-static constexpr uint8_t lineSpacing = 3;
+// static constexpr uint8_t lineSpacing = 3;
 
 static uint64_t g_pos = offset;
 
-static void writeNewLine() {
+void Framebuffer::writeNewLine() {
   const limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];
   const uint64_t horizontal_offset = g_pos % framebuffer->width;
   
@@ -31,7 +30,7 @@ static void writeNewLine() {
   row += 1;
 }
 
-static void writeCharacter(char character) {
+void Framebuffer::writeCharacter(char character) {
 
   Fonts::FontCharacter fc = Fonts::getPixelOperatorBitmap(character);
 
@@ -79,7 +78,12 @@ void Framebuffer::clearScreen() {
 
   if (framebuffer_request.response == NULL
    || framebuffer_request.response->framebuffer_count < 1) {
-    Kernel::halt();
+
+    asm volatile ("cli");
+    for (;;) {
+      asm volatile ("hlt");
+    }
+
   }
 
   limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];
