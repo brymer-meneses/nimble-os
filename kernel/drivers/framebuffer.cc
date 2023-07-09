@@ -1,6 +1,7 @@
 #include <stddef.h>
 
 #include "framebuffer.h"
+#include "../lib/kernel/halt.h"
 #include "../lib/limine.h"
 #include "../lib/color.h"
 #include "../assets/fonts/fonts.h"
@@ -78,12 +79,7 @@ void Framebuffer::clearScreen() {
 
   if (framebuffer_request.response == NULL
    || framebuffer_request.response->framebuffer_count < 1) {
-
-    asm volatile ("cli");
-    for (;;) {
-      asm volatile ("hlt");
-    }
-
+    Kernel::halt();
   }
 
   limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];

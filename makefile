@@ -56,7 +56,9 @@ LDFLAGS := \
 	-T linker.ld 
 
 QEMUFLAGS := \
-	-serial stdio \
+		-D qemu-log.txt \
+		-d int -M smm=off \
+		-serial stdio 
 
 .PHONY: clean
 
@@ -105,6 +107,10 @@ iso: kernel
 	@$(RM) -r $(BUILD_DIR)/isoroot
 
 run: iso
+	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
+
+test: CXXFLAGS += -DENABLE_TESTS
+test: clean iso
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
 $(BUILD_DIR)/%.cc.o: %.cc

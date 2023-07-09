@@ -1,12 +1,32 @@
-#include <lib/kernel.h>
+#include <lib/kernel/print.h>
+#include <lib/kernel/halt.h>
 #include <lib/color.h>
 
+#ifdef ENABLE_TESTS
+  #include "tests/tester.h"
+#endif
+
+void callConstructors() {
+  typedef void (*ConstructorFn)();
+  extern ConstructorFn start_ctors;
+  extern ConstructorFn end_ctors;
+
+  for(ConstructorFn* i = &start_ctors;i != &end_ctors; i++) {
+    (*i)();
+  }
+}
+
 extern "C" void kmain(void) {
+
+  callConstructors();
 
   Framebuffer::clearScreen();
   Kernel::print("Hello there, {}\n", 42);
   Kernel::print("The quick brown fox jumped over the lazy cat");
 
+#ifdef ENABLE_TESTS
+  Tester::main();
+#endif
 
   Kernel::halt();
 }

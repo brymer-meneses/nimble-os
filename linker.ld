@@ -32,7 +32,7 @@ SECTIONS
     . += CONSTANT(MAXPAGESIZE);
 
     .rodata : {
-        *(.rodata .rodata.*)
+      *(.rodata .rodata.*)
     } :rodata
 
     /* Move to the next memory page for .data */
@@ -46,6 +46,18 @@ SECTIONS
     .dynamic : {
         *(.dynamic)
     } :data :dynamic
+
+    .ctors : {
+      start_ctors = .;
+    	KEEP(*( .init_array ));
+    	KEEP(*(SORT_BY_INIT_PRIORITY( .init_array.* )));
+      end_ctors = .;
+
+      start_dtors = .;
+    	KEEP(*( .fini_array ));
+    	KEEP(*(SORT_BY_INIT_PRIORITY( .fini_array.* )));
+      end_dtors = .;
+    }
 
 
     /* NOTE: .bss needs to be the last thing mapped to :data, otherwise lots of */
