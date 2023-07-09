@@ -1,6 +1,6 @@
 #pragma once
 #include "tester.h"
-#include "lib/libc.h"
+#include <lib/libc.h>
 
 #include <type_traits>
 

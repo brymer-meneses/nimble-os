@@ -30,6 +30,7 @@ CXXFLAGS := \
 	-fno-lto \
 	-m64 \
 	-mabi=sysv \
+	-masm=intel \
 	-mno-80387 \
 	-mcmodel=kernel \
 	-mno-mmx \
@@ -80,10 +81,7 @@ install-deps:
 	@cp $(BUILD_DIR)/limine/limine.h lib/limine.h
 	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/libc++
 
-crti.o 		 := $(BUILD_DIR)/arch/$(ARCH)/runtime/crti.asm.o
-crtn.o 		 := $(BUILD_DIR)/arch/$(ARCH)/runtime/crtn.asm.o
-crtend.o   := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
-crtbegin.o := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
+TEST_FLAG_FILE = $(BUILD_DIR)/test_flag
 
 kernel: install-deps $(OBJECTS) 
 

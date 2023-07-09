@@ -4,7 +4,6 @@ CompileFlags:
   Add:
     - "-I../lib/libc++/include/"
     - "-I../lib/"
-    - "-I../kernel/"
-    - "-I.."
+    - "-I../"
     - "-std=c++20"
-    - "-DARCH=x86_64"
+    - "-DENABLE_TESTS"

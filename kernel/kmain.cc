@@ -1,6 +1,8 @@
 #include <lib/kernel/print.h>
 #include <lib/kernel/halt.h>
-#include <lib/color.h>
+#include <lib/kernel/panic.h>
+
+#include <kernel/cpu/gdt/gdt.h>
 
 #ifdef ENABLE_TESTS
   #include "tests/tester.h"
@@ -23,6 +25,8 @@ extern "C" void kmain(void) {
   Framebuffer::clearScreen();
   Kernel::println("Hello there, {}", 42);
   Kernel::println("The quick brown fox jumped over the lazy cat");
+
+  GDT::initialize();
 
 #ifdef ENABLE_TESTS
   Tester::main();
