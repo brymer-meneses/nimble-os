@@ -18,7 +18,7 @@ QEMU := qemu-system-x86_64
 CXXFLAGS := \
 	--target=x86_64-unknown-elf \
 	-g \
-	-O3 \
+	-O0 \
 	-std=c++20 \
 	-Wall \
 	-Wextra \
@@ -59,6 +59,7 @@ LDFLAGS := \
 QEMUFLAGS := \
 		-D qemu-log.txt \
 		-d int -M smm=off \
+		-no-reboot \
 		-serial stdio 
 
 .PHONY: clean

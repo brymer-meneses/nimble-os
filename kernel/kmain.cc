@@ -3,6 +3,7 @@
 #include <lib/kernel/panic.h>
 
 #include <kernel/cpu/gdt/gdt.h>
+#include <kernel/cpu/interrupt/idt.h>
 
 #ifdef ENABLE_TESTS
   #include "tests/tester.h"
@@ -18,15 +19,23 @@ void callConstructors() {
   }
 }
 
+#define INITIALIZE(module) \
+  Kernel::print("Initializing " #module "..."); \
+  module::initialize(); \
+  Kernel::println("  [Done]");
+
 extern "C" void kmain(void) {
 
   callConstructors();
 
   Framebuffer::clearScreen();
-  Kernel::println("Hello there, {}", 42);
-  Kernel::println("The quick brown fox jumped over the lazy cat");
+  Kernel::println("Hello kernel!");
 
-  GDT::initialize();
+  // INITIALIZE(GDT);
+  INITIALIZE(IDT);
+
+  asm volatile ("int 0x00");
+
 
 #ifdef ENABLE_TESTS
   Tester::main();
