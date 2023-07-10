@@ -1,8 +1,10 @@
 #include <lib/kernel/print.h>
 #include <lib/kernel/halt.h>
 #include <lib/kernel/panic.h>
+#include <lib/macros.h>
 
 #include <kernel/cpu/gdt/gdt.h>
+#include <kernel/cpu/interrupt/interrupt.h>
 #include <kernel/cpu/interrupt/idt.h>
 
 
@@ -20,20 +22,19 @@ void callConstructors() {
   }
 }
 
-#define INITIALIZE(module) \
-  Kernel::print("Initializing " #module "..."); \
-  module::initialize(); \
-  Kernel::println("  [Done]");
+
 
 extern "C" void kmain(void) {
 
   callConstructors();
 
   Framebuffer::clearScreen();
-  Kernel::println("Hello there, Kernel");
 
   INITIALIZE(GDT);
   INITIALIZE(IDT);
+  INITIALIZE(Interrupt);
+
+  asm volatile("int 0x2");
 
 
 #ifdef ENABLE_TESTS

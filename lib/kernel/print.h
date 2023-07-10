@@ -1,5 +1,5 @@
 #pragma once
-#include "format.h"
+#include <lib/format.h>
 #include "../kernel/drivers/framebuffer.h"
 
 namespace Kernel {

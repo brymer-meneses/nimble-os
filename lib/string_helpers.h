@@ -1,9 +1,10 @@
 #include <type_traits>
+#include <stddef.h>
 
 namespace StringHelpers {
   
 template<typename T>
-constexpr int integralToString(T value, char* buffer) {
+constexpr int integralToString(T value, int base, char* buffer) {
   bool negative = false;
 
   if (value < 0) {
@@ -11,11 +12,13 @@ constexpr int integralToString(T value, char* buffer) {
       value = -value;
   }
 
+  const char* digits = "0123456789ABCDEF"; // Digits for hexadecimal base
+
   int length = 0;
 
   do {
-      buffer[length++] = '0' + (value % 10);
-      value /= 10;
+      buffer[length++] = digits[value % base]; // Use modulus operator with base
+      value /= base;
   } while (value != 0);
 
   if (negative) {
@@ -32,6 +35,16 @@ constexpr int integralToString(T value, char* buffer) {
   buffer[length] = '\0'; // Add null terminator
 
   return length;
+}
+
+constexpr auto appendToBuffer(char* buffer, size_t bpos, const char* string) -> size_t {
+  size_t i=0;
+  while (string[i] != '\0') {
+    buffer[bpos] = string[i];
+    bpos += 1;
+    i++;
+  }
+  return i;
 }
 
 }

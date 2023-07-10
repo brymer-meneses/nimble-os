@@ -18,19 +18,19 @@ void test_##test_suite##_##test_name()
 
 template<typename Arg1, typename Arg2>
 void assertEq(Arg1 arg1, Arg2 arg2) {
-  if constexpr (!std::is_same<Arg1, Arg2>::value) {
+  if constexpr (!std::is_same_v<Arg1, Arg2>) {
     Tester::Internal::invokeTestFailure();
   }
 
 
-  if constexpr (std::is_same<Arg1, const char*>::value) {
+  if constexpr (std::is_same_v<Arg1, const char*>) {
     if (std::strcmp(arg1, arg2) == 0) {
       Tester::Internal::invokeTestSuccess();
       return;
     }
   }
 
-  if constexpr (std::is_same<Arg1, char*>::value) {
+  if constexpr (std::is_same_v<Arg1, char*>) {
     if (std::strcmp(arg1, arg2) == 0) {
       Tester::Internal::invokeTestSuccess();
       return;
@@ -44,7 +44,7 @@ void assertEq(Arg1 arg1, Arg2 arg2) {
 
 template<typename Arg1, typename Arg2>
 void assertNeq(Arg1 arg1, Arg2 arg2) {
-  if constexpr (std::is_same<Arg1, Arg2>::value) {
+  if constexpr (std::is_same_v<Arg1, Arg2>) {
     Tester::Internal::invokeTestFailure();
   }
   if (arg1 == arg2) {

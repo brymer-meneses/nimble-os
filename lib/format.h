@@ -7,35 +7,26 @@ namespace Format {
 
 // This will be useful if we want to print custom structs
 struct FormatArgument {
-  virtual const char* toString() const = 0;
+  virtual constexpr auto toString() const -> const char* = 0;
 };
 
-static constexpr auto appendToString(char* buffer, size_t bpos, const char* string) -> size_t {
-  size_t i=0;
-  while (string[i] != '\0') {
-    buffer[bpos] = string[i];
-    bpos += 1;
-    i++;
-  }
-  return i;
-}
 
 template<typename T>
 [[nodiscard]] 
 static constexpr auto appendArgument(char* buffer, size_t bpos, T value) -> int {
   if constexpr (std::is_same_v<const char*, T>) {
-    return appendToString(buffer, bpos, value);
+    return StringHelpers::appendToBuffer(buffer, bpos, value);
   }
 
   if constexpr (std::is_integral_v<T>) {
     char temp_buffer[64]; // should be sufficient
-    StringHelpers::integralToString(value, temp_buffer); // Use base 10 as default
-    return appendToString(buffer, bpos, temp_buffer);
+    StringHelpers::integralToString(value, 10, temp_buffer); // Use base 10 as default
+    return StringHelpers::appendToBuffer(buffer, bpos, temp_buffer);
   }
 
   if constexpr (std::is_base_of_v<FormatArgument, T>) {
     const char* result = value.toString();
-    return appendToString(buffer, bpos, result);
+    return StringHelpers::appendToBuffer(buffer, bpos, result);
   }
 
   return 0;

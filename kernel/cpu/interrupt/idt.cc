@@ -1,4 +1,5 @@
 #include "idt.h"
+#include "lib/kernel/print.h"
 #include <stdint.h>
 
 // NOTE:
@@ -19,11 +20,10 @@ struct IdtPtr {
   uint64_t base;
 } __attribute__((packed));
 
-static constexpr uint16_t IDT_MAX_ENTRIES = 256;
-static constexpr uint16_t KERNEL_CODE_SEGMENT = 0x28;
+static constexpr uint16_t KERNEL_CODE_SEGMENT = 0x08;
 
 __attribute__((aligned(0x10))) 
-static IdtEntry idt[IDT_MAX_ENTRIES];
+static IdtEntry idt[IDT::MAX_ENTRIES];
 
 static void setEntry(uint8_t vector, uint64_t handler, uint8_t flags) {
 
@@ -54,7 +54,7 @@ void IDT::initialize() {
   //
   // https://github.com/dreamos82/Osdev-Notes/blob/master/02_Architecture/05_InterruptHandling.md
   
-  idtptr.limit = (uint16_t) (sizeof(IdtEntry) * IDT_MAX_ENTRIES - 1);
+  idtptr.limit = (uint16_t) (sizeof(IdtEntry) * IDT::MAX_ENTRIES - 1);
 
   for (uint16_t i=0; i < 32; i++) {
     setEntry(i, (uint64_t) interruptHandlerTable[i], 0x8E);
