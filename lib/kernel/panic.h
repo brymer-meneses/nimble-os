@@ -18,4 +18,11 @@ namespace Kernel {
     Kernel::halt();
   }
 
+  inline void panic(const char* string) {
+    Framebuffer::setForeground(0xBF616A);
+    Framebuffer::writeString("[Kernel Panic]: ");
+    Framebuffer::writeString(string);
+    Framebuffer::writeCharacter('\n');
+    Kernel::halt();
+  }
 }

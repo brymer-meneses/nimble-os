@@ -2,6 +2,7 @@
 
 #include "framebuffer.h"
 #include "../lib/kernel/halt.h"
+#include "../lib/kernel/panic.h"
 #include "../lib/limine.h"
 #include "../lib/color.h"
 #include "../assets/fonts/fonts.h"
@@ -23,8 +24,6 @@ static uint64_t g_pos = offset;
 
 void Framebuffer::writeNewLine() {
   const limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];
-  const uint64_t horizontal_offset = g_pos % framebuffer->width;
-  
   static uint16_t row = 1;
 
   g_pos = framebuffer->width * 16 * row + offset;
@@ -33,16 +32,10 @@ void Framebuffer::writeNewLine() {
 
 void Framebuffer::writeCharacter(char character) {
 
-  Fonts::FontCharacter fc = Fonts::getPixelOperatorBitmap(character);
-
-  const limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];
-
-  volatile uint32_t* vram = (uint32_t*) framebuffer->address;
-
-  const uint32_t pixelWidth =  (framebuffer->pitch / 4);
+  using Fonts::FontCharacter;
 
   if (character == ' ') {
-    g_pos += fc.charWidth + 2;
+    g_pos += 4;
     return;
   }
 
@@ -50,23 +43,35 @@ void Framebuffer::writeCharacter(char character) {
     writeNewLine();
     return;
   };
+  
+  const limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];
+  std::optional<FontCharacter> fc = Fonts::PixelOperator::getBitmap(character);
 
-
-  // we can assume that each `fc` has the same height
-  for (int row=0; row<fc.maxHeight; row++) {
-    uint8_t rowData = fc.data[row] >> (fc.maxWidth - fc.charWidth);
-
-    for (int col=0; col<fc.charWidth; col++) {
-      bool isPixelActive = (rowData >> (fc.charWidth - col - 1)) & 1;
-
-      uint32_t pixelColor = isPixelActive ? g_foregroundColor : g_backgroundColor;
-
-      vram[ (row + offset) * pixelWidth + (col + g_pos) ] = pixelColor;
-    }
-
+  if (!fc.has_value()) {
+    Kernel::panic("No bitmap: {}", (int) character);
+    Kernel::halt();
+    return;
   }
 
-  g_pos += fc.charWidth + 2;
+  volatile uint32_t* vram = (uint32_t*) framebuffer->address;
+  const uint32_t pixelWidth =  (framebuffer->pitch / 4);
+  
+  
+  // we can assume that each `fc` has the same height
+  for (int row=0; row<fc->maxHeight; row++) {
+    uint8_t rowData = fc->data[row] >> (fc->maxWidth - fc->charWidth);
+  
+    for (int col=0; col<fc->charWidth; col++) {
+      bool isPixelActive = (rowData >> (fc->charWidth - col - 1)) & 1;
+  
+      uint32_t pixelColor = isPixelActive ? g_foregroundColor : g_backgroundColor;
+  
+      vram[ (row + offset) * pixelWidth + (col + g_pos) ] = pixelColor;
+    }
+  
+  }
+  
+  g_pos += fc->charWidth + 2;
 }
 
 void Framebuffer::writeString(const char* string) {
@@ -98,6 +103,9 @@ void Framebuffer::clearScreen() {
 void Framebuffer::withColor(uint32_t foreground, uint32_t background, void (*function)()) {
   uint32_t oldBackground = g_backgroundColor;
   uint32_t oldForeground = g_foregroundColor;
+
+  g_foregroundColor = foreground;
+  g_backgroundColor = background;
   function();
   g_backgroundColor = oldBackground;
   g_foregroundColor = oldForeground;

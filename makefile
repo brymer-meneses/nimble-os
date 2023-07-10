@@ -21,6 +21,7 @@ CXXFLAGS := \
 	-O3 \
 	-std=c++20 \
 	-Wall \
+	-Werror \
 	-Wextra \
 	-Wpedantic \
 	-ffreestanding \
@@ -63,7 +64,7 @@ QEMUFLAGS := \
 
 .PHONY: clean
 
-all: iso
+all: run
 
 clean:
 	$(RM) -r $(OBJECTS)
@@ -72,6 +73,9 @@ distclean:
 	$(RM) -r $(BUILD_DIR)/limine
 	$(RM) -r lib/limine.h
 	$(RM) -r lib/libc++/
+
+debug:
+	echo $(address) | x86_64-elf-addr2line -e $(BUILD_DIR)/kernel.elf
 
 install-deps:
 	@mkdir -p $(BUILD_DIR)/limine

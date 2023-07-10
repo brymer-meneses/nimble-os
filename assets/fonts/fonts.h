@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <optional>
 
 
 namespace Fonts {
@@ -16,7 +17,10 @@ namespace Fonts {
   };
 
 
-  FontCharacter getPixelOperatorBitmap(char character);
+  namespace PixelOperator {
+    std::optional<FontCharacter> getBitmap(char character);
+  }
+
 
   
 }

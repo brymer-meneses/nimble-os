@@ -1,5 +1,6 @@
 
 #include "fonts.h"
+#include <optional>
 
 // Processed using
 // https://lvgl.io/tools/font_conv_v5_3
@@ -1770,7 +1771,8 @@ static const uint8_t widths[] = {
 
 static constexpr const char* order = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-FontCharacter Fonts::getPixelOperatorBitmap(char character) {
+
+std::optional<FontCharacter> Fonts::PixelOperator::getBitmap(char character) {
 
   FontCharacter fc;
   fc.character = character;
@@ -1789,6 +1791,6 @@ FontCharacter Fonts::getPixelOperatorBitmap(char character) {
     offset += 16;
   };
 
-  __builtin_unreachable();
+  return std::nullopt;
 }
 

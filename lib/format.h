@@ -23,17 +23,17 @@ static constexpr auto appendToString(char* buffer, size_t bpos, const char* stri
 template<typename T>
 [[nodiscard]] 
 static constexpr auto appendArgument(char* buffer, size_t bpos, T value) -> int {
-  if constexpr (std::is_same<const char*, T>::value) {
+  if constexpr (std::is_same_v<const char*, T>) {
     return appendToString(buffer, bpos, value);
   }
 
   if constexpr (std::is_integral_v<T>) {
     char temp_buffer[64]; // should be sufficient
-    int length = StringHelpers::integralToString(value, temp_buffer); // Use base 10 as default
+    StringHelpers::integralToString(value, temp_buffer); // Use base 10 as default
     return appendToString(buffer, bpos, temp_buffer);
   }
 
-  if constexpr (std::is_base_of<FormatArgument, T>::value) {
+  if constexpr (std::is_base_of_v<FormatArgument, T>) {
     const char* result = value.toString();
     return appendToString(buffer, bpos, result);
   }
