@@ -20,7 +20,7 @@ struct IdtPtr {
 } __attribute__((packed));
 
 static constexpr uint16_t IDT_MAX_ENTRIES = 256;
-static constexpr uint16_t KERNEL_CODE_SEGMENT = 0x08;
+static constexpr uint16_t KERNEL_CODE_SEGMENT = 0x28;
 
 __attribute__((aligned(0x10))) 
 static IdtEntry idt[IDT_MAX_ENTRIES];
