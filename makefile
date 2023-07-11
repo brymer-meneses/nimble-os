@@ -89,6 +89,8 @@ install-deps:
 	@cp $(BUILD_DIR)/limine/limine.h lib/thirdparty/limine.h
 	@echo "Downloading Freestanding C++ Headers ..."
 	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
+	@echo "Generating `.clangd` file ..."
+	@-./scripts/generate_clangd_config.sh
 
 TEST_FLAG_FILE = $(BUILD_DIR)/test_flag
 
