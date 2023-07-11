@@ -49,7 +49,7 @@ static void exceptionHandler(InterruptFrame* context) {
   Framebuffer::setForeground(0xD08770);
   Kernel::println("----------------------------");
   Kernel::println("Received Exception {hex}", interruptNumber);
-  Kernel::println("Description: {hex}", exceptionMessages[interruptNumber]);
+  Kernel::println("Description: {}", exceptionMessages[interruptNumber]);
   Kernel::println("Error Code : {hex}", context->error_code);
   Kernel::println("----------------------------");
   Kernel::println("rax : {hex}", context->rax);
