@@ -1,11 +1,13 @@
 #include <stddef.h>
 
+#include <kernel/utils/halt.h>
+#include <kernel/utils/panic.h>
+#include <kernel/utils/color.h>
+
+#include <lib/thirdparty/limine.h>
+#include <assets/fonts/fonts.h>
+
 #include "framebuffer.h"
-#include "../lib/kernel/halt.h"
-#include "../lib/kernel/panic.h"
-#include "../lib/limine.h"
-#include "../lib/color.h"
-#include "../assets/fonts/fonts.h"
 
 
 static volatile limine_framebuffer_request framebuffer_request = {

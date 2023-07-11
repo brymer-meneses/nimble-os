@@ -1,6 +1,8 @@
-#include "idt.h"
-#include "lib/kernel/print.h"
 #include <stdint.h>
+
+#include <kernel/utils/print.h>
+
+#include "idt.h"
 
 // NOTE:
 // I once can't get interrupt working because `isr_high` is set to `16` bits

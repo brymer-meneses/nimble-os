@@ -1,6 +1,6 @@
-#include "gdt.h"
+#include <kernel/utils/print.h>
 
-#include <lib/kernel/print.h>
+#include "gdt.h"
 
 struct GdtEntry {
   uint16_t limit_low;

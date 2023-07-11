@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../kernel/drivers/framebuffer.h"
-#include "../lib/format.h"
+#include <kernel/drivers/framebuffer.h>
+#include <kernel/utils/panic.h>
+#include <kernel/utils/format.h>
 #include "halt.h"
 
 namespace Kernel {

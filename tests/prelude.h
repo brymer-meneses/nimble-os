@@ -1,5 +1,7 @@
 #pragma once
-#include "tester.h"
+
+#include <kernel/utils/print.h>
+#include <tests/tester.h>
 #include <lib/libc.h>
 
 #include <type_traits>

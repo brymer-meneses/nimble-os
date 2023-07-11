@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <lib/kernel/print.h>
+#include <kernel/utils/print.h>
 #include <assets/themes/themes.h>
 
 #include "tester.h"

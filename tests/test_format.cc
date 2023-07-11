@@ -1,5 +1,5 @@
-#include "format.h"
-#include "prelude.h"
+#include <kernel/utils/format.h>
+#include <tests/prelude.h>
 
 TEST(Format, NumberFormat) {
 
@@ -10,15 +10,6 @@ TEST(Format, NumberFormat) {
   assertEq(buffer, "The meaning of life is: 42!");
 }
 
-TEST(Format, NumberFormatUint) {
-
-  char buffer[256];
-
-  Format::format(buffer, "Helloooo {}", (uint16_t) 1);
-
-  assertEq(buffer, "Helloooo 1");
-}
-
 TEST(Format, StringFormat) {
 
   char buffer[256];
@@ -27,4 +18,26 @@ TEST(Format, StringFormat) {
 
   assertEq(buffer, "The quick brown fox jumped over the lazy cat.");
 
+}
+
+TEST(Format, Hex) {
+  char buffer[256];
+  Format::format(buffer, "{} TEST: {}-{hex}", "HEX", 314159265, 314159265);
+  assertEq(buffer, "314159265-0x12B9B0A1");
+  Format::format(buffer, "{} TEST {hex}-{}", "HEX", 314159265, 314159265);
+  assertEq(buffer, "HEX TEST 0x12B9B0A1-314159265");
+}
+
+TEST(Format, Binary) {
+  char buffer[256];
+
+  Format::format(buffer, "{}-{bin}", 2048, 2048);
+  assertEq(buffer, "2048-0b100000000000");
+}
+
+TEST(Format, Octal) {
+  char buffer[256];
+
+  Format::format(buffer, "{}-{oct}", 2048, 2048);
+  assertEq(buffer, "2048-0o4000");
 }

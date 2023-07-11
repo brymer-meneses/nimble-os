@@ -7,8 +7,6 @@ NASM_SOURCES := $(shell find . -type f -name '*.asm')
 OBJECTS := $(patsubst ./%.cc,  $(BUILD_DIR)/%.cc.o,  $(CXX_SOURCES)) \
            $(patsubst ./%.asm, $(BUILD_DIR)/%.asm.o, $(NASM_SOURCES))
 
-OBJECTS := $(filter-out $(BUILD_DIR)/crti.asm.o $(BUILD_DIR)/crtn.asm.o, $(OBJECTS))
-
 ARCH := x86_64
 CXX  := clang++
 LD	 := $(ARCH)-elf-ld
@@ -18,7 +16,7 @@ QEMU := qemu-system-x86_64
 CXXFLAGS := \
 	--target=x86_64-unknown-elf \
 	-g \
-	-O0 \
+	-O3 \
 	-std=c++20 \
 	-Wall \
 	-Werror \
@@ -38,9 +36,10 @@ CXXFLAGS := \
 	-mno-sse \
 	-mno-sse2 \
 	-mno-red-zone \
-	-I lib/libc++/include \
-	-I lib \
-	-I kernel \
+	-I lib/thirdparty/libc++/include \
+	-I lib/thirdparty/ \
+	-I lib/ \
+	-I kernel/ \
 	-I . \
 
 NASMFLAGS := \
@@ -75,6 +74,10 @@ distclean:
 	$(RM) -r lib/limine.h
 	$(RM) -r lib/libc++/
 
+slocs:
+	tokei . --exclude=assets/fonts/pixeloperator.cc --files
+
+
 debug:
 	echo $(address) | x86_64-elf-addr2line -e $(BUILD_DIR)/kernel.elf
 
@@ -83,8 +86,9 @@ install-deps:
 	@echo "Downloading Limine ..."
 	@-git clone https://github.com/limine-bootloader/limine --depth=1 --branch=v5.x-branch-binary $(BUILD_DIR)/limine
 	@$(MAKE) -C $(BUILD_DIR)/limine
-	@cp $(BUILD_DIR)/limine/limine.h lib/limine.h
-	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/libc++
+	@cp $(BUILD_DIR)/limine/limine.h lib/thirdparty/limine.h
+	@echo "Downloading Freestanding C++ Headers ..."
+	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
 
 TEST_FLAG_FILE = $(BUILD_DIR)/test_flag
 

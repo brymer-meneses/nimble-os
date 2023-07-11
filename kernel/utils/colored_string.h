@@ -13,7 +13,7 @@ namespace ColoredString {
     uint32_t textColor;
 
 
-    const char * toString() const override {
+    virtual auto toString() const -> const char* override {
       return string;
     };
 

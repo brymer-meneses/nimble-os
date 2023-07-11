@@ -1,7 +1,7 @@
-#include <lib/kernel/print.h>
-#include <lib/kernel/halt.h>
-#include <lib/kernel/panic.h>
-#include <lib/macros.h>
+#include <kernel/utils/print.h>
+#include <kernel/utils/halt.h>
+#include <kernel/utils/panic.h>
+#include <kernel/utils/macros.h>
 
 #include <kernel/cpu/gdt/gdt.h>
 #include <kernel/cpu/interrupt/interrupt.h>
@@ -34,9 +34,7 @@ extern "C" void kmain(void) {
   INITIALIZE(IDT);
   INITIALIZE(Interrupt);
 
-  Kernel::println("Hi {}", 12345);
-
-  asm volatile ("int 0x1");
+  asm volatile ("int 0x0");
 
 
 #ifdef ENABLE_TESTS

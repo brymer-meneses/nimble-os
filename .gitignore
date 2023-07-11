@@ -3,7 +3,7 @@
 .DS_Store
 .vscode
 
-lib/libc++/
-lib/limine.h
+lib/thirdparty/*
+!lib/thirdparty/features.h
 
 qemu-log.txt

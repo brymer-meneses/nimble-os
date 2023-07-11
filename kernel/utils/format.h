@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <type_traits>
 #include <lib/libc.h>
-#include <lib/string.h>
+#include <kernel/utils/string.h>
 
 namespace {
 
@@ -143,6 +143,10 @@ constexpr void formatImpl(char *buffer, const char *string, size_t bpos,
 }
 
 namespace Format {
+
+struct FormatArgument {
+  virtual auto toString() const -> const char* = 0;
+};
 
 template <typename... Args>
 constexpr void format(char *buffer, const char *string, Args... args) {

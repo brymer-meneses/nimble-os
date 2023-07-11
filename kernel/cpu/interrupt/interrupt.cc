@@ -1,12 +1,14 @@
 #include <stdint.h>
-#include <lib/format.h>
-#include <lib/kernel/print.h>
-#include "interrupt.h"
-#include "idt.h"
-#include "lib/macros.h"
+
+#include <kernel/utils/format.h>
+#include <kernel/utils/print.h>
+#include <kernel/utils/macros.h>
 #include <lib/libc.h>
 
-const char* exceptionMessages[] = {
+#include "interrupt.h"
+#include "idt.h"
+
+static const char* exceptionMessages[] = {
   "Division Error",
   "Debug",
   "Non-Maskable Interrupt",
@@ -50,7 +52,8 @@ extern "C" void interruptDispatch(InterruptFrame* context) {
   if (interruptNumber < 32) {
     Framebuffer::setForeground(0xD08770);
     Kernel::println("----------------------------");
-    Kernel::println("Received Exception {hex}: {}",  interruptNumber, exceptionMessages[interruptNumber]);
+    Kernel::println("Received Exception {hex}", interruptNumber);
+    Kernel::println("Description: {hex}", exceptionMessages[interruptNumber]);
     Kernel::println("Error Code : {hex}", context->error_code);
     Kernel::println("----------------------------");
     Kernel::println("rax : {hex}", context->rax);
