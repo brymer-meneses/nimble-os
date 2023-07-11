@@ -18,7 +18,7 @@ QEMU := qemu-system-x86_64
 CXXFLAGS := \
 	--target=x86_64-unknown-elf \
 	-g \
-	-O3 \
+	-O0 \
 	-std=c++20 \
 	-Wall \
 	-Werror \
@@ -64,7 +64,8 @@ QEMUFLAGS := \
 
 .PHONY: clean
 
-all: run
+all: 
+	$(MAKE) -j8 run
 
 clean:
 	$(RM) -r $(OBJECTS)

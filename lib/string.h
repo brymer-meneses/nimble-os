@@ -1,10 +1,10 @@
 #include <type_traits>
 #include <stddef.h>
 
-namespace StringHelpers {
+namespace String {
   
 template<typename T>
-constexpr int integralToString(T value, int base, char* buffer) {
+constexpr int fromIntegral(T value, char* buffer, int base) {
   bool negative = false;
 
   if (value < 0) {
@@ -37,13 +37,27 @@ constexpr int integralToString(T value, int base, char* buffer) {
   return length;
 }
 
-constexpr auto appendToBuffer(char* buffer, size_t bpos, const char* string) -> size_t {
+constexpr auto append(char* buffer, size_t bpos, const char* string) -> size_t {
   size_t i=0;
   while (string[i] != '\0') {
     buffer[bpos] = string[i];
     bpos += 1;
     i++;
   }
+  return i;
+}
+
+constexpr int copy(char *buffer, size_t bufpos, const char *string,
+                          size_t string_start, size_t string_end) {
+
+  size_t i = string_start;
+  while (string[i] != '\0' && i < string_end) {
+    buffer[bufpos] = string[i];
+    bufpos += 1;
+    i += 1;
+  }
+
+  buffer[bufpos] = '\0';
   return i;
 }
 

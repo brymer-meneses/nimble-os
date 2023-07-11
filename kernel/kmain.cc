@@ -34,7 +34,9 @@ extern "C" void kmain(void) {
   INITIALIZE(IDT);
   INITIALIZE(Interrupt);
 
-  asm volatile("int 0x2");
+  Kernel::println("Hi {}", 12345);
+
+  asm volatile ("int 0x1");
 
 
 #ifdef ENABLE_TESTS

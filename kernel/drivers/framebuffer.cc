@@ -48,8 +48,6 @@ void Framebuffer::writeCharacter(char character) {
   std::optional<FontCharacter> fc = Fonts::PixelOperator::getBitmap(character);
 
   if (!fc.has_value()) {
-    Kernel::panic("No bitmap: {}", (int) character);
-    Kernel::halt();
     return;
   }
 
