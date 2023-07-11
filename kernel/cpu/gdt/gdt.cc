@@ -29,6 +29,7 @@ void setEntry(size_t index, uint8_t access, uint8_t flags) {
   gdt[index].flags = flags;
 }
 
+// defined in `gdt.asm`
 extern "C" void loadGDT(GdtPtr* gdt);
 
 void GDT::initialize() {
