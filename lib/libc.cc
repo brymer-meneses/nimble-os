@@ -1,8 +1,13 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "libc.h"
+#include <kernel/utils/panic.h>
 
 extern "C" {
+
+void abort() {
+  Kernel::panic("LIBC Abort");
+};
 
 void* std::memcpy(void *dest, const void *src, size_t n) {
     uint8_t *pdest = (uint8_t *)dest;
