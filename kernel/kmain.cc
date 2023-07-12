@@ -2,10 +2,12 @@
 #include <kernel/utils/halt.h>
 #include <kernel/utils/panic.h>
 #include <kernel/utils/macros.h>
+#include <kernel/utils/assert.h>
 
 #include <kernel/cpu/gdt/gdt.h>
 #include <kernel/cpu/interrupt/interrupt.h>
 #include <kernel/cpu/interrupt/idt.h>
+#include <kernel/acpi/acpi.h>
 
 
 #ifdef ENABLE_TESTS
@@ -34,7 +36,7 @@ extern "C" void kmain(void) {
   INITIALIZE(IDT);
   INITIALIZE(Interrupt);
 
-  asm volatile ("int 0x0");
+  ACPI::initialize();
 
 
 #ifdef ENABLE_TESTS
