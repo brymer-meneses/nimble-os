@@ -78,8 +78,8 @@ void ACPI::initialize() {
 
 [[nodiscard]]
 auto ACPI::findSDT(const char signature[4]) -> std::optional<SDT*> {
-  // if we are using the xsdt, each `sdt` it points to has a size of 64 bytes, otherwise 
-  // we use 32 bytes
+  // if we are using the xsdt, each `sdt` it points to has a size of uint64_t, otherwise 
+  // we it should have a size of uint32_t
   const uint8_t sdtSize = usesVersionTwo() ? sizeof(uint64_t) : sizeof(uint32_t);
 
   size_t totalItems = (rsdt->length - sizeof(SDT)) / sdtSize;
