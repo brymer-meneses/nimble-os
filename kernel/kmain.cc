@@ -32,12 +32,12 @@ extern "C" void kmain(void) {
 
   Framebuffer::clearScreen();
 
-  INITIALIZE(GDT);
-  INITIALIZE(IDT);
-  INITIALIZE(Interrupt);
-
+  GDT::initialize();
+  IDT::initialize();
+  Interrupt::initialize();
   ACPI::initialize();
 
+  asm volatile ("int 0x0");
 
 #ifdef ENABLE_TESTS
   Tester::main();

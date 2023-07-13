@@ -6,4 +6,6 @@
 lib/thirdparty/*
 !lib/thirdparty/features.h
 
+.clangd
+
 qemu-log.txt
