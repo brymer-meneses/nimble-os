@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <lib/types.h>
 #include <cstddef>
 #include <optional>
 
@@ -9,11 +9,11 @@ namespace Fonts {
 
   // 8 by 16 by
   struct FontCharacter {
-    uint8_t charWidth;
-    uint8_t maxWidth;
-    uint8_t maxHeight;
+    u8 charWidth;
+    u8 maxWidth;
+    u8 maxHeight;
     char character;
-    uint8_t data[16];
+    u8 data[16];
   };
 
 

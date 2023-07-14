@@ -8,6 +8,7 @@
 #include <kernel/cpu/interrupt/interrupt.h>
 #include <kernel/cpu/interrupt/idt.h>
 #include <kernel/acpi/acpi.h>
+#include <kernel/acpi/madt.h>
 
 
 #ifdef ENABLE_TESTS
@@ -35,9 +36,11 @@ extern "C" void kmain(void) {
   GDT::initialize();
   IDT::initialize();
   Interrupt::initialize();
-  ACPI::initialize();
 
-  asm volatile ("int 0x0");
+  ACPI::initialize();
+  ACPI::MADT::initialize();
+
+  // asm olatile ("int 0x0");
 
 #ifdef ENABLE_TESTS
   Tester::main();

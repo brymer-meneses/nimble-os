@@ -1,6 +1,6 @@
 #pragma once
-#include <stdint.h>
 #include "format.h"
+#include <lib/types.h>
 
 /// TODO:
 /// I need a queue to feed the framebuffer driver to 
@@ -10,7 +10,7 @@ namespace ColoredString {
 
   struct Colored : Format::FormatArgument {
     const char* string;
-    uint32_t textColor;
+    u32 textColor;
 
 
     virtual auto toString() const -> const char* override {

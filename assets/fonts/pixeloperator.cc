@@ -8,7 +8,7 @@
 using Fonts::FontCharacter;
 
 /*Store the image of the letters (glyph)*/
-static const uint8_t bitmap[] = 
+static const u8 bitmap[] = 
 {
   /*Unicode: U+0021 (!) , Width: 1 */
   0x00,  //. 
@@ -1762,7 +1762,7 @@ static const uint8_t bitmap[] =
 
 
 /*Store the glyph descriptions*/
-static const uint8_t widths[] = {
+static const u8 widths[] = {
     1, 3, 6, 5, 7, 5, 1, 3, 3, 5, 5, 2, 4, 1, 3, 5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 1, 2, 3, 4, 3, 5, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 3, 3, 3, 5, 8, 2, 5, 5, 5, 5, 5,

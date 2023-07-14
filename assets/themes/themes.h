@@ -1,9 +1,9 @@
 #pragma once
-#include <stdint.h>
 #include <optional>
+#include <lib/types.h>
 
 namespace Themes {
-  enum class Nord : uint32_t {
+  enum class Nord : u32 {
     bg1 = 0x2E3440,
     bg2 = 0x3B4252,
     bg3 = 0x434C5E,

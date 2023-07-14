@@ -3,24 +3,24 @@
 #include "gdt.h"
 
 struct GdtEntry {
-  uint16_t limit_low;
-  uint16_t base_low;
-  uint8_t base_middle;
-  uint8_t access;
-  uint8_t flags;
-  uint8_t base_high;
+  u16 limit_low;
+  u16 base_low;
+  u8 base_middle;
+  u8 access;
+  u8 flags;
+  u8 base_high;
 } __attribute__((packed));
 
 struct GdtPtr {
-  uint16_t limit;
-  uint64_t base;
+  u16 limit;
+  u64 base;
 } __attribute__((packed));
 
-static constexpr uint64_t TOTAL_ENTRIES = 5;
+static constexpr u64 TOTAL_ENTRIES = 5;
 
 static GdtEntry gdt[TOTAL_ENTRIES];
 
-void setEntry(size_t index, uint8_t access, uint8_t flags) {
+void setEntry(size_t index, u8 access, u8 flags) {
   gdt[index].base_low = 0x0000;
   gdt[index].base_middle = 0x00;
   gdt[index].base_high = 0x00;
@@ -35,7 +35,7 @@ extern "C" void loadGDT(GdtPtr* gdt);
 void GDT::initialize() {
   GdtPtr gdtptr;
   gdtptr.limit = sizeof(GdtEntry) * TOTAL_ENTRIES - 1;
-  gdtptr.base = (uint64_t) &gdt;
+  gdtptr.base = (u64) &gdt;
 
   setEntry(0, 0, 0);
   setEntry(1, 0x9A, 0xA0);

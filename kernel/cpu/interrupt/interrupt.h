@@ -7,33 +7,33 @@ namespace Interrupt {
 // so we can trivially print it using `Kernel::println`, it kinda messes up the
 // placement if we did so.
 struct InterruptFrame {
-  uint64_t r15;
-  uint64_t r14;
-  uint64_t r13;
-  uint64_t r12;
-  uint64_t r11;
-  uint64_t r10;
-  uint64_t r9;
-  uint64_t r8;
-  uint64_t rdi;
-  uint64_t rsi;
-  uint64_t rdx;
-  uint64_t rcx;
-  uint64_t rbx;
-  uint64_t rax;
+  u64 r15;
+  u64 r14;
+  u64 r13;
+  u64 r12;
+  u64 r11;
+  u64 r10;
+  u64 r9;
+  u64 r8;
+  u64 rdi;
+  u64 rsi;
+  u64 rdx;
+  u64 rcx;
+  u64 rbx;
+  u64 rax;
 
-  uint64_t vector_number;
-  uint64_t error_code;
+  u64 vector_number;
+  u64 error_code;
 
-  uint64_t iret_rip;
-  uint64_t iret_cs;
-  uint64_t iret_flags;
-  uint64_t iret_rsp;
-  uint64_t iret_ss;
+  u64 iret_rip;
+  u64 iret_cs;
+  u64 iret_flags;
+  u64 iret_rsp;
+  u64 iret_ss;
 };
 
   using InterruptHandler = void (*)(InterruptFrame* context);
-  void setHandler(uint16_t interruptNumber, InterruptHandler handler);
+  void setHandler(u16 interruptNumber, InterruptHandler handler);
   void initialize();
 
 }

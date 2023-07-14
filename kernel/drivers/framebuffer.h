@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include <lib/types.h>
 
 namespace Framebuffer {
   
@@ -8,14 +8,14 @@ namespace Framebuffer {
   void writeNewLine();
 
   void clearScreen();
-  void setBackground(uint32_t color);
-  void setBackground(uint8_t r, uint8_t g, uint8_t b);
+  void setBackground(u32 color);
+  void setBackground(u8 r, u8 g, u8 b);
 
-  void setForeground(uint32_t color);
-  void setForeground(uint8_t r, uint8_t g, uint8_t b);
+  void setForeground(u32 color);
+  void setForeground(u8 r, u8 g, u8 b);
 
-  void withColor(uint32_t foreground, uint32_t background, void (*function)());
-  void withForeground(uint32_t foreground, void (*function)());
-  void withBackground(uint32_t background, void (*function)());
+  void withColor(u32 foreground, u32 background, void (*function)());
+  void withForeground(u32 foreground, void (*function)());
+  void withBackground(u32 background, void (*function)());
 
 }

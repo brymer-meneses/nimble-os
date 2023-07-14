@@ -1,4 +1,3 @@
-#include <stdint.h>
 
 #include <kernel/utils/format.h>
 #include <kernel/utils/print.h>
@@ -45,7 +44,7 @@ using Interrupt::InterruptFrame;
 static InterruptHandler handlers[IDT::MAX_ENTRIES];
 
 static void exceptionHandler(InterruptFrame* context) {
-  uint16_t interruptNumber = context->vector_number;
+  u16 interruptNumber = context->vector_number;
   Framebuffer::setForeground(0xD08770);
   Kernel::println("----------------------------");
   Kernel::println("Received Exception {hex}", interruptNumber);
@@ -78,7 +77,7 @@ static void exceptionHandler(InterruptFrame* context) {
 // this is called from `idt.asm` 
 extern "C" void interruptDispatch(InterruptFrame* context) {
 
-  uint16_t interruptNumber = context->vector_number;
+  u16 interruptNumber = context->vector_number;
 
   if (interruptNumber < 32) {
     exceptionHandler(context);
@@ -97,7 +96,7 @@ extern "C" void interruptDispatch(InterruptFrame* context) {
   return;
 }
 
-void Interrupt::setHandler(uint16_t interruptNumber, InterruptHandler handler) {
+void Interrupt::setHandler(u16 interruptNumber, InterruptHandler handler) {
 
   if (handlers[interruptNumber] != nullptr) {
     Kernel::println("Overriding interrupt handler {} with a new function.",  interruptNumber);

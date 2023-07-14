@@ -1,7 +1,7 @@
 #pragma once
-#include <stddef.h>
 
-namespace GDT {
+namespace PS2 {
 
   void initialize();
+
 }

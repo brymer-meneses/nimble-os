@@ -1,17 +1,16 @@
 #pragma once
-#include <stdint.h>
+#include <lib/types.h>
 
 namespace IO {
 
-  extern inline uint8_t inb(uint16_t portnum) {
-    uint8_t data = 0;
+  extern inline u8 inb(u16 portnum) {
+    u8 data = 0;
     asm volatile ("inb %0, %1": "=a" (data) : "Nd" (portnum));
     return data;
   }
 
-  extern inline void outb(uint16_t portnum, uint8_t data) {
+  extern inline void outb(u16 portnum, u8 data) {
     asm volatile ("outb %1, %0l" :: "a" (data), "Nd" (portnum));
   }
-
 
 }

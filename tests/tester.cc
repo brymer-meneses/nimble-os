@@ -1,14 +1,13 @@
-#include <stdint.h>
 #include <kernel/utils/print.h>
 #include <assets/themes/themes.h>
 
 #include "tester.h"
 
-static constexpr uint16_t TEST_MAX = 100;
+static constexpr u16 TEST_MAX = 100;
 
 static Tester::Internal::TestFunction g_tests[TEST_MAX];
-static uint16_t g_testCount = 0;
-static uint16_t g_numTestPass = 0;
+static u16 g_testCount = 0;
+static u16 g_numTestPass = 0;
 static bool g_didCurrentTestPass = false;
 
 void Tester::main() {

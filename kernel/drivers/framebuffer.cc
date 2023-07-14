@@ -10,13 +10,13 @@
 #include "framebuffer.h"
 
 struct Writer {
-  uint8_t x_offset = 8;
-  uint8_t y_offset = 4;
+  u8 x_offset = 8;
+  u8 y_offset = 4;
 
-  uint32_t x = x_offset;
-  uint32_t y = y_offset;
-  uint32_t background = Color::encodeHEX(0x11111B);
-  uint32_t foreground = Color::encodeHEX(0xD9E0EE);
+  u32 x = x_offset;
+  u32 y = y_offset;
+  u32 background = Color::encodeHEX(0x11111B);
+  u32 foreground = Color::encodeHEX(0xD9E0EE);
 
   limine_framebuffer* volatile framebuffer;
   uintptr_t base;
@@ -41,12 +41,12 @@ struct Writer {
     }
     
     for (int row=0; row<fc->maxHeight; row++) {
-      uint8_t rowData = fc->data[row] >> (fc->maxWidth - fc->charWidth);
+      u8 rowData = fc->data[row] >> (fc->maxWidth - fc->charWidth);
     
       for (int col=0; col<fc->charWidth; col++) {
         bool isPixelActive = (rowData >> (fc->charWidth - col - 1)) & 1;
     
-        uint32_t pixelColor = isPixelActive ? foreground : background;
+        u32 pixelColor = isPixelActive ? foreground : background;
         writePixel(col + x, row + y, pixelColor);
       }
     
@@ -60,9 +60,9 @@ struct Writer {
     y += 16;
   };
 
-  void writePixel(uint32_t posX, uint32_t posY, uint32_t color) {
-    uint64_t offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
-    *(uint32_t*) (this->base + offset) = color;
+  void writePixel(u32 posX, u32 posY, u32 color) {
+    u64 offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
+    *(u32*) (this->base + offset) = color;
   };
 
   void writeString(const char* string) {
@@ -116,9 +116,9 @@ void Framebuffer::clearScreen() {
   gWriter.clearScreen();
 }
 
-void Framebuffer::withColor(uint32_t foreground, uint32_t background, void (*function)()) {
-  uint32_t oldForeground = gWriter.foreground;
-  uint32_t oldBackground = gWriter.background;
+void Framebuffer::withColor(u32 foreground, u32 background, void (*function)()) {
+  u32 oldForeground = gWriter.foreground;
+  u32 oldBackground = gWriter.background;
 
   gWriter.foreground = foreground;
   gWriter.background = background;
@@ -127,34 +127,34 @@ void Framebuffer::withColor(uint32_t foreground, uint32_t background, void (*fun
   gWriter.background = oldBackground;
 }
 
-void Framebuffer::withForeground(uint32_t foreground, void (*function)()) {
-  uint32_t oldForeground = gWriter.foreground;
+void Framebuffer::withForeground(u32 foreground, void (*function)()) {
+  u32 oldForeground = gWriter.foreground;
   gWriter.foreground = foreground;
   function();
   gWriter.foreground = oldForeground;
 }
 
-void Framebuffer::withBackground(uint32_t background, void (*function)()) {
-  uint32_t oldBackground = gWriter.background;
+void Framebuffer::withBackground(u32 background, void (*function)()) {
+  u32 oldBackground = gWriter.background;
   gWriter.background = background;
   function();
   gWriter.background = oldBackground;
 }
 
 
-void Framebuffer::setForeground(uint32_t color) {
+void Framebuffer::setForeground(u32 color) {
   gWriter.foreground = color;
 }
 
-void Framebuffer::setForeground(uint8_t r, uint8_t g, uint8_t b) {
+void Framebuffer::setForeground(u8 r, u8 g, u8 b) {
   gWriter.foreground = Color::encodeRGB(r, g, b);
 }
 
-void Framebuffer::setBackground(uint32_t color) {
+void Framebuffer::setBackground(u32 color) {
   gWriter.background = Color::encodeHEX(color);
 }
 
-void Framebuffer::setBackground(uint8_t r, uint8_t g, uint8_t b) {
+void Framebuffer::setBackground(u8 r, u8 g, u8 b) {
   gWriter.background = Color::encodeRGB(r, g, b);
 }
 

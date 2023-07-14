@@ -3,6 +3,7 @@
 #include <kernel/drivers/framebuffer.h>
 #include <kernel/utils/panic.h>
 #include <kernel/utils/format.h>
+#include <lib/types.h>
 #include "halt.h"
 
 namespace Kernel {

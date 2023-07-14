@@ -1,9 +1,8 @@
 #pragma once
-#include <stdint.h>
-
+#include <lib/types.h>
 
 namespace IDT {
 
-  constexpr uint16_t MAX_ENTRIES = 256;
+  constexpr u16 MAX_ENTRIES = 256;
   void initialize();
 }

@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include <kernel/utils/print.h>
 
 #include "idt.h"
@@ -8,26 +6,26 @@
 // I once can't get interrupt working because `isr_high` is set to `16` bits
 // Qwinci from OSDev helped me sort it out.
 struct IdtEntry {
-  uint16_t isr_low;
-  uint16_t kernel_code_segment;
-  uint8_t ist;
-  uint8_t attributes;
-  uint16_t isr_mid;
-  uint32_t isr_high;
-  uint32_t reserved;
+  u16 isr_low;
+  u16 kernel_code_segment;
+  u8 ist;
+  u8 attributes;
+  u16 isr_mid;
+  u32 isr_high;
+  u32 reserved;
 } __attribute__((packed));
 
 struct IdtPtr {
-  uint16_t limit;
-  uint64_t base;
+  u16 limit;
+  u64 base;
 } __attribute__((packed));
 
-static constexpr uint16_t KERNEL_CODE_SEGMENT = 0x08;
+static constexpr u16 KERNEL_CODE_SEGMENT = 0x08;
 
 __attribute__((aligned(0x10))) 
 static IdtEntry idt[IDT::MAX_ENTRIES];
 
-static void setEntry(uint8_t vector, uint64_t handler, uint8_t flags) {
+static void setEntry(u8 vector, u64 handler, u8 flags) {
 
   idt[vector].isr_low = handler & 0xFFFF;
   idt[vector].isr_mid = (handler >> 16) & 0xFFFF;
@@ -44,7 +42,7 @@ extern void* interruptHandlerTable[];
 void IDT::initialize() {
   IdtPtr idtptr;
 
-  idtptr.base = (uint64_t) &idt[0];
+  idtptr.base = (u64) &idt[0];
 
   // "The reason for subtracting one from the size of the idt is interesting.
   // Loading an IDT with zero entries would effectively be pointless, as there
@@ -56,10 +54,10 @@ void IDT::initialize() {
   //
   // https://github.com/dreamos82/Osdev-Notes/blob/master/02_Architecture/05_InterruptHandling.md
   
-  idtptr.limit = (uint16_t) (sizeof(IdtEntry) * IDT::MAX_ENTRIES - 1);
+  idtptr.limit = (u16) (sizeof(IdtEntry) * IDT::MAX_ENTRIES - 1);
 
-  for (uint16_t i=0; i < 32; i++) {
-    setEntry(i, (uint64_t) interruptHandlerTable[i], 0x8E);
+  for (u16 i=0; i < 32; i++) {
+    setEntry(i, (u64) interruptHandlerTable[i], 0x8E);
   }
 
   asm volatile ("lidt %0" :: "m" (idtptr));
