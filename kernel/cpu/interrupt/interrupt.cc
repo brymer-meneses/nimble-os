@@ -31,10 +31,15 @@ static const char* exceptionMessages[] = {
   "Virtualization Exception",
   "Control Protection Exception",
   "Reserved",
+  "Reserved",
+  "Reserved",
+  "Reserved",
+  "Reserved",
+  "Reserved",
+  "Hypervisor Injection Exception",
   "VMM Communication Exception",
   "Security Exception",
-  "Reserved",
-  "Triple Fault",
+  "Reserved"
 };
 
 

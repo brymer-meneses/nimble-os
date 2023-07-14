@@ -56,7 +56,7 @@ void IDT::initialize() {
   
   idtptr.limit = (u16) (sizeof(IdtEntry) * IDT::MAX_ENTRIES - 1);
 
-  for (u16 i=0; i < 32; i++) {
+  for (u16 i=0; i < IDT::MAX_ENTRIES; i++) {
     setEntry(i, (u64) interruptHandlerTable[i], 0x8E);
   }
 

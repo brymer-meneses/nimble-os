@@ -97,10 +97,19 @@ setNoErrorInterruptHandler 29
 setErrorInterruptHandler 30
 setNoErrorInterruptHandler 31
 
+%define MAX_IDT_ENTRIES 256
+
+; Make room for the ISRs
+%assign i 32
+%rep MAX_IDT_ENTRIES - 32
+setNoErrorInterruptHandler i
+%assign i i+1
+%endrep
+
 global interruptHandlerTable
 interruptHandlerTable:
 %assign i 0
-%rep 32
+%rep MAX_IDT_ENTRIES
   dq interruptHandler%+i
 %assign i i+1
 %endrep
