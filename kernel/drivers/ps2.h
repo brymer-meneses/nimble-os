@@ -2,6 +2,12 @@
 
 namespace PS2 {
 
-  void initialize();
+  namespace Keyboard {
+    void initialize();
+  }
+
+  namespace Mouse {
+    void initialize();
+  }
 
 }

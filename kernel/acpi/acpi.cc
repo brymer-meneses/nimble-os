@@ -27,7 +27,6 @@ using ACPI::AcpiHeader;
 static RSDP* rsdp = nullptr;
 static AcpiHeader* rsdt = nullptr;
 
-
 constexpr u16 RSDP_VERSION_TWO_SIZE = sizeof(RSDP);
 // same as version two, except we remove the last four fields
 constexpr u16 RSDP_VERSION_ONE_SIZE = sizeof(RSDP) -  sizeof(u32) - sizeof(u64) - 4*sizeof(u8);

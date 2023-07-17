@@ -3,6 +3,7 @@
 #include <kernel/utils/halt.h>
 #include <kernel/utils/panic.h>
 #include <kernel/utils/color.h>
+#include <kernel/drivers/io.h>
 
 #include <lib/thirdparty/limine.h>
 #include <assets/fonts/fonts.h>
@@ -62,7 +63,7 @@ struct Writer {
 
   void writePixel(u32 posX, u32 posY, u32 color) {
     u64 offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
-    *(u32*) (this->base + offset) = color;
+    IO::Mem::write<u32>(this->base + offset, color);
   };
 
   void writeString(const char* string) {

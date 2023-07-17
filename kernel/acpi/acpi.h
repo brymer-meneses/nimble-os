@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <lib/types.h>
+#include <tuple>
 
 namespace ACPI {
 
@@ -18,6 +19,7 @@ namespace ACPI {
   } __attribute__((packed));
 
   void initialize();
+
 
   [[nodiscard]] auto findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*>;
   [[nodiscard]] auto isInitialized() -> bool;

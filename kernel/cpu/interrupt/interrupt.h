@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <lib/types.h>
 
 namespace Interrupt {
 
@@ -32,8 +33,12 @@ struct InterruptFrame {
   u64 iret_ss;
 };
 
-  using InterruptHandler = void (*)(InterruptFrame* context);
-  void setHandler(u16 interruptNumber, InterruptHandler handler);
+  using ExceptionHandler = void (*)(InterruptFrame* context);
+  using IrqHandler = void (*)();
+
+  void setExceptionHandler(u16 interruptNumber, ExceptionHandler handler);
+  void setIrqHandler(u16 interruptNumber, IrqHandler handler);
+
   void initialize();
 
 }

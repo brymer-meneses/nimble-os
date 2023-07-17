@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <tuple>
 #include <lib/types.h>
 
 namespace ACPI::MADT {
@@ -22,7 +23,7 @@ namespace ACPI::MADT {
     u32 globalInterruptBase;
   } __attribute__((packed));
 
-  struct IsoApic {
+  struct InterruptSourceOverride {
     u8 type;
     u8 length;
     u8 busSource;
@@ -31,7 +32,7 @@ namespace ACPI::MADT {
     u16 flags;
   } __attribute__((packed));
 
-  struct NmiApic {
+  struct NonMaskableInterrupt {
     u8 type;
     u8 length;
     u8 cpu;
@@ -42,6 +43,11 @@ namespace ACPI::MADT {
   void initialize();
   auto isInitialized() -> bool;
 
-  auto getIoApic() -> std::optional<IoApic*>;
+  auto getInterruptSourceOverrides() -> std::pair<InterruptSourceOverride**, size_t>;
+  auto getIoApics() -> std::pair<IoApic**, size_t>;
+  auto getNonMaskableInterrupts() -> std::pair<NonMaskableInterrupt**, size_t>;
+  auto getLocalApics() -> std::pair<LocalApic**, size_t>;
+
+  auto getLocalApicAddress() -> uintptr_t;
 
 }

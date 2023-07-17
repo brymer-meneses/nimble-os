@@ -9,6 +9,8 @@
 #include <kernel/cpu/interrupt/idt.h>
 #include <kernel/acpi/acpi.h>
 #include <kernel/acpi/madt.h>
+#include <kernel/drivers/apic/apic.h>
+#include <kernel/drivers/ps2.h>
 
 
 #ifdef ENABLE_TESTS
@@ -37,10 +39,11 @@ extern "C" void kmain(void) {
   IDT::initialize();
   Interrupt::initialize();
 
-  ACPI::initialize();
-  ACPI::MADT::initialize();
+  // ACPI::initialize();
+  // ACPI::MADT::initialize();
 
-  // asm olatile ("int 0x0");
+  // APIC::initialize();
+  PS2::Keyboard::initialize();
 
 #ifdef ENABLE_TESTS
   Tester::main();

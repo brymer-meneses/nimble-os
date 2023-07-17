@@ -1,4 +1,5 @@
 #include <kernel/utils/print.h>
+#include <kernel/utils/panic.h>
 
 #include "idt.h"
 
@@ -63,3 +64,16 @@ void IDT::initialize() {
   asm volatile ("lidt %0" :: "m" (idtptr));
   asm volatile ("sti");
 }
+
+auto IDT::allocateVector() -> u8 {
+
+  // this is the minimum idt irq
+  static u16 vector = 32;
+
+  if (vector == MAX_ENTRIES) {
+    Kernel::panic("Cannot allocate interrupt vector reached maximum");
+  } 
+
+  return vector;
+}
+

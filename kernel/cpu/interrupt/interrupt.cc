@@ -43,12 +43,14 @@ static const char* exceptionMessages[] = {
 };
 
 
-using Interrupt::InterruptHandler;
+using Interrupt::IrqHandler;
+using Interrupt::ExceptionHandler;
 using Interrupt::InterruptFrame;
 
-static InterruptHandler handlers[IDT::MAX_ENTRIES];
+static ExceptionHandler exceptionHandlers[32];
+static IrqHandler irqHandlers[256 - 32];
 
-static void exceptionHandler(InterruptFrame* context) {
+static void dumpInterruptFrame(InterruptFrame* context) {
   u16 interruptNumber = context->vector_number;
   Framebuffer::setForeground(0xD08770);
   Kernel::println("----------------------------");
@@ -85,33 +87,49 @@ extern "C" void interruptDispatch(InterruptFrame* context) {
   u16 interruptNumber = context->vector_number;
 
   if (interruptNumber < 32) {
-    exceptionHandler(context);
+    ExceptionHandler handler = exceptionHandlers[interruptNumber];
+
+    if (handler == nullptr) {
+      dumpInterruptFrame(context);
+    } else {
+      handler(context);
+    }
     return;
   }
 
-  InterruptHandler handler = handlers[interruptNumber];
+  IrqHandler handler = irqHandlers[interruptNumber];
 
   // check if there is a handler available
   if (handler == nullptr) {
     Kernel::println("Received interrupt {} that has no handler.",  interruptNumber);
   } else {
-    handler(context);
+    handler();
   }
 
   return;
 }
 
-void Interrupt::setHandler(u16 interruptNumber, InterruptHandler handler) {
+void Interrupt::setExceptionHandler(u16 interruptNumber, ExceptionHandler handler) {
 
-  if (handlers[interruptNumber] != nullptr) {
-    Kernel::println("Overriding interrupt handler {} with a new function.",  interruptNumber);
+  if (exceptionHandlers[interruptNumber] != nullptr) {
+    Kernel::println("Overriding exception interrupt handler {} with a new function.",  interruptNumber);
     return;
   }
 
-  handlers[interruptNumber] = handler;
+  exceptionHandlers[interruptNumber] = handler;
+}
 
+void Interrupt::setIrqHandler(u16 interruptNumber, IrqHandler handler) {
+
+  if (irqHandlers[interruptNumber] != nullptr) {
+    Kernel::println("Overriding exception interrupt handler {} with a new function.",  interruptNumber);
+    return;
+  }
+
+  irqHandlers[interruptNumber] = handler;
 }
 
 void Interrupt::initialize() {
-  std::memset(handlers, 0, sizeof(handlers));
+  std::memset(irqHandlers, 0, sizeof(irqHandlers));
+  std::memset(exceptionHandlers, 0, sizeof(exceptionHandlers));
 }

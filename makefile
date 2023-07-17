@@ -19,7 +19,6 @@ CXXFLAGS := \
 	-O3 \
 	-std=c++20 \
 	-Wall \
-	-Werror \
 	-Wextra \
 	-Wpedantic \
 	-ffreestanding \
@@ -29,7 +28,6 @@ CXXFLAGS := \
 	-fno-lto \
 	-m64 \
 	-mabi=sysv \
-	-masm=intel \
 	-mno-80387 \
 	-mcmodel=kernel \
 	-mno-mmx \
@@ -59,12 +57,12 @@ LDFLAGS := \
 QEMUFLAGS := \
 		-D qemu-log.txt \
 		-d int -M smm=off \
+		-smp cpus=2 \
 		-serial stdio 
 
 .PHONY: clean
 
-all: 
-	$(MAKE) -j8 run
+all: run
 
 clean:
 	$(RM) -r $(OBJECTS)
