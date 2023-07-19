@@ -34,11 +34,16 @@ struct Writer {
       writeNewLine();
       return;
     };
+
     
     std::optional<FontCharacter> fc = Fonts::PixelOperator::getBitmap(character);
 
     if (!fc.has_value()) {
       return;
+    }
+
+    if (x >= framebuffer->width - x_offset - fc->charWidth) {
+      writeNewLine();
     }
     
     for (int row=0; row<fc->maxHeight; row++) {
