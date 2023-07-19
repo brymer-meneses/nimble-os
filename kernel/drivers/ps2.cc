@@ -412,6 +412,9 @@ auto parseScancode(u32 scancode) -> std::optional<Key> {
       key.isModifier = false;
       key.input = "E0";
       break;
+    case 0xAA:
+      isShift = false;
+      break;
   }
 
 
@@ -419,7 +422,6 @@ auto parseScancode(u32 scancode) -> std::optional<Key> {
     return std::nullopt;
 
   if (!key.isModifier) {
-    isShift = false;
     isAlt = false;
   }
   return key;
