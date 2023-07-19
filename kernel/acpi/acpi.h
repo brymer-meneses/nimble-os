@@ -21,7 +21,7 @@ namespace ACPI {
   void initialize();
 
 
-  [[nodiscard]] auto findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*>;
-  [[nodiscard]] auto isInitialized() -> bool;
+  auto findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*>;
+  auto isInitialized() -> bool;
 
 }

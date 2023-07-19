@@ -14,7 +14,7 @@ enum class FormatSpecifier {
 };
 
 template <typename T, FormatSpecifier specifier = FormatSpecifier::Inferred>
-[[nodiscard]] constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
+constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
 
   if constexpr (std::is_integral_v<T>) {
     if constexpr (specifier == FormatSpecifier::Hexadecimal) {

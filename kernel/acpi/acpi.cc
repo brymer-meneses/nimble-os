@@ -31,12 +31,10 @@ constexpr u16 RSDP_VERSION_TWO_SIZE = sizeof(RSDP);
 // same as version two, except we remove the last four fields
 constexpr u16 RSDP_VERSION_ONE_SIZE = sizeof(RSDP) -  sizeof(u32) - sizeof(u64) - 4*sizeof(u8);
 
-[[nodiscard]]
 auto usesVersionTwo() -> bool {
    return rsdp->revision >= 2 &&  rsdp->xsdtAddress != 0;
 }
 
-[[nodiscard]]
 auto validateChecksum(u8* byteArray, size_t size) -> bool {
   u32 checksum = 0;
   for (size_t i = 0; i < size; i++) {
@@ -73,7 +71,6 @@ void ACPI::initialize() {
   Kernel::println("Address {hex}", (uintptr_t) rsdt);
 };
 
-[[nodiscard]]
 auto ACPI::findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*> {
   // if we are using the xsdt, each `sdt` it points to has a size of u64, otherwise 
   // we it should have a size of u32
@@ -108,7 +105,6 @@ auto ACPI::findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*>
   return std::nullopt;
 }
 
-[[nodiscard]]
 auto ACPI::isInitialized() -> bool {
   return rsdp != nullptr;
 }
