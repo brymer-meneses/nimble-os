@@ -67,7 +67,7 @@ uint8_t a1, a2;
   IO::outb(PIC2_DATA, ICW4_8086);
   IO::wait();
 
-  // :Port::estore saved masks
+  // Restore saved masks
   IO::outb(PIC1_DATA, a1);
   IO::outb(PIC2_DATA, a2);
 }
