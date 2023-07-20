@@ -1,7 +1,12 @@
 
 # NimbleOS
 
-A work in progress operating system made from scratch using C++!
+> Nimble
+> Quick and light in movement in action; agile
+
+NimbleOS, is a work in progress operating system made from scratch using C++, 
+it is an attempt to understand the inner workings of an operating system, by
+making one from scratch.
 
 
 ## Progress
@@ -12,9 +17,11 @@ A work in progress operating system made from scratch using C++!
     - [ ] Create robust API to draw icons
 - [ ] Serial Output
 - [ ] APIC Driver
-- [ ] Keyboard Support
-- [ ] Memory Allocation
-    - [ ] Heap Allocation
+- [x] Keyboard Support
+- [ ] Memory Management
+    - [ ] Physical Memory Manager
+    - [ ] Virtual Memory Manager
+    - [ ] Heap Allocation (malloc and friends)
 - [ ] File System
 - [ ] Basic Shell
 
