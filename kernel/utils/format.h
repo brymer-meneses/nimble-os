@@ -18,32 +18,40 @@ constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
 
   if constexpr (std::is_integral_v<T>) {
     if constexpr (specifier == FormatSpecifier::Hexadecimal) {
-      bpos += String::copy(buffer, bpos, "0x", 0, 3);
-
       char temp_buffer[256];
-      int length = String::fromIntegral(value, temp_buffer, 16);
-      bpos += String::copy(buffer, bpos, temp_buffer, 0, length+1);
 
-      return bpos;
+      int length = String::copy(buffer, bpos, "0x", 0, 3);
+      bpos += length;
+
+      length += String::fromIntegral(value, temp_buffer, 16);
+
+      String::copy(buffer, bpos, temp_buffer, 0, length+1);
+
+      return length;
     }
 
     if constexpr (specifier == FormatSpecifier::Octal) {
-      bpos += String::copy(buffer, bpos, "0o", 0, 3);
-
       char temp_buffer[256];
-      int length = String::fromIntegral(value, temp_buffer, 8);
-      bpos += String::copy(buffer, bpos, temp_buffer, 0, length+1);
 
-      return bpos;
+      int length = String::copy(buffer, bpos, "0o", 0, 3);
+      bpos += length;
+
+      length += String::fromIntegral(value, temp_buffer, 8);
+
+      String::copy(buffer, bpos, temp_buffer, 0, length+1);
+
+      return length;
     }
 
     if constexpr (specifier == FormatSpecifier::Binary) {
-      bpos += String::copy(buffer, bpos, "0b", 0, 3);
       char temp_buffer[256];
-      int length = String::fromIntegral(value, temp_buffer, 2);
-      bpos += String::copy(buffer, bpos, temp_buffer, 0, length+1);
+      int length = String::copy(buffer, bpos, "0b", 0, 3);
+      bpos += length;
 
-      return bpos;
+      length += String::fromIntegral(value, temp_buffer, 2);
+      String::copy(buffer, bpos, temp_buffer, 0, length+1);
+
+      return length;
     }
   }
 
