@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Kernel {
-  extern inline void halt() {
+  extern inline auto halt() -> void {
     for (;;) {
       asm volatile ("hlt");
     }

@@ -3,5 +3,5 @@
 
 namespace GDT {
 
-  void initialize();
+  auto initialize() -> void;
 }

@@ -3,11 +3,11 @@
 namespace PS2 {
 
   namespace Keyboard {
-    void initialize();
+    auto initialize() -> void;
   }
 
   namespace Mouse {
-    void initialize();
+    auto initialize() -> void;
   }
 
 }

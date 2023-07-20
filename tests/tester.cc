@@ -10,7 +10,7 @@ static u16 g_testCount = 0;
 static u16 g_numTestPass = 0;
 static bool g_didCurrentTestPass = false;
 
-void Tester::main() {
+auto Tester::main() -> void{
   Kernel::println("--------------------------");
   // TODO: some number casting is going haywire here
   Kernel::println(">> Running {} tests...", g_testCount);
@@ -37,15 +37,15 @@ void Tester::main() {
   Kernel::println("--------------------------");
 }
 
-void Tester::Internal::registerTest(Tester::Internal::TestFunction test) {
+auto Tester::Internal::registerTest(Tester::Internal::TestFunction test) -> void {
   g_tests[g_testCount] = test;
   g_testCount += 1;
 }
 
-void Tester::Internal::invokeTestFailure() {
+auto Tester::Internal::invokeTestFailure() -> void {
   g_didCurrentTestPass = false;
 }
 
-void Tester::Internal::invokeTestSuccess() {
+auto Tester::Internal::invokeTestSuccess() -> void {
   g_didCurrentTestPass = true;
 }

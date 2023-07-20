@@ -1,7 +1,8 @@
 
 # NimbleOS
 
-> Nimble
+> **Nimble**\
+> *adjective*\
 > Quick and light in movement in action; agile
 
 NimbleOS, is a work in progress operating system made from scratch using C++, 

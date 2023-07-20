@@ -36,9 +36,9 @@ struct InterruptFrame {
   using ExceptionHandler = void (*)(InterruptFrame* context);
   using IrqHandler = void (*)();
 
-  void setExceptionHandler(u16 interruptNumber, ExceptionHandler handler);
-  void setIrqHandler(u16 interruptNumber, IrqHandler handler);
+  auto setExceptionHandler(const u16 interruptNumber, ExceptionHandler handler) -> void;
+  auto setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> void;
 
-  void initialize();
+  auto initialize() -> void;
 
 }

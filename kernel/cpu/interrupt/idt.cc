@@ -26,7 +26,7 @@ static constexpr u16 KERNEL_CODE_SEGMENT = 0x08;
 __attribute__((aligned(0x10))) 
 static IdtEntry idt[IDT::MAX_ENTRIES];
 
-static void setEntry(u8 vector, u64 handler, u8 flags) {
+static auto setEntry(u8 vector, u64 handler, u8 flags) -> void {
 
   idt[vector].isr_low = handler & 0xFFFF;
   idt[vector].isr_mid = (handler >> 16) & 0xFFFF;
@@ -40,7 +40,7 @@ static void setEntry(u8 vector, u64 handler, u8 flags) {
 
 extern void* interruptHandlerTable[];
 
-void IDT::initialize() {
+auto IDT::initialize() -> void {
   IdtPtr idtptr;
 
   idtptr.base = (u64) &idt[0];

@@ -4,8 +4,8 @@
 
 namespace PIC {
   
-  void initialize();
-  void maskAll();
-  void sendEndOfInterrupt(u8 irq);
-  void clearMask(u8 irq);
+  auto initialize() -> void;
+  auto maskAll() -> void;
+  auto sendEndOfInterrupt(u8 irq) -> void;
+  auto clearMask(u8 irq) -> void;
 }

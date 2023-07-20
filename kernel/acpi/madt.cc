@@ -66,7 +66,7 @@ auto ACPI::MADT::getLocalApicAddress() -> uintptr_t {
 
 
 
-void ACPI::MADT::initialize() {
+auto ACPI::MADT::initialize() -> void {
   std::optional<AcpiHeader*> madtHeader = ACPI::findAcpiHeader("APIC");
   if (!madtHeader) {
     Kernel::panic("Cannot find APIC");

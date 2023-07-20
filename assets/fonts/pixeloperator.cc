@@ -1761,7 +1761,6 @@ static const u8 bitmap[] =
 };
 
 
-/*Store the glyph descriptions*/
 static const u8 widths[] = {
     1, 3, 6, 5, 7, 5, 1, 3, 3, 5, 5, 2, 4, 1, 3, 5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 1, 2, 3, 4, 3, 5, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5,
@@ -1772,7 +1771,7 @@ static const u8 widths[] = {
 static constexpr const char* order = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 
-std::optional<FontCharacter> Fonts::PixelOperator::getBitmap(char character) {
+auto Fonts::PixelOperator::getBitmap(char character) -> std::optional<FontCharacter>{
 
   FontCharacter fc;
   fc.character = character;

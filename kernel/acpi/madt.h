@@ -40,7 +40,7 @@ namespace ACPI::MADT {
     u8 lint;
   } __attribute__((packed));
 
-  void initialize();
+  auto initialize() -> void;
   auto isInitialized() -> bool;
 
   auto getInterruptSourceOverrides() -> std::pair<InterruptSourceOverride**, size_t>;

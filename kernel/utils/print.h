@@ -4,25 +4,25 @@
 
 namespace Kernel {
   template<typename Arg, typename ...Args>
-  void print(const char* string, Arg arg, Args ...args) {
+  auto print(const char* string, Arg arg, Args ...args) -> void {
     char buffer[256];
     Format::format(buffer, string, arg, args...);
     Framebuffer::writeString(buffer);
   }
 
   template<typename Arg, typename ...Args>
-  void println(const char* string, Arg arg, Args ...args) {
+  auto println(const char* string, Arg arg, Args ...args) -> void {
     char buffer[256];
     Format::format(buffer, string, arg, args...);
     Framebuffer::writeString(buffer);
     Framebuffer::writeCharacter('\n');
   }
 
-  inline void print(const char* string) {
+  inline auto print(const char* string) -> void {
     Framebuffer::writeString(string);
   }
 
-  inline void println(const char* string) {
+  inline auto println(const char* string) -> void {
     Framebuffer::writeString(string);
     Framebuffer::writeCharacter('\n');
   }

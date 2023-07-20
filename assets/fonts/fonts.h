@@ -18,7 +18,7 @@ namespace Fonts {
 
 
   namespace PixelOperator {
-    std::optional<FontCharacter> getBitmap(char character);
+     auto getBitmap(char character) -> std::optional<FontCharacter>;
   }
 
 

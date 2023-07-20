@@ -4,7 +4,7 @@
 namespace String {
   
 template<typename T>
-constexpr int fromIntegral(T value, char* buffer, int base) {
+constexpr auto fromIntegral(T value, char* buffer, int base) -> int {
   bool negative = false;
 
   if (value < 0) {
@@ -47,8 +47,8 @@ constexpr auto append(char* buffer, size_t bpos, const char* string) -> size_t {
   return i;
 }
 
-constexpr int copy(char *buffer, size_t bufpos, const char *string,
-                          size_t string_start, size_t string_end) {
+constexpr auto copy(char *buffer, size_t bufpos, const char *string,
+                          size_t string_start, size_t string_end) -> int {
 
   size_t i = string_start;
   while (string[i] != '\0' && i < string_end) {

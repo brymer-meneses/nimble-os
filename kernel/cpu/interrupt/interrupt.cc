@@ -50,7 +50,7 @@ using Interrupt::InterruptFrame;
 static ExceptionHandler exceptionHandlers[32];
 static IrqHandler irqHandlers[256 - 32];
 
-static void dumpInterruptFrame(InterruptFrame* context) {
+static auto dumpInterruptFrame(const InterruptFrame* context) -> void {
   u16 interruptNumber = context->vector_number;
   Framebuffer::setForeground(0xD08770);
   Kernel::println("----------------------------");
@@ -82,7 +82,7 @@ static void dumpInterruptFrame(InterruptFrame* context) {
 } 
 
 // this is called from `idt.asm` 
-extern "C" void interruptDispatch(InterruptFrame* context) {
+extern "C" auto interruptDispatch(InterruptFrame* context) -> void {
 
   u16 interruptNumber = context->vector_number;
 
@@ -109,7 +109,7 @@ extern "C" void interruptDispatch(InterruptFrame* context) {
   return;
 }
 
-void Interrupt::setExceptionHandler(u16 interruptNumber, ExceptionHandler handler) {
+auto Interrupt::setExceptionHandler(const u16 interruptNumber, ExceptionHandler handler) -> void {
 
   if (exceptionHandlers[interruptNumber] != nullptr) {
     Kernel::println("Overriding exception interrupt handler {} with a new function.",  interruptNumber);
@@ -119,7 +119,7 @@ void Interrupt::setExceptionHandler(u16 interruptNumber, ExceptionHandler handle
   exceptionHandlers[interruptNumber] = handler;
 }
 
-void Interrupt::setIrqHandler(u16 interruptNumber, IrqHandler handler) {
+auto Interrupt::setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> void {
 
   if (irqHandlers[interruptNumber] != nullptr) {
     Kernel::println("Overriding exception interrupt handler {} with a new function.",  interruptNumber);
@@ -129,7 +129,7 @@ void Interrupt::setIrqHandler(u16 interruptNumber, IrqHandler handler) {
   irqHandlers[interruptNumber] = handler;
 }
 
-void Interrupt::initialize() {
+auto Interrupt::initialize() -> void {
   std::memset(irqHandlers, 0, sizeof(irqHandlers));
   std::memset(exceptionHandlers, 0, sizeof(exceptionHandlers));
 }

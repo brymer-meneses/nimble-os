@@ -8,23 +8,19 @@
 
 namespace Kernel {
 
-  template<typename Arg, typename ...Args>
-  void panic(const char* string, Arg arg, Args ...args) {
-    char buffer[256];
-    Format::format(buffer, string, arg, args...);
-
-    Framebuffer::setForeground(0xBF616A);
-    Framebuffer::writeString("[Kernel Panic]: ");
-    Framebuffer::writeString(buffer);
-    Framebuffer::writeCharacter('\n');
-    Kernel::halt();
-  }
-
-  inline void panic(const char* string) {
+  inline auto panic(const char* string) -> void {
     Framebuffer::setForeground(0xBF616A);
     Framebuffer::writeString("[Kernel Panic]: ");
     Framebuffer::writeString(string);
     Framebuffer::writeCharacter('\n');
     Kernel::halt();
   }
+
+  template<typename Arg, typename ...Args>
+  auto panic(const char* string, Arg arg, Args ...args) -> void {
+    char buffer[256];
+    Format::format(buffer, string, arg, args...);
+    panic(buffer);
+  }
+
 }

@@ -18,8 +18,7 @@ namespace ACPI {
     u32 creatorRevision;
   } __attribute__((packed));
 
-  void initialize();
-
+  auto initialize() -> void;
 
   auto findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*>;
   auto isInitialized() -> bool;

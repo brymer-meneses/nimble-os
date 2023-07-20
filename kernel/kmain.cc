@@ -17,8 +17,8 @@
   #include "tests/tester.h"
 #endif
 
-void callConstructors() {
-  typedef void (*ConstructorFn)();
+auto callConstructors() -> void {
+  using ConstructorFn =  void(*)();
   extern ConstructorFn start_ctors;
   extern ConstructorFn end_ctors;
 
@@ -29,7 +29,7 @@ void callConstructors() {
 
 
 
-extern "C" void kmain(void) {
+extern "C" auto kmain(void) -> void {
 
   callConstructors();
 

@@ -5,7 +5,7 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
 
-static volatile limine_rsdp_request rsdpRequest = {
+static volatile auto rsdpRequest = limine_rsdp_request {
   .id = LIMINE_RSDP_REQUEST, 
   .revision = 0
 };
@@ -44,7 +44,7 @@ auto validateChecksum(u8* byteArray, size_t size) -> bool {
   return (checksum & 0xFF) == 0;
 }
 
-void ACPI::initialize() { 
+auto ACPI::initialize() -> void { 
   
   limine_rsdp_response* rsdpResponse = rsdpRequest.response;
 

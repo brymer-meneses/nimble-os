@@ -26,9 +26,9 @@
 #define PIC2_OFFSET         0x28
 #define PIC_EOI             0x20
 
-void PIC::initialize() {
+auto PIC::initialize() -> void {
   
-uint8_t a1, a2;
+  u8 a1, a2;
 
   // sanity checks
   static_assert(PIC1_OFFSET % 8 == 0);
@@ -72,12 +72,12 @@ uint8_t a1, a2;
   IO::outb(PIC2_DATA, a2);
 }
 
-void PIC::maskAll() {
+auto PIC::maskAll() -> void {
   IO::outb(PIC1_DATA, 0xff);
   IO::outb(PIC1_DATA, 0xff);
 }
 
-void PIC::sendEndOfInterrupt(u8 irq) {
+auto PIC::sendEndOfInterrupt(u8 irq) -> void {
   if (irq >= 8) {
     IO::outb(PIC2_COMMAND, PIC_EOI);
   };
@@ -85,7 +85,7 @@ void PIC::sendEndOfInterrupt(u8 irq) {
   IO::outb(PIC1_COMMAND, PIC_EOI);
 }
 
-void PIC::clearMask(u8 irq) {
+auto PIC::clearMask(u8 irq) -> void {
   u16 port;
   u8 value;
 

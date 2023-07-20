@@ -4,6 +4,6 @@
 namespace IDT {
 
   constexpr u16 MAX_ENTRIES = 256;
-  void initialize();
+  auto initialize() -> void;
   auto allocateVector() -> u8;
 }

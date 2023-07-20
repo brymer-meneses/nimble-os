@@ -2,8 +2,7 @@
 
 namespace Tester {
 
-
-  void main();
+  auto main() -> void;
 
   namespace Internal {
     struct TestFunction {
@@ -12,9 +11,9 @@ namespace Tester {
       void (*function)();
     };
 
-    void invokeTestFailure();
-    void invokeTestSuccess();
-    void registerTest(TestFunction test);
+    auto invokeTestFailure() -> void;
+    auto invokeTestSuccess() -> void;
+    auto registerTest(TestFunction test) -> void;
   }
 
 

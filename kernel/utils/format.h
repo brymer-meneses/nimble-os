@@ -157,7 +157,7 @@ struct FormatArgument {
 };
 
 template <typename... Args>
-constexpr void format(char *buffer, const char *string, Args... args) {
+constexpr auto format(char *buffer, const char *string, Args... args) -> void {
   formatImpl(buffer, string, 0, 0, args...);
 }
 

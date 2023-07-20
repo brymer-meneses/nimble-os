@@ -3,19 +3,19 @@
 
 namespace Framebuffer {
   
-  void writeString(const char* string);
-  void writeCharacter(char character);
-  void writeNewLine();
+  auto writeString(const char* string) -> void;
+  auto writeCharacter(const char character) -> void;
+  auto writeNewLine() -> void;
 
-  void clearScreen();
-  void setBackground(u32 color);
-  void setBackground(u8 r, u8 g, u8 b);
+  auto clearScreen() -> void;
+  auto setBackground(const u32 color) -> void;
+  auto setBackground(const u8 r, const u8 g, const u8 b) -> void;
 
-  void setForeground(u32 color);
-  void setForeground(u8 r, u8 g, u8 b);
+  auto setForeground(const u32 color) -> void;
+  auto setForeground(const u8 r, const u8 g, const u8 b) -> void;
 
-  void withColor(u32 foreground, u32 background, void (*function)());
-  void withForeground(u32 foreground, void (*function)());
-  void withBackground(u32 background, void (*function)());
+  auto withColor(const u32 foreground, const u32 background, void (*function)()) -> void;
+  auto withForeground(const u32 foreground, void (*function)()) -> void;
+  auto withBackground(const u32 background, void (*function)()) -> void;
 
 }

@@ -20,7 +20,7 @@ static constexpr u64 TOTAL_ENTRIES = 5;
 
 static GdtEntry gdt[TOTAL_ENTRIES];
 
-void setEntry(size_t index, u8 access, u8 flags) {
+auto setEntry(size_t index, u8 access, u8 flags) -> void {
   gdt[index].base_low = 0x0000;
   gdt[index].base_middle = 0x00;
   gdt[index].base_high = 0x00;
@@ -32,7 +32,7 @@ void setEntry(size_t index, u8 access, u8 flags) {
 // defined in `gdt.asm`
 extern "C" void loadGDT(GdtPtr* gdt);
 
-void GDT::initialize() {
+auto GDT::initialize() -> void {
   GdtPtr gdtptr;
   gdtptr.limit = sizeof(GdtEntry) * TOTAL_ENTRIES - 1;
   gdtptr.base = (u64) &gdt;

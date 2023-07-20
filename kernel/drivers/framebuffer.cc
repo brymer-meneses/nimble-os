@@ -22,7 +22,7 @@ struct Writer {
   limine_framebuffer* volatile framebuffer;
   uintptr_t base;
 
-  void writeCharacter(char character) {
+  auto writeCharacter(const char character) -> void {
 
     using Fonts::FontCharacter;
     if (character == ' ') {
@@ -51,9 +51,9 @@ struct Writer {
     
       for (int col=0; col<fc->charWidth; col++) {
         bool isPixelActive = (rowData >> (fc->charWidth - col - 1)) & 1;
+        if (!isPixelActive) continue;
     
-        u32 pixelColor = isPixelActive ? foreground : background;
-        writePixel(col + x, row + y, pixelColor);
+        writePixel(col + x, row + y, foreground);
       }
     
     }
@@ -61,23 +61,23 @@ struct Writer {
     x += fc->charWidth + 2;
   };
 
-  void writeNewLine() {
+  auto writeNewLine() -> void {
     x = x_offset;
     y += 16;
   };
 
-  void writePixel(u32 posX, u32 posY, u32 color) {
+  auto writePixel(const u32 posX, const u32 posY, const u32 color) -> void {
     u64 offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
     IO::Mem::write<u32>(this->base + offset, color);
   };
 
-  void writeString(const char* string) {
+  auto writeString(const char* string) -> void {
     for (int i=0; string[i] != '\0'; i++) {
       writeCharacter(string[i]);
     }
   };
 
-  void clearScreen() {
+  auto clearScreen() -> void {
 
     for (size_t y = 0; y < framebuffer->height; ++y) {
       for (size_t x = 0; x < framebuffer->width; ++x) {
@@ -88,7 +88,7 @@ struct Writer {
 
   Writer() {
 
-    static volatile limine_framebuffer_request framebuffer_request = {
+    static volatile auto framebuffer_request = limine_framebuffer_request {
       .id = LIMINE_FRAMEBUFFER_REQUEST,
       .revision = 0
     };
@@ -106,23 +106,23 @@ struct Writer {
 static Writer gWriter;
 
 
-void Framebuffer::writeNewLine() {
+auto Framebuffer::writeNewLine() -> void {
   gWriter.writeNewLine();
 }
 
-void Framebuffer::writeCharacter(char character) {
+auto Framebuffer::writeCharacter(const char character) -> void {
   gWriter.writeCharacter(character);
 }
 
-void Framebuffer::writeString(const char* string) {
+auto Framebuffer::writeString(const char* string) -> void {
   gWriter.writeString(string);
 }
 
-void Framebuffer::clearScreen() {
+auto Framebuffer::clearScreen() -> void {
   gWriter.clearScreen();
 }
 
-void Framebuffer::withColor(u32 foreground, u32 background, void (*function)()) {
+auto Framebuffer::withColor(const u32 foreground, const u32 background, void (*function)()) -> void {
   u32 oldForeground = gWriter.foreground;
   u32 oldBackground = gWriter.background;
 
@@ -133,14 +133,14 @@ void Framebuffer::withColor(u32 foreground, u32 background, void (*function)()) 
   gWriter.background = oldBackground;
 }
 
-void Framebuffer::withForeground(u32 foreground, void (*function)()) {
+auto Framebuffer::withForeground(const u32 foreground, void (*function)()) -> void {
   u32 oldForeground = gWriter.foreground;
   gWriter.foreground = foreground;
   function();
   gWriter.foreground = oldForeground;
 }
 
-void Framebuffer::withBackground(u32 background, void (*function)()) {
+auto Framebuffer::withBackground(const u32 background, void (*function)()) -> void {
   u32 oldBackground = gWriter.background;
   gWriter.background = background;
   function();
@@ -148,19 +148,19 @@ void Framebuffer::withBackground(u32 background, void (*function)()) {
 }
 
 
-void Framebuffer::setForeground(u32 color) {
+auto Framebuffer::setForeground(const u32 color) -> void {
   gWriter.foreground = color;
 }
 
-void Framebuffer::setForeground(u8 r, u8 g, u8 b) {
+auto Framebuffer::setForeground(const u8 r, const u8 g, const u8 b) -> void {
   gWriter.foreground = Color::encodeRGB(r, g, b);
 }
 
-void Framebuffer::setBackground(u32 color) {
+auto Framebuffer::setBackground(const u32 color) -> void {
   gWriter.background = Color::encodeHEX(color);
 }
 
-void Framebuffer::setBackground(u8 r, u8 g, u8 b) {
+auto Framebuffer::setBackground(const u8 r, const u8 g, const u8 b) -> void {
   gWriter.background = Color::encodeRGB(r, g, b);
 }
 
