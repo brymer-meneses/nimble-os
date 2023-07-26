@@ -22,7 +22,10 @@ CXXFLAGS := \
 	-Wextra \
 	-Wpedantic \
 	-ffreestanding \
+	-fPIE \
 	-fno-stack-protector \
+	-fno-unwind-tables \
+	-fno-asynchronous-unwind-tables \
 	-fno-rtti \
 	-fno-exceptions \
 	-fno-lto \
@@ -50,6 +53,7 @@ LDFLAGS := \
 	-m elf_${ARCH} \
 	-nostdlib \
 	-static \
+	-pie \
 	--no-dynamic-linker \
 	-z max-page-size=0x1000 \
 	-T linker.ld 
@@ -57,6 +61,7 @@ LDFLAGS := \
 QEMUFLAGS := \
 		-D qemu-log.txt \
 		-d int -M smm=off \
+		-m 512M \
 		-smp cpus=2 \
 		-serial stdio 
 

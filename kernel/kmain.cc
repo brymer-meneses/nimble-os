@@ -12,13 +12,14 @@
 #include <kernel/drivers/apic/apic.h>
 #include <kernel/drivers/ps2.h>
 
+#include <kernel/memory/pmm.h>
 
 #ifdef ENABLE_TESTS
   #include "tests/tester.h"
 #endif
 
 auto callConstructors() -> void {
-  using ConstructorFn =  void(*)();
+  using ConstructorFn = void(*)();
   extern ConstructorFn start_ctors;
   extern ConstructorFn end_ctors;
 
@@ -26,7 +27,6 @@ auto callConstructors() -> void {
     (*i)();
   }
 }
-
 
 
 extern "C" auto kmain(void) -> void {
@@ -44,6 +44,7 @@ extern "C" auto kmain(void) -> void {
 
   // APIC::initialize();
   PS2::Keyboard::initialize();
+  PMM::initialize();
 
 #ifdef ENABLE_TESTS
   Tester::main();
