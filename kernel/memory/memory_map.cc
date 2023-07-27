@@ -23,16 +23,14 @@ MemoryMap::MemoryMap() {
   // m_hhdmResponse = hhdmRequest.response;
 
   auto entries = m_memmapResponse->entries;
-  auto totalEntries = m_memmapResponse->entry_count;
+  entryCount = m_memmapResponse->entry_count;
 
-  std::sort(entries, entries + totalEntries,
-            [](const limine_memmap_entry* a, limine_memmap_entry* b) -> bool {
+  std::sort(entries, entries + entryCount,
+            [](const auto* a, auto* b) -> bool {
               return a->type < b->type;
             });
 
-  entryCount = totalEntries;
-
-  for (size_t i = 0; i < totalEntries; i++) {
+  for (size_t i = 0; i < entryCount; i++) {
     auto* entry = entries[i];
 
     switch (entry->type) {
@@ -81,7 +79,7 @@ MemoryMap::MemoryMap() {
 }
 
 auto MemoryMap::operator[](size_t index) -> limine_memmap_entry* {
-  if (index > this->entryCount) 
+  if (index >= this->entryCount) 
     return nullptr;
   return this->m_memmapResponse->entries[index];
 }

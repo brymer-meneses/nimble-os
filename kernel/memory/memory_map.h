@@ -20,14 +20,12 @@ class MemoryMap {
   private:
     MemoryMap();
 
-  private:
+  public:
     struct Range {
       size_t start = std::numeric_limits<size_t>::max();
       size_t end = 0;
       size_t count = 0;
     };
-
-  public:
     Range usable{};
     Range reserved{};
     Range acpiReclaimaible{};
@@ -42,5 +40,6 @@ class MemoryMap {
   private:
     limine_memmap_response* m_memmapResponse = nullptr;
     limine_hhdm_response* m_hhdmResponse = nullptr;
+
 
 };
