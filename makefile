@@ -31,7 +31,6 @@ CXXFLAGS := \
 	-fno-lto \
 	-m64 \
 	-mabi=sysv \
-	-mno-80387 \
 	-mcmodel=kernel \
 	-mno-mmx \
 	-mno-sse \
