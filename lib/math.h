@@ -15,11 +15,4 @@ namespace Math {
   constexpr auto alignDown(T value, T align) -> T {
     return (value / align) * align;
   }
-
-  template<typename T>
-  requires std::is_arithmetic_v<T>
-  constexpr auto max(T v1, T v2) -> T {
-    return v1 > v2 ? v1 : v2;
-  }
-
 }
