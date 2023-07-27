@@ -74,33 +74,33 @@ auto BitmapAllocator::isBitFree(size_t i) -> bool {
 }
 
 auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
-  static size_t i = 0; 
-  static u64 lastUsedIndex = 0;
+  static size_t memoryIndex = 0; 
+  static u64 bitmapIndex = 0;
+  static u64 entryIndex = 0;
 
-  while (lastUsedIndex < mMemory.usablePages) {
+  while (bitmapIndex < mMemory.usablePages) {
 
-    // find which memmap entry should be used
-    auto* entry = mMemory[i].value();
-    while (lastUsedIndex * PAGE_SIZE >= entry->base + entry->length) {
-
-      if (!mMemory[i]) {
+    auto* entry = mMemory[memoryIndex].value();
+    while (entryIndex * PAGE_SIZE >= entry->length) {
+      memoryIndex += 1;
+      if (memoryIndex >= mMemory.usableEntries) {
         Kernel::panic("Memory full");
         return std::nullopt;
       }
-
-      entry = mMemory[i].value();
-      i += 1;
+      entryIndex = 0;
+      entry = mMemory[memoryIndex].value();
     }
 
-    if (isBitFree(lastUsedIndex)) {
-      uintptr_t address = entry->base + lastUsedIndex * PAGE_SIZE;
+    if (isBitFree(bitmapIndex)) {
+      auto address = entry->base + entryIndex * PAGE_SIZE;
 
-      setUsed(lastUsedIndex);
-      lastUsedIndex += 1;
+      setUsed(bitmapIndex);
+      bitmapIndex += 1;
+      entryIndex += 1;
       return address;
     }
 
-    lastUsedIndex += 1;
+    bitmapIndex += 1;
   }
 
   return std::nullopt;
@@ -116,7 +116,6 @@ auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
     }
   }
 
-  // Kernel::println("Freeing {hex}", (address-entry->base)/PAGE_SIZE);
   setFree((address - entry->base) / PAGE_SIZE);
 }
 
