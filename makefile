@@ -77,7 +77,7 @@ distclean:
 	$(RM) -r lib/libc++/
 
 slocs:
-	tokei . --exclude=assets/fonts/pixeloperator.cc --files
+	tokei . --exclude=assets/fonts/pixeloperator.cc
 
 
 debug:

@@ -15,14 +15,17 @@ making one from scratch.
 - [x] Interrupts
 - [x] Graphics
     - [x] Print strings to the screen 
+    - [ ] Window Management
     - [ ] Create robust API to draw icons
+- [x] Custom Testing Framework (inspired by GTest)
 - [ ] Serial Output
 - [ ] APIC Driver
 - [x] Keyboard Support
 - [ ] Memory Management
-    - [ ] Physical Memory Manager
+    - [x] Physical Memory Manager
     - [ ] Virtual Memory Manager
-    - [ ] Heap Allocation (malloc and friends)
+    - [ ] Heap Allocation (`malloc` and friends)
 - [ ] File System
+- [ ] NVMe Driver
 - [ ] Basic Shell
 
