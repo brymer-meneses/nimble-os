@@ -8,12 +8,15 @@
 
 #include <cstddef>
 
-#include "bitmap_allocator.h"
+#include "memory_map.h"
 
 
 auto PMM::initialize() -> void {
 
-  auto allocator = BitmapAllocator();
+  auto& memoryMap = MemoryMap::get();
+  memoryMap.get();
+
+  // auto allocator = BitmapAllocator();
   // u64 address = allocator.allocatePage().value();
   // u64 address1 = allocator.allocatePage().value();
   //

@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <optional>
 #include "pmm.h"
-#include "usable_memory.h"
+#include "memory_map.h"
 
 class BitmapAllocator {
 
@@ -15,6 +15,7 @@ class BitmapAllocator {
     auto allocatePage() -> std::optional<PhysicalAddress>;
     auto freePage(PhysicalAddress address) -> void;
     auto operator[](size_t index) -> u8;
+    auto allocatePages(size_t index) -> std::optional<PhysicalAddress>;
 
   private:
     auto setFree(size_t index) -> void;
@@ -26,11 +27,11 @@ class BitmapAllocator {
     auto isBitFree(size_t index) -> bool;
 
   private:
-    u8* mBitmapData = nullptr;
-    size_t mBitmapSize = 0;
-    size_t mLastIndex = 0;
-    limine_memmap_response* mMemmap;
-    limine_hhdm_response* mHhdm;
-    // just a wrapper for `mMemmap->entries`
-    UsableMemory mMemory;
+    size_t m_memoryIndex = 0; 
+    u64 m_bitmapIndex = 0;
+    u64 m_entryIndex = 0;
+    u8* m_bitmapData = nullptr;
+    size_t m_bitmapSize = 0;
+    size_t m_lastIndex = 0;
+    MemoryMap& memoryMap = MemoryMap::get();
 };
