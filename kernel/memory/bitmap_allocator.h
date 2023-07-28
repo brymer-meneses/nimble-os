@@ -24,7 +24,7 @@ class BitmapAllocator {
         auto setUsed(size_t index) -> void;
         auto freeAll() -> void;
         auto isPageFree(size_t index) -> bool;
-        auto setContiguousPagesAsUsed(size_t pages);
+        auto setContiguousPagesAsUsed(size_t start, size_t end);
     };
 
   public:

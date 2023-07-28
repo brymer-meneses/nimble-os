@@ -42,8 +42,8 @@ auto Bitmap::isPageFree(size_t index) -> bool {
   return (data[row] & (1 << col)) == 0;
 }
 
-auto Bitmap::setContiguousPagesAsUsed(size_t pages) {
-  for (size_t i = 0; i < pages; i++) {
+auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
+  for (size_t i = start; i < end; i++) {
     setUsed(i);
   }
 }
@@ -52,7 +52,7 @@ Bitmap::Bitmap(u8* data, size_t maxPages) : data(data), maxPages(maxPages)  {
   const auto dataSize = Math::ceilDiv(maxPages, 8);
   const auto pagesAllocateToBitmap = Math::ceilDiv(dataSize, PAGE_SIZE);
   freeAll();
-  setContiguousPagesAsUsed(pagesAllocateToBitmap);
+  setContiguousPagesAsUsed(0, pagesAllocateToBitmap);
 };
 
 
@@ -137,7 +137,7 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
 
   lastIndexUsed = index;
   auto address = getAddressFromBitmapIndex(baseIndex);
-  bitmap.setContiguousPagesAsUsed(requiredPages);
+  bitmap.setContiguousPagesAsUsed(baseIndex, index);
   return address;
 }
 
