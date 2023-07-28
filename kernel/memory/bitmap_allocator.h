@@ -36,7 +36,6 @@ class BitmapAllocator {
     auto allocateContiguousPages(size_t pages) -> std::optional<PhysicalAddress>;
 
   private:
-    auto getCurrentEntry() -> limine_memmap_entry*;
     auto getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress>;
     auto getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t>;
 
@@ -44,6 +43,5 @@ class BitmapAllocator {
     MemoryMap& memoryMap = MemoryMap::get();
     Bitmap bitmap{};
     size_t entryIndex = memoryMap.usable.start;
-    size_t entryPageIndex = 0;
     size_t lastIndexUsed = 0;
 };

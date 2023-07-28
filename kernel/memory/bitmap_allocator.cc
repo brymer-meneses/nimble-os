@@ -79,25 +79,6 @@ BitmapAllocator::BitmapAllocator() {
   lastIndexUsed = bitmap.usedPages + 1;
 }
 
-auto BitmapAllocator::getCurrentEntry() -> limine_memmap_entry* {
-
-  auto* entry = memoryMap[entryIndex];
-  const auto canEntryFit = entry->length >= entryPageIndex * PAGE_SIZE;
-  if (not canEntryFit) {
-    entryIndex += 1;
-    if (entryIndex > memoryMap.usable.end) {
-      Kernel::panic("Failed to allocate a page since memory is full");
-    }
-
-    // get the new entry
-    entry = memoryMap[entryPageIndex];
-    // reset the `entryPageIndex` since this is relative to the current entry
-    entryPageIndex = 0;
-  }
-  
-  return entry;
-}
-
 auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
 
   while (bitmap.usedPages < bitmap.maxPages) {
@@ -111,7 +92,6 @@ auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
       auto address = getAddressFromBitmapIndex(lastIndexUsed);
       bitmap.setUsed(lastIndexUsed);
       lastIndexUsed += 1;
-      entryPageIndex += 1;
       return address;
     } 
 
