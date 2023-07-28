@@ -15,6 +15,7 @@ class BitmapAllocator {
         size_t usedPages = 0;
         u8* data = nullptr;
         size_t maxPages = 0;
+        size_t reservedPages = 0;
 
       public:
         Bitmap(u8* data, size_t maxPages);
@@ -38,6 +39,7 @@ class BitmapAllocator {
   private:
     auto getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress>;
     auto getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t>;
+    auto getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*>;
 
   private:
     MemoryMap& memoryMap = MemoryMap::get();

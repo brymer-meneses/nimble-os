@@ -51,6 +51,9 @@ auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
 Bitmap::Bitmap(u8* data, size_t maxPages) : data(data), maxPages(maxPages)  {
   const auto dataSize = Math::ceilDiv(maxPages, 8);
   const auto pagesAllocateToBitmap = Math::ceilDiv(dataSize, PAGE_SIZE);
+
+  reservedPages = pagesAllocateToBitmap;
+
   freeAll();
   setContiguousPagesAsUsed(0, pagesAllocateToBitmap);
 };
@@ -110,12 +113,18 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
   size_t numPages = 0;
   size_t index = lastIndexUsed;
   size_t baseIndex = index;
-  size_t baseEntryIndex = entryIndex;
+  auto baseEntry = getEntryFromBitmapIndex(baseIndex);
 
   while (numPages < requiredPages) {
 
+    // TODO:
+    // this should really start from the beginning and try again
     if (index > bitmap.maxPages) {
-      break;
+      return std::nullopt;
+    }
+
+    if (baseEntry != getEntryFromBitmapIndex(index)) {
+      return std::nullopt;
     }
 
     if (bitmap.isPageFree(index)) {
@@ -128,17 +137,28 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
     index += 1;
   }
 
-  const auto achievedRequiredPages = numPages == requiredPages;
-  const auto isSameEntry = baseEntryIndex == entryIndex;
-
-  if (!achievedRequiredPages or !isSameEntry) {
-    return std::nullopt;
-  }
-
   lastIndexUsed = index;
   auto address = getAddressFromBitmapIndex(baseIndex);
   bitmap.setContiguousPagesAsUsed(baseIndex, index);
   return address;
+}
+
+auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*> {
+  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
+    auto* entry = memoryMap[i];
+
+    const auto pagesInEntry = entry->length / PAGE_SIZE;
+
+    if (index > pagesInEntry) {
+      index -= pagesInEntry;
+      continue;
+    }
+
+    // we found the entry we're looking for
+    return entry;
+  }
+
+  return std::nullopt;
 }
 
 auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress> {
