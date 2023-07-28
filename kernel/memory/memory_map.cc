@@ -17,6 +17,8 @@ static volatile auto hhdmRequest = limine_hhdm_request{
     .revision = 0,
 };
 
+using PMM::PAGE_SIZE;
+
 MemoryMap::MemoryMap() {
 
   m_memmapResponse = memmapRequest.response;
@@ -38,6 +40,7 @@ MemoryMap::MemoryMap() {
         usable.end = std::max(usable.end, i);
         usable.start = std::min(usable.start, i);
         usable.count += 1;
+        usablePages += Math::ceilDiv(entry->length, PAGE_SIZE);
         break;
       case LIMINE_MEMMAP_RESERVED:
         reserved.end = std::max(reserved.end, i);

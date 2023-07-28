@@ -10,28 +10,40 @@
 class BitmapAllocator {
 
   public:
+    class Bitmap {
+      public:
+        size_t usedPages = 0;
+        u8* data = nullptr;
+        size_t maxPages = 0;
+
+      public:
+        Bitmap(u8* data, size_t maxPages);
+        Bitmap() {};
+
+        auto setFree(size_t index) -> void;
+        auto setUsed(size_t index) -> void;
+        auto freeAll() -> void;
+        auto isPageFree(size_t index) -> bool;
+        auto setContiguousPagesAsUsed(size_t pages);
+    };
+
+  public:
     BitmapAllocator();
 
     auto allocatePage() -> std::optional<PhysicalAddress>;
     auto freePage(PhysicalAddress address) -> void;
-    auto operator[](size_t index) -> u8;
-    auto allocatePages(size_t index) -> std::optional<PhysicalAddress>;
+    auto getBitmapData(size_t index) -> u8;
+    auto allocateContiguousPages(size_t pages) -> std::optional<PhysicalAddress>;
 
   private:
-    auto setFree(size_t index) -> void;
-    auto setUsed(size_t index) -> void;
-    auto freeAll() -> void;
-
-    auto getUsableMemmapIndex() -> std::optional<size_t>;
-    auto getMemmapIndex(size_t index) -> std::optional<limine_memmap_entry*>; 
-    auto isBitFree(size_t index) -> bool;
+    auto getCurrentEntry() -> limine_memmap_entry*;
+    auto getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress>;
+    auto getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t>;
 
   private:
-    size_t m_memoryIndex = 0; 
-    u64 m_bitmapIndex = 0;
-    u64 m_entryIndex = 0;
-    u8* m_bitmapData = nullptr;
-    size_t m_bitmapSize = 0;
-    size_t m_lastIndex = 0;
     MemoryMap& memoryMap = MemoryMap::get();
+    Bitmap bitmap{};
+    size_t entryIndex = memoryMap.usable.start;
+    size_t entryPageIndex = 0;
+    size_t lastIndexUsed = 0;
 };

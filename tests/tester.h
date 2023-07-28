@@ -14,6 +14,7 @@ namespace Tester {
     auto invokeTestFailure() -> void;
     auto invokeTestSuccess() -> void;
     auto registerTest(TestFunction test) -> void;
+    auto registerInternalTest(TestFunction test) -> void;
   }
 
 

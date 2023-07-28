@@ -14,6 +14,7 @@ CompileFlags:
     - "-I$project_dir/lib/thirdparty/"
     - "-std=c++20"
     - "-Wpedantic"
+    - "-DENABLE_TESTS"
     - "-Wextra"
     - "-Wall"
 EOT

@@ -4,107 +4,210 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/assert.h>
 #include <lib/math.h>
+#include <algorithm>
 
 #include "memory_map.h"
 
 using PMM::PAGE_SIZE;
 
+#define BITMAP_FREE 0
+#define BITMAP_USED 1
 
-BitmapAllocator::BitmapAllocator() {
+using Bitmap = BitmapAllocator::Bitmap;
 
-  // the bitmap is a u8 array, each `u8` corresponds to 8 pages
-  m_bitmapSize = Math::ceilDiv(memoryMap.usable.count, 8);
+auto Bitmap::setFree(size_t index) -> void {
+  auto row = index / 8;
+  auto col = index % 8;
+  data[row] = data[row] & ~(1 << col);
+  usedPages -= 1;
+}
+
+auto Bitmap::setUsed(size_t index) -> void {
+  auto row = index / 8;
+  auto col = index % 8;
+  data[row] = data[row] | (1 << col);
+  usedPages += 1;
+}
+
+auto Bitmap::freeAll() -> void {
+  for (size_t i=0; i<maxPages; i++) {
+    data[i] = 0;
+  }
+  usedPages = 0;
+}
+
+auto Bitmap::isPageFree(size_t index) -> bool {
+  auto row = index / 8;
+  auto col = index % 8;
+  return (data[row] & (1 << col)) == 0;
+}
+
+auto Bitmap::setContiguousPagesAsUsed(size_t pages) {
+  for (size_t i = 0; i < pages; i++) {
+    setUsed(i);
+  }
+}
+
+Bitmap::Bitmap(u8* data, size_t maxPages) : data(data), maxPages(maxPages)  {
+  const auto dataSize = Math::ceilDiv(maxPages, 8);
+  const auto pagesAllocateToBitmap = Math::ceilDiv(dataSize, PAGE_SIZE);
+  freeAll();
+  setContiguousPagesAsUsed(pagesAllocateToBitmap);
+};
+
+
+BitmapAllocator::BitmapAllocator() { 
+
+  // I'm an idiot, it took me a whole day to figure out this computation.
+  const auto totalPages = memoryMap.usablePages;
+  const auto bitmapSize = Math::ceilDiv(totalPages, 8);
 
   // find a place for the bitmap
-  for (size_t i=0; i<memoryMap.usable.count; i++) {
-
+  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
     auto* entry = memoryMap[i];
-    if (entry->length >= m_bitmapSize) {
-      m_bitmapData = (u8*) entry->base;
-      entry->base += m_bitmapSize;
-      entry->length -= m_bitmapSize;
+    if (entry->length >= bitmapSize) {
+      bitmap = Bitmap(reinterpret_cast<u8*>(entry->base), bitmapSize);
       break;
     }
   }
 
-  if (!m_bitmapData) {
-    Kernel::panic("Cannot find a place for `mBitmapData`");
+  // ensure that bitmap.data is not a nullptr
+  KERNEL_ASSERT(bitmap.data);
+
+  // the bitmap marks the first `n` pages as used since this is occuped by the
+  // bitmap data itself
+  lastIndexUsed = bitmap.usedPages + 1;
+}
+
+auto BitmapAllocator::getCurrentEntry() -> limine_memmap_entry* {
+
+  auto* entry = memoryMap[entryIndex];
+  const auto canEntryFit = entry->length >= entryPageIndex * PAGE_SIZE;
+  if (not canEntryFit) {
+    entryIndex += 1;
+    if (entryIndex > memoryMap.usable.end) {
+      Kernel::panic("Failed to allocate a page since memory is full");
+    }
+
+    // get the new entry
+    entry = memoryMap[entryPageIndex];
+    // reset the `entryPageIndex` since this is relative to the current entry
+    entryPageIndex = 0;
   }
   
-  freeAll();
-}
-
-auto BitmapAllocator::setFree(size_t i) -> void {
-  auto row = i / 8;
-  auto col = i % 8;
-  m_bitmapData[row] = m_bitmapData[row] & ~(1 << col);
-}
-
-auto BitmapAllocator::setUsed(size_t i) -> void {
-  auto row = i / 8;
-  auto col = i % 8;
-  m_bitmapData[row] = m_bitmapData[row] | (1 << col);
-}
-
-auto BitmapAllocator::freeAll() -> void {
-  for (size_t i=0; i<m_bitmapSize; i++) {
-    m_bitmapData[i] = 0;
-  }
-}
-
-auto BitmapAllocator::isBitFree(size_t i) -> bool {
-  auto row = i / 8;
-  auto col = i % 8;
-  return (m_bitmapData[row] & (1 << col)) == 0;
+  return entry;
 }
 
 auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
 
-  while (m_bitmapIndex < memoryMap.usable.count) {
+  while (bitmap.usedPages < bitmap.maxPages) {
 
-    auto* entry = memoryMap[m_memoryIndex];
-    while (m_entryIndex * PAGE_SIZE >= entry->length) {
-      m_memoryIndex += 1;
-      if (m_memoryIndex >= memoryMap.usable.count) {
-        Kernel::panic("Memory full");
-        return std::nullopt;
-      }
-      m_entryIndex = 0;
-      entry = memoryMap[m_memoryIndex];
+    if (lastIndexUsed > bitmap.usedPages) {
+      // reset the lastIndexUsed just after the reserved pages for the bitmap
+      lastIndexUsed = bitmap.usedPages + 1;
     }
 
-    if (isBitFree(m_bitmapIndex)) {
-      auto address = entry->base + m_entryIndex * PAGE_SIZE;
-
-      setUsed(m_bitmapIndex);
-      m_bitmapIndex += 1;
-      m_entryIndex += 1;
+    if (bitmap.isPageFree(lastIndexUsed)) {
+      auto address = getAddressFromBitmapIndex(lastIndexUsed);
+      bitmap.setUsed(lastIndexUsed);
+      lastIndexUsed += 1;
+      entryPageIndex += 1;
       return address;
-    }
+    } 
 
-    m_bitmapIndex += 1;
+    lastIndexUsed += 1;
   }
 
   return std::nullopt;
 }
 
-auto BitmapAllocator::allocatePages(size_t index) -> std::optional<PhysicalAddress> {
+auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::optional<PhysicalAddress> {
 
+  if (requiredPages > bitmap.maxPages) {
+    Kernel::panic("Can't allocate that much memory");
+  }
+
+  size_t numPages = 0;
+  size_t index = lastIndexUsed;
+  size_t baseIndex = index;
+  size_t baseEntryIndex = entryIndex;
+
+  while (numPages < requiredPages) {
+
+    if (index > bitmap.maxPages) {
+      break;
+    }
+
+    if (bitmap.isPageFree(index)) {
+      numPages += 1;
+    } else {
+      baseIndex = index;
+      numPages = 0;
+    }
+
+    index += 1;
+  }
+
+  const auto achievedRequiredPages = numPages == requiredPages;
+  const auto isSameEntry = baseEntryIndex == entryIndex;
+
+  if (!achievedRequiredPages or !isSameEntry) {
+    return std::nullopt;
+  }
+
+  lastIndexUsed = index;
+  auto address = getAddressFromBitmapIndex(baseIndex);
+  bitmap.setContiguousPagesAsUsed(requiredPages);
+  return address;
 }
 
-auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
-  limine_memmap_entry* entry = nullptr;
+auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress> {
 
-  for (size_t i = 0; i < memoryMap.usable.count; i++) {
+  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
+    auto* entry = memoryMap[i];
+
+    const auto pagesInEntry = entry->length / PAGE_SIZE;
+
+    if (index > pagesInEntry) {
+      index -= pagesInEntry;
+      continue;
+    }
+
+    // we found the entry we're looking for
+    return entry->base + index * PAGE_SIZE;
+  }
+
+  return std::nullopt;
+}
+
+auto BitmapAllocator::getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t> {
+  limine_memmap_entry* entry = nullptr;
+  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
     entry = memoryMap[i];
-    if (address >= entry->base && address < entry->base + entry->length) {
+    auto isAddressInEntry = address >= entry->base && address < entry->base + entry->length;
+
+    if (isAddressInEntry) {
       break;
     }
   }
 
-  setFree((address - entry->base) / PAGE_SIZE);
+  if (entry == nullptr)  {
+    return std::nullopt;
+  } else {
+    return (address - entry->base) / PAGE_SIZE;
+  }
 }
 
-auto BitmapAllocator::operator[](size_t i) -> u8 {
-  return m_bitmapData[i];
+auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
+  const auto index = getBitmapIndexFromAddress(address);
+
+  if (!index) {
+    Kernel::panic("Failed to free page that is out of range");
+  }
+
+  bitmap.setFree(index.value());
+}
+
+auto BitmapAllocator::getBitmapData(size_t i) -> u8 {
+  return bitmap.data[i];
 }

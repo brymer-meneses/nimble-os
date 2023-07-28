@@ -5,6 +5,8 @@
 #include <lib/libc.h>
 
 #include <type_traits>
+#include <source_location>
+
 
 #define TEST(test_suite, test_name) \
 void test_##test_suite##_##test_name(); \
@@ -14,9 +16,13 @@ void register_##test_suite##_##test_name() { \
   test.suiteName = #test_suite; \
   test.testName = #test_name; \
   test.function = test_##test_suite##_##test_name; \
-  Tester::Internal::registerTest(test); \
+  const auto loc = std::source_location::current(); \
+  if (std::memcmp(loc.file_name(), "test", 4)) \
+    Tester::Internal::registerInternalTest(test); \
+  else \
+    Tester::Internal::registerTest(test); \
 }; \
-void test_##test_suite##_##test_name()
+void test_##test_suite##_##test_name() \
 
 template<typename Arg1, typename Arg2>
 auto assertEq(Arg1 arg1, Arg2 arg2) -> void {
