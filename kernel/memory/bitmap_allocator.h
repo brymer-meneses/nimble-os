@@ -48,6 +48,6 @@ class BitmapAllocator {
   private:
     MemoryMap& memoryMap = MemoryMap::get();
     Bitmap bitmap{};
-    size_t entryIndex = memoryMap.usable.start;
+    size_t entryIndex = memoryMap.usable.first;
     size_t lastIndexUsed = 0;
 };

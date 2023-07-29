@@ -14,16 +14,19 @@
 
 auto PMM::initialize() -> void {
 
-
   auto& memoryMap = MemoryMap::get();
-  memoryMap.get();
+  // memoryMap.get();
 
   auto allocator = BitmapAllocator();
   PhysicalAddress address = allocator.allocateContiguousPages(10).value();
-
-  Kernel::println("{hex}", address);
-
+  //
+  // Kernel::println("{hex}", address);
+  //
   allocator.freeContiguousPages(address, 10);
-  allocator.printInfo();
+  // allocator.printInfo();
+  //
+  for (auto* entry : memoryMap.usable) {
+    Kernel::println("base {hex} {hex}", entry->base, entry->length);
+  }
 }
 

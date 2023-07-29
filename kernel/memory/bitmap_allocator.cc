@@ -66,8 +66,7 @@ BitmapAllocator::BitmapAllocator() {
   const auto bitmapSize = Math::ceilDiv(totalPages, 8);
 
   // find a place for the bitmap
-  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
-    auto* entry = memoryMap[i];
+  for (auto* entry : memoryMap.usable) {
     if (entry->length >= bitmapSize) {
       bitmap = Bitmap(reinterpret_cast<u8*>(entry->base), totalPages);
       break;
@@ -171,10 +170,8 @@ auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std
 
   // calculate how many pages each entry has
   size_t numPages = 0;
-  limine_memmap_entry* current = nullptr; 
 
-  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
-    current = memoryMap[i];
+  for (auto* current : memoryMap.usable) {
     if (current == entry) {
       break;
     }
@@ -186,9 +183,8 @@ auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std
 }
 
 auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*> {
-  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
-    auto* entry = memoryMap[i];
 
+  for (auto* entry : memoryMap.usable) {
     const auto pagesInEntry = entry->length / PAGE_SIZE;
 
     if (index > pagesInEntry) {
@@ -205,9 +201,7 @@ auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<lim
 
 auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress> {
 
-  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
-    auto* entry = memoryMap[i];
-
+  for (auto* entry : memoryMap.usable) {
     const auto pagesInEntry = entry->length / PAGE_SIZE;
 
     if (index > pagesInEntry) {
@@ -225,9 +219,9 @@ auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<P
 auto BitmapAllocator::getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t> {
 
   limine_memmap_entry* entry = nullptr;
-  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
-    entry = memoryMap[i];
-    if (address >= entry->base && address <= entry->base + entry->length) {
+  for (auto* current : memoryMap.usable) {
+    if (address >= current->base && address <= current->base + current->length) {
+      entry = current;
       break;
     }
   }
