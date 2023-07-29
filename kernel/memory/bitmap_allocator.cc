@@ -30,7 +30,7 @@ auto Bitmap::setUsed(size_t index) -> void {
 }
 
 auto Bitmap::freeAll() -> void {
-  for (size_t i=0; i<maxPages; i++) {
+  for (size_t i=0; i<maxPages/8; i++) {
     data[i] = 0;
   }
   usedPages = 0;
@@ -69,7 +69,7 @@ BitmapAllocator::BitmapAllocator() {
   for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
     auto* entry = memoryMap[i];
     if (entry->length >= bitmapSize) {
-      bitmap = Bitmap(reinterpret_cast<u8*>(entry->base), bitmapSize);
+      bitmap = Bitmap(reinterpret_cast<u8*>(entry->base), totalPages);
       break;
     }
   }
@@ -79,7 +79,7 @@ BitmapAllocator::BitmapAllocator() {
 
   // the bitmap marks the first `n` pages as used since this is occuped by the
   // bitmap data itself
-  lastIndexUsed = bitmap.usedPages + 1;
+  lastIndexUsed = bitmap.usedPages;
 }
 
 auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
@@ -113,7 +113,6 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
   size_t numPages = 0;
   size_t index = lastIndexUsed;
   size_t baseIndex = index;
-  auto baseEntry = getEntryFromBitmapIndex(baseIndex);
 
   while (numPages < requiredPages) {
 
@@ -123,8 +122,9 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
       return std::nullopt;
     }
 
-    if (baseEntry != getEntryFromBitmapIndex(index)) {
-      return std::nullopt;
+    if (getEntryFromBitmapIndex(baseIndex) != getEntryFromBitmapIndex(index)) {
+      baseIndex = index;
+      numPages = 0;
     }
 
     if (bitmap.isPageFree(index)) {
@@ -141,6 +141,48 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
   auto address = getAddressFromBitmapIndex(baseIndex);
   bitmap.setContiguousPagesAsUsed(baseIndex, index);
   return address;
+}
+
+auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
+  const auto index = getBitmapIndexFromAddress(address);
+
+  if (!index) {
+    Kernel::panic("Failed to free page that is out of range");
+  }
+
+  bitmap.setFree(index.value());
+}
+
+auto BitmapAllocator::freeContiguousPages(PhysicalAddress address, size_t numPages) -> void {
+  const auto index = getBitmapIndexFromAddress(address);
+
+  Kernel::println("index {}", index.value());
+  if (!index) {
+    Kernel::panic("Failed to free page, since it is out of range");
+    return;
+  }
+
+  for (size_t i = index.value(); i < index.value() + numPages; i++) {
+    bitmap.setFree(i);
+  }
+}
+
+auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std::optional<size_t> {
+
+  // calculate how many pages each entry has
+  size_t numPages = 0;
+  limine_memmap_entry* current = nullptr; 
+
+  for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
+    current = memoryMap[i];
+    if (current == entry) {
+      break;
+    }
+
+    numPages += current->length/PAGE_SIZE;
+  }
+
+  return numPages;
 }
 
 auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*> {
@@ -181,33 +223,49 @@ auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<P
 }
 
 auto BitmapAllocator::getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t> {
+
   limine_memmap_entry* entry = nullptr;
   for (size_t i = memoryMap.usable.start; i <= memoryMap.usable.end; i++) {
     entry = memoryMap[i];
-    auto isAddressInEntry = address >= entry->base && address < entry->base + entry->length;
-
-    if (isAddressInEntry) {
+    if (address >= entry->base && address <= entry->base + entry->length) {
       break;
     }
   }
 
-  if (entry == nullptr)  {
+  if (!entry) {
     return std::nullopt;
-  } else {
-    return (address - entry->base) / PAGE_SIZE;
-  }
-}
-
-auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
-  const auto index = getBitmapIndexFromAddress(address);
-
-  if (!index) {
-    Kernel::panic("Failed to free page that is out of range");
   }
 
-  bitmap.setFree(index.value());
+  // I kept getting overflow here, turns out i was doing entry->base - address.
+  // compute how many pages before we get to address
+  size_t numPages = (address - entry->base) / PAGE_SIZE;
+  // number of pages before the entry;
+  size_t basePages = getBitmapIndexFromEntry(entry).value();
+  return numPages + basePages;
 }
+
 
 auto BitmapAllocator::getBitmapData(size_t i) -> u8 {
   return bitmap.data[i];
+}
+
+auto BitmapAllocator::printInfo() -> void {
+
+  Kernel::println("Bitmap");
+
+  for (size_t i = 0; i < 40; i++) {
+    const auto data = getBitmapData(i);
+
+    Kernel::print("{} -", i);
+    for (u8 j = 0; j < 8; j++) {
+      Kernel::print("{} ", (data >> j) & 1);
+    }
+    Kernel::println("");
+  }
+
+  Kernel::println("Reserved {}", bitmap.reservedPages);
+  Kernel::println("Used {}", bitmap.usedPages - bitmap.reservedPages);
+  Kernel::println("Capacity {}", bitmap.maxPages);
+
+  Kernel::println("");
 }

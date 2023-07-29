@@ -14,19 +14,16 @@
 
 auto PMM::initialize() -> void {
 
+
   auto& memoryMap = MemoryMap::get();
   memoryMap.get();
 
   auto allocator = BitmapAllocator();
-  // u64 address = allocator.allocatePage().value();
-  // u64 address1 = allocator.allocatePage().value();
-  //
-  // Kernel::println("{hex}", address);
-  //
-  // allocator.freePage(address);
-  // allocator.freePage(address1);
-  //
-  // Kernel::println("yoo {bin}", (u8) allocator.mBitmapData[0]);
+  PhysicalAddress address = allocator.allocateContiguousPages(10).value();
 
+  Kernel::println("{hex}", address);
+
+  allocator.freeContiguousPages(address, 10);
+  allocator.printInfo();
 }
 
