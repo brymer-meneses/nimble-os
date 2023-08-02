@@ -5,6 +5,8 @@
 #include <limits>
 
 #include <kernel/utils/print.h>
+#include <kernel/utils/panic.h>
+
 #include <lib/math.h>
 
 static volatile auto memmapRequest = limine_memmap_request{
@@ -12,20 +14,19 @@ static volatile auto memmapRequest = limine_memmap_request{
     .revision = 0,
 };
 
-static volatile auto hhdmRequest = limine_hhdm_request{
-    .id = LIMINE_HHDM_REQUEST,
-    .revision = 0,
-};
 
 using PMM::PAGE_SIZE;
 
 MemoryMap::MemoryMap() {
 
-  m_memmapResponse = memmapRequest.response;
-  // m_hhdmResponse = hhdmRequest.response;
+  memmapResponse = memmapRequest.response;
 
-  auto entries = m_memmapResponse->entries;
-  entryCount = m_memmapResponse->entry_count;
+  if (!memmapResponse) {
+    Kernel::panic("memmapResponse is null");
+  }
+
+  auto entries = memmapResponse->entries;
+  entryCount = memmapResponse->entry_count;
 
   std::sort(entries, entries + entryCount,
             [](const auto* a, auto* b) -> bool {
@@ -80,34 +81,35 @@ MemoryMap::MemoryMap() {
     };
   }
   
-  usable.startPointer = &m_memmapResponse->entries[usable.first];
-  usable.endPointer = &m_memmapResponse->entries[usable.last + 1];
+  // we need to assign the end and start pointer mainly for iteration
+  usable.startPointer = &memmapResponse->entries[usable.first];
+  usable.endPointer = &memmapResponse->entries[usable.last + 1];
 
-  reserved.startPointer = &m_memmapResponse->entries[reserved.first];
-  reserved.endPointer = &m_memmapResponse->entries[reserved.last + 1];
+  reserved.startPointer = &memmapResponse->entries[reserved.first];
+  reserved.endPointer = &memmapResponse->entries[reserved.last + 1];
 
-  acpiReclaimable.startPointer = &m_memmapResponse->entries[acpiReclaimable.first];
-  acpiReclaimable.endPointer = &m_memmapResponse->entries[acpiReclaimable.last + 1];
+  acpiReclaimable.startPointer = &memmapResponse->entries[acpiReclaimable.first];
+  acpiReclaimable.endPointer = &memmapResponse->entries[acpiReclaimable.last + 1];
 
-  acpiNvs.startPointer = &m_memmapResponse->entries[acpiNvs.first];
-  acpiNvs.endPointer = &m_memmapResponse->entries[acpiNvs.last + 1];
+  acpiNvs.startPointer = &memmapResponse->entries[acpiNvs.first];
+  acpiNvs.endPointer = &memmapResponse->entries[acpiNvs.last + 1];
 
-  badMemory.startPointer = &m_memmapResponse->entries[badMemory.first];
-  badMemory.endPointer = &m_memmapResponse->entries[badMemory.last + 1];
+  badMemory.startPointer = &memmapResponse->entries[badMemory.first];
+  badMemory.endPointer = &memmapResponse->entries[badMemory.last + 1];
 
-  bootloaderReclaimable.startPointer = &m_memmapResponse->entries[bootloaderReclaimable.first];
-  bootloaderReclaimable.endPointer = &m_memmapResponse->entries[bootloaderReclaimable.last + 1];
+  bootloaderReclaimable.startPointer = &memmapResponse->entries[bootloaderReclaimable.first];
+  bootloaderReclaimable.endPointer = &memmapResponse->entries[bootloaderReclaimable.last + 1];
 
-  kernelAndModules.startPointer = &m_memmapResponse->entries[kernelAndModules.first];
-  kernelAndModules.endPointer = &m_memmapResponse->entries[kernelAndModules.last + 1];
+  kernelAndModules.startPointer = &memmapResponse->entries[kernelAndModules.first];
+  kernelAndModules.endPointer = &memmapResponse->entries[kernelAndModules.last + 1];
 
-  framebuffer.startPointer = &m_memmapResponse->entries[framebuffer.first];
-  framebuffer.endPointer = &m_memmapResponse->entries[framebuffer.last + 1];
+  framebuffer.startPointer = &memmapResponse->entries[framebuffer.first];
+  framebuffer.endPointer = &memmapResponse->entries[framebuffer.last + 1];
 }
 
 auto MemoryMap::operator[](size_t index) -> limine_memmap_entry* {
-  if (index >= this->entryCount) 
+  if (index >= entryCount) 
     return nullptr;
-  return this->m_memmapResponse->entries[index];
+  return memmapResponse->entries[index];
 }
 

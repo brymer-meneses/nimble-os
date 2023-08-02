@@ -13,6 +13,7 @@
 #include <kernel/drivers/ps2.h>
 
 #include <kernel/memory/pmm.h>
+#include <kernel/memory/vmm.h>
 
 #ifdef ENABLE_TESTS
   #include "tests/tester.h"
@@ -45,6 +46,7 @@ extern "C" auto kmain(void) -> void {
   // APIC::initialize();
   PS2::Keyboard::initialize();
   PMM::initialize();
+  VMM::initialize();
 
 #ifdef ENABLE_TESTS
   Tester::main();

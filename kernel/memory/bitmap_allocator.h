@@ -18,7 +18,7 @@ class BitmapAllocator {
         size_t reservedPages = 0;
 
       public:
-        Bitmap(u8* data, size_t maxPages);
+        Bitmap(u8* data, size_t offset, size_t maxPages);
         Bitmap() {};
 
         auto setFree(size_t index) -> void;
@@ -29,7 +29,8 @@ class BitmapAllocator {
     };
 
   public:
-    BitmapAllocator();
+    BitmapAllocator() {};
+    auto initialize() -> void;
 
     [[nodiscard]] auto allocatePage() -> std::optional<PhysicalAddress>;
     [[nodiscard]] auto allocateContiguousPages(size_t pages) -> std::optional<PhysicalAddress>;

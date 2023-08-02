@@ -47,21 +47,20 @@ class MemoryMap {
       friend class MemoryMap;
     };
 
-    Range usable{};
-    Range reserved{};
-    Range acpiReclaimable{};
-    Range acpiNvs{};
-    Range badMemory{};
-    Range bootloaderReclaimable{};
-    Range kernelAndModules{};
-    Range framebuffer{};
+    Range usable;
+    Range reserved;
+    Range acpiReclaimable;
+    Range acpiNvs;
+    Range badMemory;
+    Range bootloaderReclaimable;
+    Range kernelAndModules;
+    Range framebuffer;
 
     size_t entryCount;
     size_t usablePages;
 
   private:
-    limine_memmap_response* m_memmapResponse = nullptr;
-    limine_hhdm_response* m_hhdmResponse = nullptr;
+    limine_memmap_response* memmapResponse = nullptr;
 
   public:
     

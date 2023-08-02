@@ -4,7 +4,6 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/assert.h>
 #include <lib/math.h>
-#include <algorithm>
 
 #include "memory_map.h"
 
@@ -18,14 +17,14 @@ using Bitmap = BitmapAllocator::Bitmap;
 auto Bitmap::setFree(size_t index) -> void {
   auto row = index / 8;
   auto col = index % 8;
-  data[row] = data[row] & ~(1 << col);
+  data[row] = Math::unsetBit(data[row], col);
   usedPages -= 1;
 }
 
 auto Bitmap::setUsed(size_t index) -> void {
   auto row = index / 8;
   auto col = index % 8;
-  data[row] = data[row] | (1 << col);
+  data[row] = Math::setBit(data[row], col);
   usedPages += 1;
 }
 
@@ -39,7 +38,7 @@ auto Bitmap::freeAll() -> void {
 auto Bitmap::isPageFree(size_t index) -> bool {
   auto row = index / 8;
   auto col = index % 8;
-  return (data[row] & (1 << col)) == 0;
+  return Math::getBit(data[row], col) == 0;
 }
 
 auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
@@ -48,29 +47,34 @@ auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
   }
 }
 
-Bitmap::Bitmap(u8* data, size_t maxPages) : data(data), maxPages(maxPages)  {
+Bitmap::Bitmap(u8* data, size_t offset, size_t maxPages) : data(data), maxPages(maxPages)  {
   const auto dataSize = Math::ceilDiv(maxPages, 8);
   const auto pagesAllocateToBitmap = Math::ceilDiv(dataSize, PAGE_SIZE);
 
   reservedPages = pagesAllocateToBitmap;
 
   freeAll();
-  setContiguousPagesAsUsed(0, pagesAllocateToBitmap);
+  setContiguousPagesAsUsed(offset, pagesAllocateToBitmap);
 };
 
 
-BitmapAllocator::BitmapAllocator() { 
+auto BitmapAllocator::initialize() -> void { 
 
   // I'm an idiot, it took me a whole day to figure out this computation.
   const auto totalPages = memoryMap.usablePages;
   const auto bitmapSize = Math::ceilDiv(totalPages, 8);
 
   // find a place for the bitmap
+  size_t skippedPages = 0;
   for (auto* entry : memoryMap.usable) {
     if (entry->length >= bitmapSize) {
-      bitmap = Bitmap(reinterpret_cast<u8*>(entry->base), totalPages);
+      bitmap = Bitmap(reinterpret_cast<u8*>(entry->base), skippedPages, totalPages);
       break;
     }
+
+    // we need to keep track of the skipped pages, since some entries may not be able to fit the 
+    // bitmap data
+    skippedPages += entry->length / PAGE_SIZE;
   }
 
   // ensure that bitmap.data is not a nullptr
@@ -78,7 +82,7 @@ BitmapAllocator::BitmapAllocator() {
 
   // the bitmap marks the first `n` pages as used since this is occuped by the
   // bitmap data itself
-  lastIndexUsed = bitmap.usedPages;
+  lastIndexUsed = skippedPages + bitmap.usedPages;
 }
 
 auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
@@ -87,7 +91,7 @@ auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
 
     if (lastIndexUsed > bitmap.usedPages) {
       // reset the lastIndexUsed just after the reserved pages for the bitmap
-      lastIndexUsed = bitmap.usedPages + 1;
+      lastIndexUsed = bitmap.usedPages;
     }
 
     if (bitmap.isPageFree(lastIndexUsed)) {
