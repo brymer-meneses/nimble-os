@@ -1,7 +1,7 @@
 #pragma once
 #include <lib/types.h>
 
-namespace IDT {
+namespace x86_64::IDT {
 
   constexpr u16 MAX_ENTRIES = 256;
   auto initialize() -> void;

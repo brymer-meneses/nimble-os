@@ -32,7 +32,7 @@ auto setEntry(size_t index, u8 access, u8 flags) -> void {
 // defined in `gdt.asm`
 extern "C" void loadGDT(GdtPtr* gdt);
 
-auto GDT::initialize() -> void {
+auto x86_64::GDT::initialize() -> void {
   GdtPtr gdtptr;
   gdtptr.limit = sizeof(GdtEntry) * TOTAL_ENTRIES - 1;
   gdtptr.base = (u64) &gdt;

@@ -24,7 +24,7 @@ struct IdtPtr {
 static constexpr u16 KERNEL_CODE_SEGMENT = 0x08;
 
 __attribute__((aligned(0x10))) 
-static IdtEntry idt[IDT::MAX_ENTRIES];
+static IdtEntry idt[x86_64::IDT::MAX_ENTRIES];
 
 static auto setEntry(u8 vector, u64 handler, u8 flags) -> void {
 
@@ -40,7 +40,7 @@ static auto setEntry(u8 vector, u64 handler, u8 flags) -> void {
 
 extern void* interruptHandlerTable[];
 
-auto IDT::initialize() -> void {
+auto x86_64::IDT::initialize() -> void {
   IdtPtr idtptr;
 
   idtptr.base = (u64) &idt[0];
@@ -65,7 +65,7 @@ auto IDT::initialize() -> void {
   asm volatile ("sti");
 }
 
-auto IDT::allocateVector() -> u8 {
+auto x86_64::IDT::allocateVector() -> u8 {
 
   // this is the minimum idt irq
   static u16 vector = 32;

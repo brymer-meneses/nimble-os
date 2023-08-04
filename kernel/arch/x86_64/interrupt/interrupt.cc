@@ -43,9 +43,9 @@ static const char* exceptionMessages[] = {
 };
 
 
-using Interrupt::IrqHandler;
-using Interrupt::ExceptionHandler;
-using Interrupt::InterruptFrame;
+using x86_64::Interrupt::IrqHandler;
+using x86_64::Interrupt::ExceptionHandler;
+using x86_64::Interrupt::InterruptFrame;
 
 static ExceptionHandler exceptionHandlers[32];
 static IrqHandler irqHandlers[256 - 32];
@@ -109,7 +109,7 @@ extern "C" auto interruptDispatch(InterruptFrame* context) -> void {
   return;
 }
 
-auto Interrupt::setExceptionHandler(const u16 interruptNumber, ExceptionHandler handler) -> void {
+auto x86_64::Interrupt::setExceptionHandler(const u16 interruptNumber, ExceptionHandler handler) -> void {
 
   if (exceptionHandlers[interruptNumber] != nullptr) {
     Kernel::println("Overriding exception interrupt handler {} with a new function.",  interruptNumber);
@@ -119,7 +119,7 @@ auto Interrupt::setExceptionHandler(const u16 interruptNumber, ExceptionHandler 
   exceptionHandlers[interruptNumber] = handler;
 }
 
-auto Interrupt::setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> void {
+auto x86_64::Interrupt::setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> void {
 
   if (irqHandlers[interruptNumber] != nullptr) {
     Kernel::println("Overriding exception interrupt handler {} with a new function.",  interruptNumber);
@@ -129,7 +129,7 @@ auto Interrupt::setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> 
   irqHandlers[interruptNumber] = handler;
 }
 
-auto Interrupt::initialize() -> void {
+auto x86_64::Interrupt::initialize() -> void {
   std::memset(irqHandlers, 0, sizeof(irqHandlers));
   std::memset(exceptionHandlers, 0, sizeof(exceptionHandlers));
 }

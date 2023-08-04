@@ -3,6 +3,7 @@
 
 #include <kernel/utils/panic.h>
 #include <kernel/utils/assert.h>
+#include <lib/bit.h>
 #include <lib/math.h>
 
 #include "memory_map.h"
@@ -17,14 +18,14 @@ using Bitmap = BitmapAllocator::Bitmap;
 auto Bitmap::setFree(size_t index) -> void {
   auto row = index / 8;
   auto col = index % 8;
-  data[row] = Math::unsetBit(data[row], col);
+  Bit::unsetMut(data[row], col);
   usedPages -= 1;
 }
 
 auto Bitmap::setUsed(size_t index) -> void {
   auto row = index / 8;
   auto col = index % 8;
-  data[row] = Math::setBit(data[row], col);
+  Bit::setMut(data[row], col);
   usedPages += 1;
 }
 
@@ -38,7 +39,7 @@ auto Bitmap::freeAll() -> void {
 auto Bitmap::isPageFree(size_t index) -> bool {
   auto row = index / 8;
   auto col = index % 8;
-  return Math::getBit(data[row], col) == 0;
+  return Bit::get(data[row], col) == 0;
 }
 
 auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
@@ -186,6 +187,7 @@ auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std
   return numPages;
 }
 
+// TODO: broken
 auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*> {
 
   for (auto* entry : memoryMap.usable) {
@@ -203,6 +205,7 @@ auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<lim
   return std::nullopt;
 }
 
+// TODO: broken
 auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress> {
 
   for (auto* entry : memoryMap.usable) {

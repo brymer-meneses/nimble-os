@@ -1,10 +1,10 @@
 #include <kernel/drivers/ps2.h>
 #include <kernel/drivers/apic/ioapic.h>
 #include <kernel/drivers/io.h>
-#include <kernel/cpu/interrupt/idt.h>
-#include <kernel/cpu/interrupt/interrupt.h>
 #include <kernel/utils/print.h>
 #include <kernel/drivers/pic.h>
+
+#include <kernel/arch/prelude.h>
 
 #include <limine.h>
 #include <lib/types.h>
@@ -64,7 +64,7 @@ auto PS2::Keyboard::initialize() -> void {
   PIC::initialize();
   PIC::clearMask(1);
 
-  Interrupt::setIrqHandler(33, keyboardHandler);
+  x86_64::Interrupt::setIrqHandler(33, keyboardHandler);
 }
 
 auto keyboardHandler() -> void {

@@ -1,7 +1,7 @@
 #pragma once
 #include <stddef.h>
 
-namespace GDT {
+namespace x86_64::GDT {
 
   auto initialize() -> void;
 }
