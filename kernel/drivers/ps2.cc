@@ -64,7 +64,7 @@ auto PS2::Keyboard::initialize() -> void {
   PIC::initialize();
   PIC::clearMask(1);
 
-  x86_64::Interrupt::setIrqHandler(33, keyboardHandler);
+  Arch::Interrupt::setIrqHandler(33, keyboardHandler);
 }
 
 auto keyboardHandler() -> void {

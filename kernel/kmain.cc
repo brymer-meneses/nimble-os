@@ -2,9 +2,7 @@
 
 #include <kernel/drivers/ps2.h>
 #include <kernel/drivers/framebuffer.h>
-
-#include <kernel/memory/pmm.h>
-#include <kernel/memory/vmm.h>
+#include <kernel/memory/memory.h>
 
 #include "kernel/arch/prelude.h"
 
@@ -23,8 +21,7 @@ extern "C" auto kmain(void) -> void {
   Framebuffer::clearScreen();
 
   PS2::Keyboard::initialize();
-  PMM::initialize();
-  VMM::initialize();
+  Memory::initialize();
 
 #ifdef ENABLE_TESTS
   Tester::main();

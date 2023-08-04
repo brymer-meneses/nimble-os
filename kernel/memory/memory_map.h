@@ -20,6 +20,7 @@ class MemoryMap {
 
   private:
     MemoryMap();
+    auto initializeRange() -> void;
 
   public:
     struct Iterator;

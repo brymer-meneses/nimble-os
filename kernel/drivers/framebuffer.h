@@ -1,5 +1,6 @@
 #pragma once
 #include <lib/types.h>
+#include <type_traits>
 
 namespace Framebuffer {
   
@@ -14,8 +15,37 @@ namespace Framebuffer {
   auto setForeground(const u32 color) -> void;
   auto setForeground(const u8 r, const u8 g, const u8 b) -> void;
 
-  auto withColor(const u32 foreground, const u32 background, void (*function)()) -> void;
-  auto withForeground(const u32 foreground, void (*function)()) -> void;
-  auto withBackground(const u32 background, void (*function)()) -> void;
+  auto getForeground() -> u32;
+  auto getBackground() -> u32;
+
+  template<typename Function>
+  concept FunctionType = std::is_invocable_v<Function>;
+
+  template<FunctionType Function>
+  auto withColor(const u32 foreground, const u32 background, Function function) -> void {
+    u32 oldForeground = getForeground();
+    u32 oldBackground = getBackground();
+    setForeground(foreground);
+    setForeground(background);
+    function();
+    setForeground(oldForeground);
+    setForeground(oldBackground);
+  }
+
+  template<FunctionType Function>
+  auto withForeground(const u32 foreground, Function function) -> void {
+    u32 oldForeground = getForeground();
+    setForeground(foreground);
+    function();
+    setForeground(oldForeground);
+  }
+
+  template<FunctionType Function>
+  auto withBackground(const u32 background, Function function) -> void {
+    u32 oldForeground = getBackground();
+    setForeground(background);
+    function();
+    setForeground(oldForeground);
+  }
 
 }

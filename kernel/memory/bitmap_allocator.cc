@@ -7,8 +7,9 @@
 #include <lib/math.h>
 
 #include "memory_map.h"
+#include "memory.h"
 
-using PMM::PAGE_SIZE;
+using Memory::PAGE_SIZE;
 
 #define BITMAP_FREE 0
 #define BITMAP_USED 1

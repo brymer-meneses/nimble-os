@@ -8,5 +8,8 @@ auto Arch::initialize() -> void {
   x86_64::Interrupt::initialize();
 #endif
 
+#ifdef __aarch64__
+#endif
+
 }
 

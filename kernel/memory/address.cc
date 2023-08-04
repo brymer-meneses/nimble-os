@@ -1,6 +1,7 @@
 #include "address.h"
 #include "vmm.h"
 
+
 auto PhysicalAddress::toVirtual() const -> u64 {
   return VMM::physicalToVirtual(address);
 }

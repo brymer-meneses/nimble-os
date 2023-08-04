@@ -122,31 +122,13 @@ auto Framebuffer::clearScreen() -> void {
   gWriter.clearScreen();
 }
 
-auto Framebuffer::withColor(const u32 foreground, const u32 background, void (*function)()) -> void {
-  u32 oldForeground = gWriter.foreground;
-  u32 oldBackground = gWriter.background;
-
-  gWriter.foreground = foreground;
-  gWriter.background = background;
-  function();
-  gWriter.foreground = oldForeground;
-  gWriter.background = oldBackground;
+auto Framebuffer::getBackground() -> u32 {
+  return gWriter.background;
 }
 
-auto Framebuffer::withForeground(const u32 foreground, void (*function)()) -> void {
-  u32 oldForeground = gWriter.foreground;
-  gWriter.foreground = foreground;
-  function();
-  gWriter.foreground = oldForeground;
+auto Framebuffer::getForeground() -> u32 {
+  return gWriter.foreground;
 }
-
-auto Framebuffer::withBackground(const u32 background, void (*function)()) -> void {
-  u32 oldBackground = gWriter.background;
-  gWriter.background = background;
-  function();
-  gWriter.background = oldBackground;
-}
-
 
 auto Framebuffer::setForeground(const u32 color) -> void {
   gWriter.foreground = color;

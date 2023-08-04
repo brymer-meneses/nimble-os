@@ -1,4 +1,5 @@
 #include "memory_map.h"
+#include "memory.h"
 #include "pmm.h"
 
 #include <algorithm>
@@ -9,13 +10,12 @@
 
 #include <lib/math.h>
 
-static volatile auto memmapRequest = limine_memmap_request{
+static volatile auto memmapRequest = limine_memmap_request {
     .id = LIMINE_MEMMAP_REQUEST,
     .revision = 0,
 };
 
-
-using PMM::PAGE_SIZE;
+using Memory::PAGE_SIZE;
 
 MemoryMap::MemoryMap() {
 
@@ -29,9 +29,21 @@ MemoryMap::MemoryMap() {
   entryCount = memmapResponse->entry_count;
 
   std::sort(entries, entries + entryCount,
-            [](const auto* a, auto* b) -> bool {
+            [](const auto* a, const auto* b) -> bool {
               return a->type < b->type;
             });
+
+  initializeRange();
+}
+
+auto MemoryMap::operator[](size_t index) -> limine_memmap_entry* {
+  if (index >= entryCount) 
+    return nullptr;
+  return memmapResponse->entries[index];
+}
+
+auto MemoryMap::initializeRange() -> void {
+  auto entries = memmapResponse->entries;
 
   for (size_t i = 0; i < entryCount; i++) {
     auto* entry = entries[i];
@@ -105,11 +117,5 @@ MemoryMap::MemoryMap() {
 
   framebuffer.startPointer = &memmapResponse->entries[framebuffer.first];
   framebuffer.endPointer = &memmapResponse->entries[framebuffer.last + 1];
-}
-
-auto MemoryMap::operator[](size_t index) -> limine_memmap_entry* {
-  if (index >= entryCount) 
-    return nullptr;
-  return memmapResponse->entries[index];
 }
 

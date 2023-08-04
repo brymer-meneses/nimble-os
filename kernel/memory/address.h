@@ -8,14 +8,18 @@ class PhysicalAddress {
     u64 address = 0;
 
   public:
-    PhysicalAddress(u64 address) : address(address) {} 
-    PhysicalAddress() {} 
+    constexpr PhysicalAddress(u64 address) : address(address) {} 
+    constexpr PhysicalAddress() {} 
 
     auto toVirtual() const -> u64;
 
-    constexpr operator u64() {
+    constexpr operator u64() const {
       return address;
     }  
+
+    constexpr auto value() const -> u64 {
+      return address;
+    }
 };
 
 class VirtualAddress {
@@ -23,12 +27,16 @@ class VirtualAddress {
     u64 address = 0;
 
   public:
-    VirtualAddress(u64 address) : address(address) {} 
-    VirtualAddress() {} 
+    constexpr VirtualAddress(u64 address) : address(address) {} 
+    constexpr VirtualAddress() {} 
 
     auto toPhysical() const -> u64;
 
-    constexpr operator u64() {
+    constexpr operator u64() const {
       return address;
     }  
+
+    constexpr auto value() const -> u64 {
+      return address;
+    }
 };

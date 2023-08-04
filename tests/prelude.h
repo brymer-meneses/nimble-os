@@ -46,6 +46,11 @@ auto assertEq(Arg1 arg1, Arg2 arg2) -> void {
   }
 
   if (arg1 != arg2) {
+    Framebuffer::withForeground(0xBF616A, [&arg1, &arg2](){
+      Kernel::println("Test failed");
+      Kernel::println("Left {}", arg1);
+      Kernel::println("Right {}", arg2);
+    });
     Tester::Internal::invokeTestFailure();
   }
 }

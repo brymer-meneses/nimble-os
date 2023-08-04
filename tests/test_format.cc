@@ -22,7 +22,7 @@ TEST(Format, StringFormat) {
 
 TEST(Format, Hex) {
   char buffer[256];
-  Format::format(buffer, "{} TEST: {}-{hex}", "HEX", 314159265, 314159265);
+  Format::format(buffer, "{}-{hex}", 314159265, 314159265);
   assertEq(buffer, "314159265-0x12B9B0A1");
   Format::format(buffer, "{} TEST {hex}-{}", "HEX", 314159265, 314159265);
   assertEq(buffer, "HEX TEST 0x12B9B0A1-314159265");

@@ -14,7 +14,7 @@ static u16 g_internalTestCount = 0;
 static u16 g_numTestPass = 0;
 static u16 g_numInternalTestPass = 0;
 
-static bool g_didCurrentTestPass = false;
+static bool g_didCurrentTestPass = true;
 
 auto Tester::main() -> void{
   Kernel::println("--------------------------");
