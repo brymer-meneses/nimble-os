@@ -17,4 +17,12 @@ CompileFlags:
     - "-DENABLE_TESTS"
     - "-Wextra"
     - "-Wall"
+
+Diagnostics:
+  ClangTidy:
+    Add: 
+      - modernize*
+    Remove:
+      - misc-unused-alias-decls
+      - modernize-use-nodiscard
 EOT

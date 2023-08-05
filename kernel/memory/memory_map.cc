@@ -52,70 +52,61 @@ auto MemoryMap::initializeRange() -> void {
       case LIMINE_MEMMAP_USABLE:
         usable.last = std::max(usable.last, i);
         usable.first = std::min(usable.first, i);
+        usable.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         usable.count += 1;
-        usablePages += Math::ceilDiv(entry->length, PAGE_SIZE);
         break;
       case LIMINE_MEMMAP_RESERVED:
         reserved.last = std::max(reserved.last, i);
         reserved.first = std::min(reserved.first, i);
+        reserved.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         reserved.count += 1;
         break;
       case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
         acpiReclaimable.last = std::max(acpiReclaimable.last, i);
         acpiReclaimable.first = std::min(acpiReclaimable.first, i);
+        acpiReclaimable.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         acpiReclaimable.count += 1;
         break;
       case LIMINE_MEMMAP_ACPI_NVS:
         acpiNvs.last = std::max(acpiNvs.last, i);
         acpiNvs.first = std::min(acpiNvs.first, i);
+        acpiNvs.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         acpiNvs.count += 1;
         break;
       case LIMINE_MEMMAP_BAD_MEMORY:
         badMemory.last = std::max(badMemory.last, i);
         badMemory.first = std::min(badMemory.first, i);
+        badMemory.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         badMemory.count += 1;
         break;
       case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
         bootloaderReclaimable.last = std::max(bootloaderReclaimable.last, i);
         bootloaderReclaimable.first = std::min(bootloaderReclaimable.first, i);
+        bootloaderReclaimable.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         bootloaderReclaimable.count += 1;
         break;
       case LIMINE_MEMMAP_KERNEL_AND_MODULES:
         kernelAndModules.last = std::max(kernelAndModules.last, i);
         kernelAndModules.first = std::min(kernelAndModules.first, i);
+        kernelAndModules.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         kernelAndModules.count += 1;
         break;
       case LIMINE_MEMMAP_FRAMEBUFFER:
         framebuffer.last = std::max(framebuffer.last, i);
         framebuffer.first = std::min(framebuffer.first, i);
+        framebuffer.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
         framebuffer.count += 1;
         break;
     };
   }
-  
-  // we need to assign the end and start pointer mainly for iteration
-  usable.startPointer = &memmapResponse->entries[usable.first];
-  usable.endPointer = &memmapResponse->entries[usable.last + 1];
 
-  reserved.startPointer = &memmapResponse->entries[reserved.first];
-  reserved.endPointer = &memmapResponse->entries[reserved.last + 1];
-
-  acpiReclaimable.startPointer = &memmapResponse->entries[acpiReclaimable.first];
-  acpiReclaimable.endPointer = &memmapResponse->entries[acpiReclaimable.last + 1];
-
-  acpiNvs.startPointer = &memmapResponse->entries[acpiNvs.first];
-  acpiNvs.endPointer = &memmapResponse->entries[acpiNvs.last + 1];
-
-  badMemory.startPointer = &memmapResponse->entries[badMemory.first];
-  badMemory.endPointer = &memmapResponse->entries[badMemory.last + 1];
-
-  bootloaderReclaimable.startPointer = &memmapResponse->entries[bootloaderReclaimable.first];
-  bootloaderReclaimable.endPointer = &memmapResponse->entries[bootloaderReclaimable.last + 1];
-
-  kernelAndModules.startPointer = &memmapResponse->entries[kernelAndModules.first];
-  kernelAndModules.endPointer = &memmapResponse->entries[kernelAndModules.last + 1];
-
-  framebuffer.startPointer = &memmapResponse->entries[framebuffer.first];
-  framebuffer.endPointer = &memmapResponse->entries[framebuffer.last + 1];
+  usable.entries = entries;
+  reserved.entries = entries;
+  acpiReclaimable.entries = entries;
+  acpiNvs.entries = entries;
+  badMemory.entries = entries;
+  bootloaderReclaimable.entries = entries;
+  kernelAndModules.entries = entries;
+  framebuffer.entries = entries;
 }
 

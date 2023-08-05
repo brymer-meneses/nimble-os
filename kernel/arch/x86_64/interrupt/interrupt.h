@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 #include <lib/types.h>
 
 namespace x86_64::Interrupt {

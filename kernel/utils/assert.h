@@ -3,15 +3,28 @@
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
 #include <source_location>
+#include <kernel/drivers/framebuffer.h>
 
+namespace Kernel {
 
-#define KERNEL_ASSERT(condition) \
-  if (!(condition)) { \
-    const auto location = std::source_location::current(); \
-    Kernel::println("Assertion Failed at {} {} {} {}", \
-      location.function_name(),  \
-      location.file_name(),  \
-      location.line(),  \
-      location.column()); \
-    Kernel::halt(); \
+  template <typename FormatArg, typename... FormatArgs>
+  auto assert(bool condition, FormatArg arg, FormatArgs... args, const std::source_location loc = std::source_location::current()) -> void {
+    if (condition)
+      return;
+
+    Kernel::print("[ Assertion Failed ]: {}:{} {}:{} ", 
+                  loc.file_name(),
+                  loc.function_name(), loc.line(), loc.column());
+    Kernel::println(arg, args...);
+    Kernel::halt();
   }
+
+  inline auto assert(bool condition, const std::source_location loc = std::source_location::current()) -> void {
+    if (condition) return;
+
+    Kernel::println("[ Assertion Failed ]: {} {} {} {}", loc.function_name(),
+                    loc.file_name(), loc.line(), loc.column());
+    Kernel::halt();
+  }
+}
+

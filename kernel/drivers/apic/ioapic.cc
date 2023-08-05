@@ -33,7 +33,7 @@ static auto read(IoApic* ioApic, u32 reg) -> u32 {
   return IO::Mem::read<u32>(ioApic->addressBase + 0x10);
 }
 
-static void write(IoApic* ioApic, u32 reg, u32 value) {
+static auto write(IoApic* ioApic, u32 reg, u32 value) -> void {
   IO::Mem::write<u32>(ioApic->addressBase, reg);
   IO::Mem::write<u32>(ioApic->addressBase + 0x10, value);
 }
@@ -42,7 +42,7 @@ static auto getIoApicEntries(IoApic* ioApic) -> size_t {
   return (read(ioApic, 0x1) & 0xff0000) >> 16;
 }
 
-static IoApic* findIoApicWithGsi(u32 gsi) {
+static auto findIoApicWithGsi(u32 gsi) -> IoApic* {
   auto [ioApics, count] = ACPI::MADT::getIoApics();
 
   for (size_t i=0; i<count; i++) {
@@ -56,7 +56,7 @@ static IoApic* findIoApicWithGsi(u32 gsi) {
   __builtin_unreachable();
 }
 
-static void setGsiRedirect(u32 lapicId, u8 vector, u8 gsi, u16 isoFlags, bool status) {
+static auto setGsiRedirect(u32 lapicId, u8 vector, u8 gsi, u16 isoFlags, bool status) -> void {
   // get the IoApic that is responsible for the GSI
   IoApic* ioApic = findIoApicWithGsi(gsi);
 
@@ -105,7 +105,7 @@ static void setGsiRedirect(u32 lapicId, u8 vector, u8 gsi, u16 isoFlags, bool st
   write(ioApic, redirectEntry + 1, (u32) (redirect >> 32));
 }
 
-void IOAPIC::setRedirect(u32 lapicId, u8 vector, u8 irq, bool status) {
+auto IOAPIC::setRedirect(u32 lapicId, u8 vector, u8 irq, bool status) -> void {
 
   // first check if there's a set handler for the irq in the interrupt source
   // overrides

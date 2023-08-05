@@ -19,7 +19,7 @@ class BitmapAllocator {
 
       public:
         Bitmap(u8* data, size_t offset, size_t maxPages);
-        Bitmap() {};
+        Bitmap() = default;
 
         auto setFree(size_t index) -> void;
         auto setUsed(size_t index) -> void;
@@ -29,7 +29,7 @@ class BitmapAllocator {
     };
 
   public:
-    BitmapAllocator() {};
+    BitmapAllocator() = default;
     auto initialize() -> void;
 
     [[nodiscard]] auto allocatePage() -> std::optional<PhysicalAddress>;

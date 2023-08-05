@@ -2,6 +2,9 @@
 #include <kernel/utils/panic.h>
 
 #include "idt.h"
+#include <array>
+
+using namespace x86_64;
 
 // NOTE:
 // I once can't get interrupt working because `isr_high` is set to `16` bits
@@ -24,7 +27,7 @@ struct IdtPtr {
 static constexpr u16 KERNEL_CODE_SEGMENT = 0x08;
 
 __attribute__((aligned(0x10))) 
-static IdtEntry idt[x86_64::IDT::MAX_ENTRIES];
+static std::array<IdtEntry, IDT::MAX_ENTRIES> idt;
 
 static auto setEntry(u8 vector, u64 handler, u8 flags) -> void {
 
@@ -38,9 +41,10 @@ static auto setEntry(u8 vector, u64 handler, u8 flags) -> void {
   idt[vector].reserved = 0;
 }
 
-extern void* interruptHandlerTable[];
+// defined at `interrupt.asm`
+extern std::array<void*, 256> interruptHandlerTable;
 
-auto x86_64::IDT::initialize() -> void {
+auto IDT::initialize() -> void {
   IdtPtr idtptr;
 
   idtptr.base = (u64) &idt[0];
@@ -65,7 +69,7 @@ auto x86_64::IDT::initialize() -> void {
   asm volatile ("sti");
 }
 
-auto x86_64::IDT::allocateVector() -> u8 {
+auto IDT::allocateVector() -> u8 {
 
   // this is the minimum idt irq
   static u16 vector = 32;

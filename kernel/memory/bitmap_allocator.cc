@@ -63,7 +63,7 @@ Bitmap::Bitmap(u8* data, size_t offset, size_t maxPages) : data(data), maxPages(
 auto BitmapAllocator::initialize() -> void { 
 
   // I'm an idiot, it took me a whole day to figure out this computation.
-  const auto totalPages = memoryMap.usablePages;
+  const auto totalPages = memoryMap.usable.pages;
   const auto bitmapSize = Math::ceilDiv(totalPages, 8);
 
   // find a place for the bitmap
@@ -80,7 +80,7 @@ auto BitmapAllocator::initialize() -> void {
   }
 
   // ensure that bitmap.data is not a nullptr
-  KERNEL_ASSERT(bitmap.data);
+  Kernel::assert(bitmap.data != nullptr);
 
   // the bitmap marks the first `n` pages as used since this is occuped by the
   // bitmap data itself

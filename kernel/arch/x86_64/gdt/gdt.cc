@@ -1,6 +1,7 @@
 #include <kernel/utils/print.h>
 
 #include "gdt.h"
+#include <array>
 
 struct GdtEntry {
   u16 limit_low;
@@ -18,7 +19,7 @@ struct GdtPtr {
 
 static constexpr u64 TOTAL_ENTRIES = 5;
 
-static GdtEntry gdt[TOTAL_ENTRIES];
+static std::array<GdtEntry, TOTAL_ENTRIES> gdt;
 
 auto setEntry(size_t index, u8 access, u8 flags) -> void {
   gdt[index].base_low = 0x0000;

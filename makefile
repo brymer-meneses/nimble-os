@@ -30,7 +30,6 @@ CXXFLAGS := \
 	-fno-exceptions \
 	-fno-lto \
 	-m64 \
-	-mabi=sysv \
 	-mcmodel=kernel \
 	-mno-mmx \
 	-mno-sse \

@@ -7,9 +7,11 @@
 #include "kernel/arch/prelude.h"
 
 #include <lib/ctors.h>
+#include <source_location>
+#include <functional>
 
 #ifdef ENABLE_TESTS
-  #include "tests/tester.h"
+#include "tests/tester.h"
 #endif
 
 extern "C" auto kmain(void) -> void {

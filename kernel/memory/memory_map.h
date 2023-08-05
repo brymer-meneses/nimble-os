@@ -31,18 +31,18 @@ class MemoryMap {
         size_t first = std::numeric_limits<size_t>::max();
         size_t last = 0;
         size_t count = 0;
+        size_t pages = 0;
 
       private:
-        limine_memmap_entry** startPointer = nullptr;
-        limine_memmap_entry** endPointer = nullptr;
+        limine_memmap_entry** entries = nullptr;
       
       public:
         auto begin() -> Iterator {
-          return Iterator(startPointer);
+          return &entries[first];
         }
 
         auto end() -> Iterator {
-          return Iterator(endPointer);
+          return &entries[last + 1];
         }
 
       friend class MemoryMap;
@@ -58,12 +58,19 @@ class MemoryMap {
     Range framebuffer;
 
     size_t entryCount;
-    size_t usablePages;
 
   private:
     limine_memmap_response* memmapResponse = nullptr;
 
   public:
+
+    auto begin() -> Iterator {
+      return &memmapResponse->entries[0];
+    }
+
+    auto end() -> Iterator {
+      return &memmapResponse->entries[entryCount];
+    }
     
     struct Iterator {
       // this is used 

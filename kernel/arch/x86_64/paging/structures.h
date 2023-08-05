@@ -35,9 +35,9 @@ namespace x86_64 {
       }
       constexpr auto setAvailable(u8 value) -> void {
         // ensure only 4 bits are used by the value
-        KERNEL_ASSERT((value & u64(0b1111)) == 0);
+        Kernel::assert((value & u64(0b1111)) == 0);
 
-        data = ~Bit::mask(data, 63-39, 9) | (value << 11);
+        data &= ~Bit::mask(data, 63-39, 9) | (value << 11);
       }
 
       constexpr auto setFlags(u64 flags) {
@@ -76,12 +76,12 @@ namespace x86_64 {
 
       constexpr auto setAvailable(u8 value) -> void {
         // ensure only 4 bits are used by the value
-        KERNEL_ASSERT((value & u64(0b1111)) == 0);
+        Kernel::assert((value & u64(0b1111)) == 0);
         data = ~Bit::mask(data, 63-39, 9) | (value << 11);
       }
 
-      constexpr auto setFlags(u64 flags) {
-        data |= flags;
+      constexpr auto setFlags(u64 vmmflags) {
+        data |= vmmflags;
       }
   };
 
