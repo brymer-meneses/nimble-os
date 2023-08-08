@@ -4,7 +4,7 @@
 #include <kernel/drivers/framebuffer.h>
 #include <kernel/memory/memory.h>
 
-#include "kernel/arch/prelude.h"
+#include <kernel/arch/platform.h>
 
 #include <lib/ctors.h>
 #include <source_location>

@@ -2,6 +2,7 @@
 #include <kernel/utils/format.h>
 #include <kernel/utils/macros.h>
 #include <kernel/utils/print.h>
+#include <kernel/utils/halt.h>
 #include <lib/libc.h>
 
 #include "idt.h"
@@ -83,6 +84,8 @@ static auto dumpInterruptFrame(const InterruptFrame* context) -> void {
       Kernel::println("----------------------------");
     }
   );
+
+  Kernel::halt();
 }
 
 // this is called from `idt.asm`

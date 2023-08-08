@@ -2,19 +2,18 @@
 
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
-#include <source_location>
 #include <kernel/drivers/framebuffer.h>
+
+#include <source_location>
 
 namespace Kernel {
 
   template <typename FormatArg, typename... FormatArgs>
   auto assert(bool condition, FormatArg arg, FormatArgs... args, const std::source_location loc = std::source_location::current()) -> void {
-    if (condition)
-      return;
+    if (condition) return;
 
     Kernel::print("[ Assertion Failed ]: {}:{} {}:{} ", 
-                  loc.file_name(),
-                  loc.function_name(), loc.line(), loc.column());
+                  loc.file_name(), loc.function_name(), loc.line(), loc.column());
     Kernel::println(arg, args...);
     Kernel::halt();
   }

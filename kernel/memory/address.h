@@ -3,15 +3,18 @@
 #include <lib/types.h>
 #include <limine.h>
 
+class VirtualAddress;
+
 class PhysicalAddress {
   private:
     u64 address = 0;
 
   public:
     constexpr PhysicalAddress(u64 address) : address(address) {} 
-    constexpr PhysicalAddress() {} 
+    constexpr PhysicalAddress() = default;
 
-    auto toVirtual() const -> u64;
+    auto toVirtual() const -> VirtualAddress;
+    auto ptr() -> void*;
 
     constexpr operator u64() const {
       return address;
@@ -28,9 +31,10 @@ class VirtualAddress {
 
   public:
     constexpr VirtualAddress(u64 address) : address(address) {} 
-    constexpr VirtualAddress() {} 
+    constexpr VirtualAddress() = default;
 
-    auto toPhysical() const -> u64;
+    auto toPhysical() const -> PhysicalAddress;
+    auto ptr() -> void*;
 
     constexpr operator u64() const {
       return address;

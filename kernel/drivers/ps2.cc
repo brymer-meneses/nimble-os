@@ -4,7 +4,7 @@
 #include <kernel/utils/print.h>
 #include <kernel/drivers/pic.h>
 
-#include <kernel/arch/prelude.h>
+#include <kernel/arch/platform.h>
 
 #include <limine.h>
 #include <lib/types.h>

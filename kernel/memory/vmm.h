@@ -5,10 +5,10 @@
 
 #include "address.h"
 
-struct VMMFlags {
-  bool isWriteable;
-  bool isExecutable;
-  bool isUserAccessible;
+struct VMFlag {
+  bool userAccessible;
+  bool writeable;
+  bool executable;
 };
 
 namespace VMM {
@@ -16,9 +16,6 @@ namespace VMM {
   auto virtualToPhysical(const u64 virtualAddress) -> u64;
   auto physicalToVirtual(const u64 physicalAddress) -> u64;
 
-  auto alloc(size_t length, const VMMFlags& flags) -> void*;
-
-  auto mapPage(const PhysicalAddress physicalAddress, const VirtualAddress virtualAddress, const VMMFlags flags) -> void;
-  auto unmapPage(const PhysicalAddress physicalAddress, const VirtualAddress virtualAddress, const VMMFlags flags) -> void;
-  auto exploreAddress(const VirtualAddress address) -> void;
+  auto map(VirtualAddress virtualAddr, PhysicalAddress physicalAddr, VMFlag flags) -> void;
+  auto unmap(VirtualAddress virtualAddr, PhysicalAddress physicalAddr) -> void;
 }

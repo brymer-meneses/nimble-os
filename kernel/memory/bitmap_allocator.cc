@@ -188,7 +188,6 @@ auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std
   return numPages;
 }
 
-// TODO: broken
 auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*> {
 
   for (auto* entry : memoryMap.usable) {
@@ -206,7 +205,6 @@ auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<lim
   return std::nullopt;
 }
 
-// TODO: broken
 auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress> {
 
   for (auto* entry : memoryMap.usable) {

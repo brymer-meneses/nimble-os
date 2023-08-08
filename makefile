@@ -15,12 +15,12 @@ QEMU := qemu-system-x86_64
 
 CXXFLAGS := \
 	--target=x86_64-unknown-elf \
-	-g \
 	-O3 \
 	-std=c++20 \
 	-Wall \
 	-Wextra \
 	-Wpedantic \
+	-pedantic-errors \
 	-ffreestanding \
 	-fPIE \
 	-fno-stack-protector \

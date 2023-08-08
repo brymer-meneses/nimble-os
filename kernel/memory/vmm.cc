@@ -6,6 +6,10 @@
 
 #include "vmm.h"
 #include "pmm.h"
+#include "memory.h"
+
+#include <kernel/arch/platform.h>
+#include <tuple>
 
 static volatile auto hhdmRequest = limine_hhdm_request {
   .id = LIMINE_HHDM_REQUEST,
@@ -14,26 +18,20 @@ static volatile auto hhdmRequest = limine_hhdm_request {
 
 static u64 hhdmOffset = 0;
 
-static auto readCR3() -> u64 {
-  u64 value;
-  asm ("movq %%cr3, %0" : "=r"(value));
-  return value;
-}
-
 auto VMM::physicalToVirtual(u64 physicalAddress) -> u64 {
-  if (physicalAddress <= hhdmOffset) {
-    return physicalAddress;
-  } else {
+  if (hhdmOffset) [[likely]] {
     return physicalAddress + hhdmOffset;
-  }
+  } 
+  Kernel::panic("VMM not initialized");
+  __builtin_unreachable();
 }
 
 auto VMM::virtualToPhysical(u64 virtualAddress) -> u64 {
-  if (virtualAddress <= hhdmOffset) {
-    return virtualAddress;
-  } else {
+  if (hhdmOffset) [[likely]] {
     return virtualAddress - hhdmOffset;
   }
+  Kernel::panic("VMM not initialized");
+  __builtin_unreachable();
 }
 
 auto VMM::initialize() -> void {
@@ -41,22 +39,18 @@ auto VMM::initialize() -> void {
     Kernel::panic("HHDM Request is null");
   }
   hhdmOffset = hhdmRequest.response->offset;
+
+  VMFlag flags;
+  flags.executable = true;
+  flags.userAccessible = true;
+  flags.writeable = true;
+
+  u64 virtualAddr = 0xdeadc0de000;
+  u64 physicalAddr = (uintptr_t) PMM::allocatePage();
+  Arch::Paging::map(virtualAddr, physicalAddr, flags);
+
+  *((u64*) virtualAddr) = 5;
+  // dump_pagetable(virtualAddr);
 }
 
-auto VMM::exploreAddress(VirtualAddress address) -> void {
-
-}
-
-auto VMM::mapPage(const PhysicalAddress physicalAddress, const VirtualAddress virtualAddress, const VMMFlags flags) -> void {
-
-}
-
-auto VMM::unmapPage(const PhysicalAddress physicalAddress, const VirtualAddress virtualAddress, const VMMFlags flags) -> void {
-  auto root = readCR3();
-}
-
-auto VMM::alloc(size_t length, const VMMFlags& flags) -> void* {
-
-}
-  
 

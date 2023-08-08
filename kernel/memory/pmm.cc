@@ -20,20 +20,20 @@ auto PMM::initialize() -> void {
   allocator.initialize();
 }
 
-auto PMM::allocatePage() -> PhysicalAddress {
+auto PMM::allocatePage() -> void* {
   auto page = allocator.allocatePage();
   if (!page) {
     Kernel::panic("PMM: cannot allocate page");
   }
-  return page.value();
+  return reinterpret_cast<void*>(page->value());
 }
 
-auto PMM::allocateContiguousPages(size_t num) -> PhysicalAddress {
+auto PMM::allocateContiguousPages(size_t num) -> void* {
   auto pages = allocator.allocateContiguousPages(num);
   if (!pages) {
     Kernel::panic("PMM: cannot allocate page");
   }
-  return pages.value();
+  return reinterpret_cast<void*>(pages->value());
 }
 
 auto PMM::freePage(PhysicalAddress address) -> void {

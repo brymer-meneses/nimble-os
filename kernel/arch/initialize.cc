@@ -1,4 +1,4 @@
-#include "prelude.h"
+#include "platform.h"
 
 auto Arch::initialize() -> void {
 
@@ -6,6 +6,7 @@ auto Arch::initialize() -> void {
   x86_64::GDT::initialize();
   x86_64::IDT::initialize();
   x86_64::Interrupt::initialize();
+  x86_64::Paging::initialize();
 #endif
 
 #ifdef __aarch64__
