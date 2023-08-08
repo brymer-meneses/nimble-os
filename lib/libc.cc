@@ -1,14 +1,14 @@
-#include <stddef.h>
+#include <cstddef>
 #include "libc.h"
 #include <kernel/utils/panic.h>
 
 extern "C" {
 
-void abort() {
+auto abort() -> void {
   Kernel::panic("LIBC Abort");
 };
 
-void* std::memcpy(void *dest, const void *src, size_t n) {
+auto std::memcpy(void *dest, const void *src, size_t n) -> void* {
     u8 *pdest = (u8 *)dest;
     const u8 *psrc = (const u8 *)src;
 
@@ -19,7 +19,7 @@ void* std::memcpy(void *dest, const void *src, size_t n) {
     return dest;
 }
 
-void* std::memset(void *s, int c, size_t n) {
+auto std::memset(void *s, int c, size_t n) -> void* {
     u8 *p = (u8 *)s;
 
     for (size_t i = 0; i < n; i++) {
@@ -29,7 +29,7 @@ void* std::memset(void *s, int c, size_t n) {
     return s;
 }
 
-void* std::memmove(void *dest, const void *src, size_t n) {
+auto std::memmove(void *dest, const void *src, size_t n) -> void* {
     u8 *pdest = (u8 *)dest;
     const u8 *psrc = (const u8 *)src;
 
@@ -46,7 +46,7 @@ void* std::memmove(void *dest, const void *src, size_t n) {
     return dest;
 }
 
-int std::memcmp(const void *s1, const void *s2, size_t n) {
+auto std::memcmp(const void *s1, const void *s2, size_t n) -> int {
     const u8 *p1 = (const u8 *)s1;
     const u8 *p2 = (const u8 *)s2;
 
@@ -59,7 +59,7 @@ int std::memcmp(const void *s1, const void *s2, size_t n) {
     return 0;
 } 
 
-int std::strcmp(const char* s1, const char* s2) {
+auto std::strcmp(const char* s1, const char* s2) -> int {
   while (*s1 == *s2++)
     if (*s1++ == '\0')
         return (0);

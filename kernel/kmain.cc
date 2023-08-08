@@ -6,7 +6,7 @@
 
 #include <kernel/arch/platform.h>
 
-#include <lib/ctors.h>
+#include <lib/libcxx.h>
 #include <source_location>
 #include <functional>
 
@@ -16,9 +16,9 @@
 
 extern "C" auto kmain(void) -> void {
 
-  callGlobalConstructors();
-
   Arch::initialize();
+
+  LibCXX::callGlobalConstructors();
 
   Framebuffer::clearScreen();
 
