@@ -1,5 +1,5 @@
 #include <type_traits>
-#include <stddef.h>
+#include <cstddef>
 
 namespace String {
   

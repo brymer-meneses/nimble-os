@@ -1,4 +1,5 @@
 BUILD_DIR := build
+DEPS_DIR := build/deps
 LIBS_DIR := lib
 
 CXX_SOURCES  := $(shell find . -type f -name '*.cc')
@@ -15,6 +16,7 @@ QEMU := qemu-system-x86_64
 
 CXXFLAGS := \
 	--target=x86_64-unknown-elf \
+	-g \
 	-O3 \
 	-std=c++20 \
 	-Wall \
@@ -57,18 +59,18 @@ LDFLAGS := \
 	-T linker.ld 
 
 QEMUFLAGS := \
-		-D qemu-log.txt \
-		-d int -M smm=off \
-		-m 512M \
-		-smp cpus=2 \
-		-serial stdio 
+	-D qemu-log.txt \
+	-d int -M smm=off \
+	-m 512M \
+	-smp cpus=2 \
+	-serial stdio 
 
 .PHONY: clean
 
 all: run
 
 clean:
-	$(RM) -r $(OBJECTS)
+	@$(RM) -r $(OBJECTS)
 
 distclean:
 	$(RM) -r $(BUILD_DIR)/limine
@@ -78,50 +80,45 @@ distclean:
 slocs:
 	tokei . --exclude=assets/fonts/pixeloperator.cc
 
-
-debug:
+debug-address:
 	echo $(address) | x86_64-elf-addr2line -e $(BUILD_DIR)/kernel.elf
-
-install-deps:
-	@mkdir -p $(BUILD_DIR)/limine
-	@echo "Downloading Limine ..."
-	@-git clone https://github.com/limine-bootloader/limine --depth=1 --branch=v5.x-branch-binary $(BUILD_DIR)/limine
-	@$(MAKE) -C $(BUILD_DIR)/limine
-	@cp $(BUILD_DIR)/limine/limine.h lib/thirdparty/limine.h
-	@echo "Downloading Freestanding C++ Headers ..."
-	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
-	@echo "Generating `.clangd` file ..."
-	@-./scripts/generate_clangd_config.sh
-
-TEST_FLAG_FILE = $(BUILD_DIR)/test_flag
-
-kernel: install-deps $(OBJECTS) 
-
-iso: kernel
-	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf
-	@mkdir -p $(BUILD_DIR)/isoroot
-	@cp $(BUILD_DIR)/kernel.elf \
-		limine.cfg \
-		$(BUILD_DIR)/limine/limine-bios.sys \
-		$(BUILD_DIR)/limine/limine-bios-cd.bin \
-		$(BUILD_DIR)/limine/limine-uefi-cd.bin \
-		$(BUILD_DIR)/isoroot
-	@mkdir -p $(BUILD_DIR)/isoroot/EFI/BOOT
-	@cp $(BUILD_DIR)/limine/BOOT*.EFI $(BUILD_DIR)/isoroot/EFI/BOOT/
-	@xorriso -as mkisofs -b limine-bios-cd.bin \
-		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		--efi-boot limine-uefi-cd.bin \
-		-efi-boot-part --efi-boot-image --protective-msdos-label \
-		$(BUILD_DIR)/isoroot -o $(BUILD_DIR)/nimble-os.iso
-	@$(BUILD_DIR)/limine/limine bios-install $(BUILD_DIR)/nimble-os.iso
-	@$(RM) -r $(BUILD_DIR)/isoroot
 
 run: iso
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
 test: CXXFLAGS += -DENABLE_TESTS
-test: clean iso
+test: iso
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
+
+iso: dependencies $(OBJECTS)
+	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf
+	@mkdir -p $(BUILD_DIR)/isoroot
+	@cp $(BUILD_DIR)/kernel.elf \
+		limine.cfg \
+		$(DEPS_DIR)/limine/limine-bios.sys \
+		$(DEPS_DIR)/limine/limine-bios-cd.bin \
+		$(DEPS_DIR)/limine/limine-uefi-cd.bin \
+		$(BUILD_DIR)/isoroot
+	@mkdir -p $(BUILD_DIR)/isoroot/EFI/BOOT
+	@cp $(DEPS_DIR)/limine/BOOT*.EFI $(BUILD_DIR)/isoroot/EFI/BOOT/
+	@xorriso -as mkisofs -b limine-bios-cd.bin \
+		-no-emul-boot -boot-load-size 4 -boot-info-table \
+		--efi-boot limine-uefi-cd.bin \
+		-efi-boot-part --efi-boot-image --protective-msdos-label \
+		$(BUILD_DIR)/isoroot -o $(BUILD_DIR)/nimble-os.iso
+	@$(DEPS_DIR)/limine/limine bios-install $(BUILD_DIR)/nimble-os.iso
+	@$(RM) -r $(BUILD_DIR)/isoroot
+
+dependencies:
+	@mkdir -p $(DEPS_DIR)/limine
+	@echo "Downloading Limine ..."
+	@-git clone https://github.com/limine-bootloader/limine --depth=1 --branch=v5.x-branch-binary $(DEPS_DIR)/limine
+	@$(MAKE) -C $(DEPS_DIR)/limine
+	@cp $(DEPS_DIR)/limine/limine.h lib/thirdparty/limine.h
+	@echo "Downloading Freestanding C++ Headers ..."
+	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
+	@echo "Generating `.clangd` file ..."
+	@-./scripts/generate_clangd_config.sh
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)

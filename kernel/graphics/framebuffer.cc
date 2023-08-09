@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 
 #include <kernel/utils/halt.h>
 #include <kernel/utils/panic.h>

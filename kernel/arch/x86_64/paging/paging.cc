@@ -112,6 +112,7 @@ auto Paging::unmap(uintptr_t virtualAddress) -> void {
   auto* pd = getNextLevel(pdp, pdpIndex, flags, false);
   auto* pt = getNextLevel(pd, pdIndex, flags, false);
 
+  PMM::freePage(VMM::virtualToPhysical(pt[ptIndex] & PTE_ADDRESS_MASK));
   pt[ptIndex] = 0;
   invalidateTLBCache(virtualAddress);
 }

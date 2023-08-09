@@ -13,8 +13,8 @@ CompileFlags:
     - "-I$project_dir/lib/thirdparty/libc++/include"
     - "-I$project_dir/lib/thirdparty/"
     - "-std=c++20"
-    - "-Wpedantic"
     - "-DENABLE_TESTS"
+    - "-Wpedantic"
     - "-Wextra"
     - "-Wall"
 

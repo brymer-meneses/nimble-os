@@ -4,7 +4,7 @@
 
 
 template<typename T>
-concept IntegralType = std::is_integral_v<T>;
+concept Integral = std::is_integral_v<T>;
 
 namespace IO {
 
@@ -24,12 +24,12 @@ namespace IO {
 
   namespace Mem {
 
-    template<IntegralType T>
+    template<Integral T>
     extern inline auto read(uintptr_t address) -> T {
       return *(T volatile*) address;
     }
 
-    template<IntegralType T>
+    template<Integral T>
     extern inline auto write(uintptr_t address, T value) -> void {
       *(T volatile*) address = value;
     }

@@ -16,7 +16,7 @@ namespace CPU {
     return value;
   };
 
-  extern inline auto write(void* address) -> void {
+  extern inline auto writeCR3(void* address) -> void {
     asm volatile ("mov %0, %%cr3" :: "r" ((u64) address) : "memory");
   }
 #endif

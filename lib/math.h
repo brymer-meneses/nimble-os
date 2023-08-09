@@ -5,16 +5,19 @@
 
 namespace Math {
 
-  template <typename T, typename U>
-  requires std::is_integral_v<T> && std::is_integral_v<U>
-  constexpr auto ceilDiv(T dividend, U divisor) -> std::common_type_t<T, U> {
+  template <typename T>
+  concept Integral = std::is_integral_v<T>;
+
+  constexpr auto ceilDiv(const Integral auto dividend, const Integral auto divisor) -> Integral auto {
     return ((dividend + divisor - 1) / divisor);
   }
 
-  template<typename T>
-  requires std::is_integral_v<T>
-  constexpr auto alignDown(T value, T align) -> T {
+  constexpr auto alignDown(const Integral auto value, const Integral auto align) -> Integral auto {
     return (value / align) * align;
+  }
+
+  constexpr auto alignUp(const Integral auto value, const Integral auto align) -> Integral auto {
+    return ((value + align - 1) / align) * align;
   }
 
 

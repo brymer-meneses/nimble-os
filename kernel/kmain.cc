@@ -1,14 +1,10 @@
 #include <kernel/utils/halt.h>
-
 #include <kernel/drivers/ps2.h>
-#include <kernel/drivers/framebuffer.h>
+#include <kernel/graphics/framebuffer.h>
 #include <kernel/memory/memory.h>
-
 #include <kernel/arch/platform.h>
 
 #include <lib/libcxx.h>
-#include <source_location>
-#include <functional>
 
 #ifdef ENABLE_TESTS
 #include "tests/tester.h"

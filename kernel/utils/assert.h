@@ -2,7 +2,7 @@
 
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
-#include <kernel/drivers/framebuffer.h>
+#include <kernel/graphics/framebuffer.h>
 
 #include <source_location>
 
@@ -10,7 +10,7 @@ namespace Kernel {
 
   template <typename FormatArg, typename... FormatArgs>
   auto assert(bool condition, FormatArg arg, FormatArgs... args, const std::source_location loc = std::source_location::current()) -> void {
-    if (condition) return;
+    if (condition) [[likely]] return;
 
     Kernel::print("[ Assertion Failed ]: {}:{} {}:{} ", 
                   loc.file_name(), loc.function_name(), loc.line(), loc.column());
@@ -19,7 +19,7 @@ namespace Kernel {
   }
 
   inline auto assert(bool condition, const std::source_location loc = std::source_location::current()) -> void {
-    if (condition) return;
+    if (condition) [[likely]] return;
 
     Kernel::println("[ Assertion Failed ]: {} {} {} {}", loc.function_name(),
                     loc.file_name(), loc.line(), loc.column());

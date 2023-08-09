@@ -1,5 +1,5 @@
 #pragma once
-#include <stddef.h>
+#include <cstddef>
 #include <type_traits>
 #include <lib/libc.h>
 #include <kernel/utils/string.h>
