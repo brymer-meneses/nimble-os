@@ -32,17 +32,17 @@ class BitmapAllocator {
     BitmapAllocator() = default;
     auto initialize() -> void;
 
-    [[nodiscard]] auto allocatePage() -> std::optional<PhysicalAddress>;
-    [[nodiscard]] auto allocateContiguousPages(size_t pages) -> std::optional<PhysicalAddress>;
-    auto freePage(PhysicalAddress address) -> void;
-    auto freeContiguousPages(PhysicalAddress, size_t pages) -> void;
+    [[nodiscard]] auto allocatePage() -> std::optional<uintptr_t>;
+    [[nodiscard]] auto allocateContiguousPages(size_t pages) -> std::optional<uintptr_t>;
+    auto freePage(uintptr_t address) -> void;
+    auto freeContiguousPages(uintptr_t, size_t pages) -> void;
     auto getBitmapData(size_t index) -> u8;
 
     auto printInfo() -> void;
 
   private:
-    auto getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress>;
-    auto getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t>;
+    auto getAddressFromBitmapIndex(size_t index) -> std::optional<uintptr_t>;
+    auto getBitmapIndexFromAddress(uintptr_t address) -> std::optional<size_t>;
     auto getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*>;
     auto getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std::optional<size_t>;
 

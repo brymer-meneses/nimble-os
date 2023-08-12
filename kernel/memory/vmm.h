@@ -3,7 +3,6 @@
 #include <lib/types.h>
 #include <optional>
 
-#include "address.h"
 #include "memory.h"
 
 struct VMFlag {
@@ -18,8 +17,8 @@ namespace VMM {
   auto physicalToVirtual(const u64 physicalAddress) -> u64;
 
   auto alloc(size_t length, VMFlag flags) -> void*;
-  auto free(VirtualAddress address, size_t length) -> void;
+  auto free(uintptr_t address, size_t length=Memory::PAGE_SIZE) -> void;
 
-  auto map(VirtualAddress virtualAddr, PhysicalAddress physicalAddr, VMFlag flags) -> void;
-  auto unmap(VirtualAddress virtualAddr) -> void;
+  auto map(uintptr_t virtualAddr, uintptr_t physicalAddr, VMFlag flags) -> void;
+  auto unmap(uintptr_t virtualAddr) -> void;
 }

@@ -53,6 +53,8 @@ auto assertEq(Arg1 arg1, Arg2 arg2) -> void {
     });
     Tester::Internal::invokeTestFailure();
   }
+
+  Tester::Internal::invokeTestSuccess();
 }
 
 template<typename Arg1, typename Arg2>

@@ -87,7 +87,7 @@ run: iso
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
 test: CXXFLAGS += -DENABLE_TESTS
-test: iso
+test: clean iso
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
 iso: dependencies $(OBJECTS)

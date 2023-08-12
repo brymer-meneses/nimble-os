@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/types.h>
-#include "address.h"
 
 namespace PMM {
 
@@ -11,6 +10,6 @@ namespace PMM {
   [[nodiscard]] auto allocatePage() -> void*;
   [[nodiscard]] auto allocateContiguousPages(size_t num) -> void*;
   
-  auto freePage(PhysicalAddress address) -> void;
-  auto freeContiguousPages(PhysicalAddress address, size_t num) -> void;
+  auto freePage(uintptr_t address) -> void;
+  auto freeContiguousPages(uintptr_t address, size_t num) -> void;
 }

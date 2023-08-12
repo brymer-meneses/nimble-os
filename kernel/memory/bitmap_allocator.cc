@@ -87,7 +87,7 @@ auto BitmapAllocator::initialize() -> void {
   lastIndexUsed = skippedPages + bitmap.usedPages;
 }
 
-auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
+auto BitmapAllocator::allocatePage() -> std::optional<uintptr_t> {
 
   while (bitmap.usedPages < bitmap.maxPages) {
 
@@ -109,7 +109,7 @@ auto BitmapAllocator::allocatePage() -> std::optional<PhysicalAddress> {
   return std::nullopt;
 }
 
-auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::optional<PhysicalAddress> {
+auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::optional<uintptr_t> {
 
   if (requiredPages > bitmap.maxPages) {
     Kernel::panic("Can't allocate that much memory");
@@ -148,7 +148,7 @@ auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::opti
   return address;
 }
 
-auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
+auto BitmapAllocator::freePage(uintptr_t address) -> void {
   const auto index = getBitmapIndexFromAddress(address);
 
   if (!index) {
@@ -158,7 +158,7 @@ auto BitmapAllocator::freePage(PhysicalAddress address) -> void {
   bitmap.setFree(index.value());
 }
 
-auto BitmapAllocator::freeContiguousPages(PhysicalAddress address, size_t numPages) -> void {
+auto BitmapAllocator::freeContiguousPages(uintptr_t address, size_t numPages) -> void {
   const auto index = getBitmapIndexFromAddress(address);
 
   Kernel::println("index {}", index.value());
@@ -205,7 +205,7 @@ auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<lim
   return std::nullopt;
 }
 
-auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<PhysicalAddress> {
+auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<uintptr_t> {
 
   for (auto* entry : memoryMap.usable) {
     const auto pagesInEntry = entry->length / PAGE_SIZE;
@@ -222,7 +222,7 @@ auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<P
   return std::nullopt;
 }
 
-auto BitmapAllocator::getBitmapIndexFromAddress(PhysicalAddress address) -> std::optional<size_t> {
+auto BitmapAllocator::getBitmapIndexFromAddress(uintptr_t address) -> std::optional<size_t> {
 
   limine_memmap_entry* entry = nullptr;
   for (auto* current : memoryMap.usable) {

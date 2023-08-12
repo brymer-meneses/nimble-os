@@ -12,7 +12,6 @@
 
 #include "memory_map.h"
 #include "bitmap_allocator.h"
-#include "address.h"
 
 static BitmapAllocator allocator;
 
@@ -25,7 +24,7 @@ auto PMM::allocatePage() -> void* {
   if (!page) {
     Kernel::panic("PMM: cannot allocate page");
   }
-  return reinterpret_cast<void*>(page->value());
+  return reinterpret_cast<void*>(page.value());
 }
 
 auto PMM::allocateContiguousPages(size_t num) -> void* {
@@ -33,14 +32,14 @@ auto PMM::allocateContiguousPages(size_t num) -> void* {
   if (!pages) {
     Kernel::panic("PMM: cannot allocate page");
   }
-  return reinterpret_cast<void*>(pages->value());
+  return reinterpret_cast<void*>(pages.value());
 }
 
-auto PMM::freePage(PhysicalAddress address) -> void {
+auto PMM::freePage(uintptr_t address) -> void {
   allocator.freePage(address);
 }
 
-auto PMM::freeContiguousPages(PhysicalAddress address, size_t num) -> void {
+auto PMM::freeContiguousPages(uintptr_t address, size_t num) -> void {
   allocator.freeContiguousPages(address, num);
 }
 

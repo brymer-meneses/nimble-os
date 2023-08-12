@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "memory_map.h"
 #include "pmm.h"
+#include "vmm.h"
 
 auto Memory::initialize() -> void {
   PMM::initialize();

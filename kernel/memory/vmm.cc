@@ -39,10 +39,10 @@ auto VMM::initialize() -> void {
   hhdmOffset = hhdmRequest.response->offset;
 }
 
-auto VMM::map(VirtualAddress virtualAddr, PhysicalAddress physicalAddr, VMFlag flags) -> void {
+auto VMM::map(uintptr_t virtualAddr, uintptr_t physicalAddr, VMFlag flags) -> void {
   Arch::Paging::map(virtualAddr, physicalAddr, flags);
 }
-auto VMM::unmap(VirtualAddress virtualAddr) -> void {
+auto VMM::unmap(uintptr_t virtualAddr) -> void {
   Arch::Paging::unmap(virtualAddr);
 }
 
@@ -55,31 +55,30 @@ private:
 public:
   BumpAllocator(uintptr_t base) : mBase(base) {}
 
-  auto allocate(size_t length, VMFlag flags) -> VirtualAddress {
+  auto allocate(size_t length, VMFlag flags) -> uintptr_t {
     const auto pages = Math::ceilDiv(length, PAGE_SIZE);
     const auto address = mBase + mCurrent * PAGE_SIZE;
 
     for (size_t i = 0; i < pages; i++) {
       auto page = (uintptr_t) PMM::allocatePage();
       std::memset((void*) VMM::physicalToVirtual(page), 0, PAGE_SIZE);
-      VMM::map(page, address, flags);
+      VMM::map(address, page, flags);
     }
 
     mCurrent += pages;
     return address;
   }
 
-  auto free(size_t length, VirtualAddress address) -> void {
+  auto free(size_t length, uintptr_t address) -> void {
     const auto pages = Math::ceilDiv(length, PAGE_SIZE);
-
-    Kernel::assert(mCurrent - pages > 0, "tried to free with length surpassing the amount of allocated memory");
+    Kernel::assert(mCurrent - pages >= 0, "tried to free with length surpassing the amount of allocated memory");
 
     if (address != mBase + (mCurrent - pages) * PAGE_SIZE) {
       return;
     }
 
     for (size_t i = 0; i < pages; i++) {
-      VMM::unmap(mBase + (mCurrent + i) * PAGE_SIZE);
+      VMM::unmap(mBase + (mCurrent - pages + i) * PAGE_SIZE);
     }
 
     mCurrent -= pages;
@@ -92,7 +91,7 @@ auto VMM::alloc(size_t length, VMFlag flags) -> void* {
   return (void*) (uintptr_t) gAllocator.allocate(length, flags);
 }
 
-auto VMM::free(VirtualAddress addr, size_t length=PAGE_SIZE) -> void {
+auto VMM::free(uintptr_t addr, size_t length) -> void {
   gAllocator.free(length, addr);
 }
 
