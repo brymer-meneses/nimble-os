@@ -16,16 +16,22 @@ making one from scratch.
 - [x] Graphics
     - [x] Print strings to the screen 
     - [ ] Window Management
-    - [ ] Create robust API to draw icons
 - [x] Custom Testing Framework (inspired by GTest)
 - [ ] Serial Output
-- [ ] APIC Driver
+- [ ] Use APIC instead of PIC
 - [x] Keyboard Support
 - [ ] Memory Management
-    - [x] Physical Memory Manager
-    - [ ] Virtual Memory Manager
+    - [x] Physical Memory Manager (Bitmap for now)
+    - [x] Virtual Memory Manager (Bump Allocator for now)
     - [ ] Heap Allocation (`malloc` and friends)
-- [ ] File System
+- [ ] Scheduler
+- [ ] Virtual File System
+    - [ ] Ext2
 - [ ] NVMe Driver
 - [ ] Basic Shell
+- [ ] Ports
+    - [ ] Doom
+    - [ ] GCC
+    - [ ] Cargo
+    - [ ] Vim
 
