@@ -1,13 +1,12 @@
 
-#include <kernel/utils/format.h>
 #include <kernel/utils/macros.h>
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
-#include <lib/libc.h>
+#include <lib/format.h>
+#include <array>
 
 #include "idt.h"
 #include "interrupt.h"
-#include <array>
 
 using namespace x86_64;
 

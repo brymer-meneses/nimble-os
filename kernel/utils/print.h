@@ -1,6 +1,6 @@
 #pragma once
-#include <kernel/utils/format.h>
 #include <kernel/graphics/framebuffer.h>
+#include <lib/format.h>
 
 namespace Kernel {
   template<typename Arg, typename ...Args>

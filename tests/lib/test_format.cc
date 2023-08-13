@@ -1,4 +1,4 @@
-#include <kernel/utils/format.h>
+#include <lib/format.h>
 #include <tests/prelude.h>
 
 TEST(Format, NumberFormat) {
