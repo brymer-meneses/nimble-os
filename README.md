@@ -35,3 +35,15 @@ making one from scratch.
     - [ ] Cargo
     - [ ] Vim
 
+## Building
+
+Currently, this project can only be built using `clang++` with version `>= 16.0.6`.
+
+```bash
+make <run|build> MODE=<debug|test|release>
+```
+
+Invoking `make`, will default to 
+```bash
+make run MODE=debug
+```

@@ -1,16 +1,21 @@
-
-PROFILE := debug
+MODE := debug
 ARCH := x86_64
+
 CXX  := clang++
 NASM := nasm
 LD	 := $(ARCH)-elf-ld
 QEMU := qemu-system-$(ARCH)
 
-override DEPS_DIR := build/deps
-override LIBS_DIR := lib
+DEPS_DIR := build/deps
+LIBS_DIR := lib
+SUPPORTED_ARCHS = x86_64
 
 ifneq ($(CXX), clang++)
   $(error Only clang++ is supported for now)
+endif
+
+ifeq ($(filter $(ARCH),$(SUPPORTED_ARCHS)),)
+  $(error ARCH "$(ARCH)" is not supported. Supported architectures: $(SUPPORTED_ARCHS))
 endif
 
 CXXFLAGS := \
@@ -58,38 +63,46 @@ QEMUFLAGS := \
 	-smp cpus=2 \
 	-serial stdio 
 
-ifeq ($(PROFILE), debug)
+ifeq ($(MODE), debug)
 	BUILD_DIR := build/debug
-	CXXFLAGS += -g -O0 \
-							-DDEBUG
 	NASMFLAGS += -g -dwarf 
-	QEMUFLAGS += -D qemu-log.txt \
-							 -d int -M smm=off
-else ifeq ($(PROFILE), test)
+	CXXFLAGS += \
+		-g -O0 \
+		-DDEBUG
+	QEMUFLAGS += \
+		-D qemu-log.txt \
+		-d int -M smm=off
+else ifeq ($(MODE), test)
 	BUILD_DIR := build/test
-	CXXFLAGS += -g -O0 \
-							-DENABLE_TESTS
 	NASMFLAGS += -g -dwarf 
-	QEMUFLAGS += -D qemu-log.txt \
-							 -d int -M smm=off
-else ifeq ($(PROFILE), release)
+	CXXFLAGS += \
+		-g -O0 \
+		-DENABLE_TESTS
+	QEMUFLAGS += \
+		-D qemu-log.txt \
+		-d int -M smm=off
+else ifeq ($(MODE), release)
 	BUILD_DIR := build/release
 	CXXFLAGS += -O3
 else 
-  $(error Invalid argument for variable PROFILE. Must be either debug, release, or test.)
+  $(error Invalid argument $(mode) for variable mode. Must be either debug, release, or test.)
 endif
 
-CXX_SOURCES  := $(shell find . -type f -name '*.cc' | grep -v build/deps)
-NASM_SOURCES := $(shell find . -type f -name '*.asm'| grep -v build/deps)
+CXX_SOURCES  := $(shell find . -type f -name '*.cc'  | grep -v $(DEPS_DIR))
+NASM_SOURCES := $(shell find . -type f -name '*.asm' | grep -v $(DEPS_DIR))
 
 OBJECTS := $(patsubst ./%.cc,  $(BUILD_DIR)/%.cc.o,  $(CXX_SOURCES)) \
            $(patsubst ./%.asm, $(BUILD_DIR)/%.asm.o, $(NASM_SOURCES))
 
-ifneq ($(PROFILE), test)
+# Ignore the other object files for other architectures
+OBJECTS := $(filter-out $(foreach arch,$(filter-out $(ARCH),$(SUPPORTED_ARCHS)), $(BUILD_DIR)/arch/$(arch)/%.o), $(OBJECTS))
+
+# Do not build test objects if we're not on `test` mode
+ifneq ($(MODE), test)
   OBJECTS := $(filter-out $(BUILD_DIR)/tests/%.cc.o, $(OBJECTS))
 endif
 
-.PHONY: clean .clangd
+.PHONY: clean .clangd build
 
 all: run
 
@@ -105,10 +118,10 @@ slocs:
 debug-address:
 	echo $(address) | x86_64-elf-addr2line -e $(BUILD_DIR)/kernel.elf
 
-run: iso
+run: build
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
-iso: .clangd dependencies $(OBJECTS)
+build: .clangd dependencies $(OBJECTS)
 	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf
 	@mkdir -p $(BUILD_DIR)/isoroot
 	@cp $(BUILD_DIR)/kernel.elf \
