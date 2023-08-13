@@ -1,5 +1,5 @@
-#include <lib/bit.h>
 #include <tests/prelude.h>
+#include <lib/bit.h>
 
 TEST(BitManipulation, Unset) {
   u8 value = 0b11111111;

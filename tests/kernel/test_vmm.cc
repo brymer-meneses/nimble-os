@@ -1,4 +1,4 @@
-#include "tests/prelude.h"
+#include <tests/prelude.h>
 #include <kernel/memory/vmm.h>
 
 TEST(VMM, Allocation) {
