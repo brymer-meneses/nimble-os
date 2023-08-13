@@ -85,8 +85,8 @@ NASM_SOURCES := $(shell find . -type f -name '*.asm'| grep -v build/deps)
 OBJECTS := $(patsubst ./%.cc,  $(BUILD_DIR)/%.cc.o,  $(CXX_SOURCES)) \
            $(patsubst ./%.asm, $(BUILD_DIR)/%.asm.o, $(NASM_SOURCES))
 
-ifeq ($(PROFILE), test)
-  OBJECTS := $(filter-out $(BUILD_DIR)/test/%.cc.o, $(OBJECTS))
+ifneq ($(PROFILE), test)
+  OBJECTS := $(filter-out $(BUILD_DIR)/tests/%.cc.o, $(OBJECTS))
 endif
 
 .PHONY: clean .clangd
