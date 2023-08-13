@@ -1,23 +1,20 @@
-BUILD_DIR := build
-DEPS_DIR := build/deps
-LIBS_DIR := lib
 
-CXX_SOURCES  := $(shell find . -type f -name '*.cc')
-NASM_SOURCES := $(shell find . -type f -name '*.asm')
-
-OBJECTS := $(patsubst ./%.cc,  $(BUILD_DIR)/%.cc.o,  $(CXX_SOURCES)) \
-           $(patsubst ./%.asm, $(BUILD_DIR)/%.asm.o, $(NASM_SOURCES))
-
+PROFILE := debug
 ARCH := x86_64
 CXX  := clang++
-LD	 := $(ARCH)-elf-ld
 NASM := nasm
-QEMU := qemu-system-x86_64
+LD	 := $(ARCH)-elf-ld
+QEMU := qemu-system-$(ARCH)
+
+override DEPS_DIR := build/deps
+override LIBS_DIR := lib
+
+ifneq ($(CXX), clang++)
+  $(error Only clang++ is supported for now)
+endif
 
 CXXFLAGS := \
 	--target=x86_64-unknown-elf \
-	-g \
-	-O3 \
 	-std=c++20 \
 	-Wall \
 	-Wextra \
@@ -45,8 +42,6 @@ CXXFLAGS := \
 
 NASMFLAGS := \
 	-Wall \
-	-g \
-	-dwarf \
 	-f elf64 \
 
 LDFLAGS := \
@@ -59,23 +54,50 @@ LDFLAGS := \
 	-T linker.ld 
 
 QEMUFLAGS := \
-	-D qemu-log.txt \
-	-d int -M smm=off \
 	-m 512M \
 	-smp cpus=2 \
 	-serial stdio 
 
-.PHONY: clean
+ifeq ($(PROFILE), debug)
+	BUILD_DIR := build/debug
+	CXXFLAGS += -g -O0 \
+							-DDEBUG
+	NASMFLAGS += -g -dwarf 
+	QEMUFLAGS += -D qemu-log.txt \
+							 -d int -M smm=off
+else ifeq ($(PROFILE), test)
+	BUILD_DIR := build/test
+	CXXFLAGS += -g -O0 \
+							-DENABLE_TESTS
+	NASMFLAGS += -g -dwarf 
+	QEMUFLAGS += -D qemu-log.txt \
+							 -d int -M smm=off
+else ifeq ($(PROFILE), release)
+	BUILD_DIR := build/release
+	CXXFLAGS += -O3
+else 
+  $(error Invalid argument for variable PROFILE. Must be either debug, release, or test.)
+endif
+
+CXX_SOURCES  := $(shell find . -type f -name '*.cc' | grep -v build/deps)
+NASM_SOURCES := $(shell find . -type f -name '*.asm'| grep -v build/deps)
+
+OBJECTS := $(patsubst ./%.cc,  $(BUILD_DIR)/%.cc.o,  $(CXX_SOURCES)) \
+           $(patsubst ./%.asm, $(BUILD_DIR)/%.asm.o, $(NASM_SOURCES))
+
+ifeq ($(PROFILE), test)
+  OBJECTS := $(filter-out $(BUILD_DIR)/test/%.cc.o, $(OBJECTS))
+endif
+
+.PHONY: clean .clangd
 
 all: run
 
 clean:
-	@$(RM) -r $(OBJECTS)
+	$(RM) -r build/debug build/release build/test
 
 distclean:
-	$(RM) -r $(BUILD_DIR)/limine
-	$(RM) -r lib/limine.h
-	$(RM) -r lib/libc++/
+	$(RM) -rf build .clangd qemu-log.txt
 
 slocs:
 	tokei . --exclude=assets/fonts/pixeloperator.cc
@@ -86,11 +108,7 @@ debug-address:
 run: iso
 	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
 
-test: CXXFLAGS += -DENABLE_TESTS
-test: clean iso
-	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
-
-iso: dependencies $(OBJECTS)
+iso: .clangd dependencies $(OBJECTS)
 	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf
 	@mkdir -p $(BUILD_DIR)/isoroot
 	@cp $(BUILD_DIR)/kernel.elf \
@@ -117,15 +135,16 @@ dependencies:
 	@cp $(DEPS_DIR)/limine/limine.h lib/thirdparty/limine.h
 	@echo "Downloading Freestanding C++ Headers ..."
 	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
-	@echo "Generating `.clangd` file ..."
-	@-./scripts/generate_clangd_config.sh
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)
-	@echo "Compiling $< -> $@"
+	@echo "CC $<"
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.asm.o: %.asm
 	@mkdir -p $(dir $@)
-	@echo "Compiling $< -> $@"
+	@echo "NASM $<"
 	@$(NASM) $(NASMFLAGS) $< -o $@
+
+.clangd:
+	@./scripts/generate_clangd_config.sh
