@@ -51,7 +51,7 @@ LDFLAGS := \
 	-pie \
 	--no-dynamic-linker \
 	-z max-page-size=0x1000 \
-	-T linker.ld 
+	-T kernel/arch/$(ARCH)/linker.ld
 
 QEMUFLAGS := \
 	-m 512M \
