@@ -44,7 +44,7 @@ static constexpr u64 PTE_ADDRESS_MASK = 0x000ffffffffff000;
 static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool shouldAllocate) -> uintptr_t* {
   auto entry = topLevel[index];
   if ((entry & PTE_PRESENT) != 0) {
-    return (uintptr_t*) VMM::physicalToVirtual(entry & PTE_ADDRESS_MASK);
+    return (uintptr_t*) VMM::addHHDM(entry & PTE_ADDRESS_MASK);
   }
 
   if (!shouldAllocate) {
@@ -55,7 +55,7 @@ static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool s
   Kernel::assert(page != 0, "allocated page is a nullptr");
   Kernel::assert(page % PAGE_SIZE == 0, "allocated page must be page-aligned");
 
-  std::memset((void*) VMM::physicalToVirtual(page), 0, PAGE_SIZE);
+  std::memset((void*) VMM::addHHDM(page), 0, PAGE_SIZE);
 
   auto newLevel = page;
   newLevel |= PTE_PRESENT;
@@ -67,21 +67,21 @@ static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool s
 
   // can't believe i spent a couple of days not being able to figure out that
   // that I am supposed to mask the bits here
-  return (uintptr_t*) VMM::physicalToVirtual(newLevel & PTE_ADDRESS_MASK);
+  return (uintptr_t*) VMM::addHHDM(newLevel & PTE_ADDRESS_MASK);
 }
 
 auto Paging::map(uintptr_t virtualAddress, uintptr_t physicalAddress, VMFlag vmflags) -> void {
   Kernel::assert(virtualAddress % Memory::PAGE_SIZE == 0, "virtual address should be page-aligned!");
   Kernel::assert(physicalAddress % Memory::PAGE_SIZE == 0, "physical address should be page-aligned!");
 
-  std::memset((void*) VMM::physicalToVirtual(physicalAddress), 0, PAGE_SIZE);
+  std::memset((void*) VMM::addHHDM(physicalAddress), 0, PAGE_SIZE);
 
   auto pml4Index = (virtualAddress >> 39) & 0x1ff;
   auto pdpIndex = (virtualAddress >> 30) & 0x1ff;
   auto pdIndex = (virtualAddress >> 21) & 0x1ff;
   auto ptIndex = (virtualAddress >> 12) & 0x1ff;
 
-  auto* pml4 = (uintptr_t*) VMM::physicalToVirtual(CPU::readCR3() & PTE_ADDRESS_MASK);
+  auto* pml4 = (uintptr_t*) VMM::addHHDM(CPU::readCR3() & PTE_ADDRESS_MASK);
   auto* pdp = getNextLevel(pml4, pml4Index, vmflags, true);
   auto* pd = getNextLevel(pdp, pdpIndex, vmflags, true);
   auto* pt = getNextLevel(pd, pdIndex, vmflags, true);
@@ -107,12 +107,12 @@ auto Paging::unmap(uintptr_t virtualAddress) -> void {
 
   VMFlag flags;
 
-  auto* pml4 = (uintptr_t*) VMM::physicalToVirtual(CPU::readCR3() & PTE_ADDRESS_MASK);
+  auto* pml4 = (uintptr_t*) VMM::addHHDM(CPU::readCR3() & PTE_ADDRESS_MASK);
   auto* pdp = getNextLevel(pml4, pml4Index, flags, false);
   auto* pd = getNextLevel(pdp, pdpIndex, flags, false);
   auto* pt = getNextLevel(pd, pdIndex, flags, false);
 
-  PMM::freePage(VMM::virtualToPhysical((uintptr_t) &pt[ptIndex]));
+  PMM::freePage(VMM::addHHDM((uintptr_t) &pt[ptIndex]));
   pt[ptIndex] = 0;
 
   invalidateTLBCache(virtualAddress);

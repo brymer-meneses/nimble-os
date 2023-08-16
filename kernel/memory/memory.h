@@ -7,3 +7,8 @@ namespace Memory {
 
   auto initialize() -> void;
 }
+
+namespace Kernel {
+  auto malloc(size_t size) -> void*;
+  auto free(void* address) -> void;
+}

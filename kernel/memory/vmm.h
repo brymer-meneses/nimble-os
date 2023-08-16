@@ -13,8 +13,8 @@ struct VMFlag {
 
 namespace VMM {
   auto initialize() -> void;
-  auto virtualToPhysical(const u64 virtualAddress) -> u64;
-  auto physicalToVirtual(const u64 physicalAddress) -> u64;
+  auto subHHDM(const u64 virtualAddress) -> u64;
+  auto addHHDM(const u64 physicalAddress) -> u64;
 
   auto alloc(size_t length, VMFlag flags) -> void*;
   auto free(uintptr_t address, size_t length=Memory::PAGE_SIZE) -> void;

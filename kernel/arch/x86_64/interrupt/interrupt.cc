@@ -1,5 +1,4 @@
 
-#include <kernel/utils/macros.h>
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
 #include <lib/format.h>

@@ -20,13 +20,13 @@ static volatile auto hhdmRequest = limine_hhdm_request {
 
 static u64 hhdmOffset = 0;
 
-auto VMM::physicalToVirtual(u64 physicalAddress) -> u64 {
+auto VMM::addHHDM(u64 physicalAddress) -> u64 {
   Kernel::assert(hhdmOffset, "VMM not initialized");
 
   return physicalAddress + hhdmOffset;
 }
 
-auto VMM::virtualToPhysical(u64 virtualAddress) -> u64 {
+auto VMM::subHHDM(u64 virtualAddress) -> u64 {
   Kernel::assert(hhdmOffset, "VMM not initialized");
 
   return virtualAddress - hhdmOffset;
@@ -61,7 +61,7 @@ public:
 
     for (size_t i = 0; i < pages; i++) {
       auto page = (uintptr_t) PMM::allocatePage();
-      std::memset((void*) VMM::physicalToVirtual(page), 0, PAGE_SIZE);
+      std::memset((void*) VMM::addHHDM(page), 0, PAGE_SIZE);
       VMM::map(address, page, flags);
     }
 

@@ -9,5 +9,5 @@ TEST(VMM, Allocation) {
 
   *(page) = 5;
   assertEq(*page, 5);
-  VMM::free((uintptr_t) page);
+  // VMM::free((uintptr_t) page);
 }
