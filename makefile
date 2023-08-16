@@ -69,6 +69,7 @@ ifeq ($(MODE), debug)
 	CXXFLAGS += \
 		-g -O0 \
 		-DDEBUG
+	MACROS := -DDEBUG
 	QEMUFLAGS += \
 		-D qemu-log.txt \
 		-d int -M smm=off
@@ -79,12 +80,14 @@ else ifeq ($(MODE), test)
 		-g -O0 \
 		-DENABLE_TESTS \
 		-DDEBUG
+	MACROS := -DDEBUG -DENABLE_TESTS
 	QEMUFLAGS += \
 		-D qemu-log.txt \
 		-d int -M smm=off
 else ifeq ($(MODE), release)
 	BUILD_DIR := build/release
-	CXXFLAGS += -O3
+	MACROS := -DRELEASE
+	CXXFLAGS += -O3 -DRELEASE
 else 
   $(error Invalid argument $(mode) for variable mode. Must be either debug, release, or test.)
 endif
@@ -161,4 +164,4 @@ $(BUILD_DIR)/%.asm.o: %.asm
 	@$(NASM) $(NASMFLAGS) $< -o $@
 
 .clangd:
-	@./scripts/generate_clangd_config.sh
+	@./scripts/generate_clangd_config.sh $(MACROS)
