@@ -8,6 +8,7 @@
 
 namespace Kernel {
 
+#ifdef DEBUG
   template <typename FormatArg, typename... FormatArgs>
   auto assert(bool condition, FormatArg arg, FormatArgs... args, const std::source_location loc = std::source_location::current()) -> void {
     if (condition) [[likely]] return;
@@ -25,5 +26,13 @@ namespace Kernel {
                     loc.file_name(), loc.line(), loc.column());
     Kernel::halt();
   }
+#else
+  // this should be optimized away
+  template <typename... FormatArgs>
+  inline auto assert(bool, FormatArgs...) -> void { }
+  inline auto assert(bool) -> void {}
+#endif
+
+
 }
 

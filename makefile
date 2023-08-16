@@ -77,7 +77,8 @@ else ifeq ($(MODE), test)
 	NASMFLAGS += -g -dwarf 
 	CXXFLAGS += \
 		-g -O0 \
-		-DENABLE_TESTS
+		-DENABLE_TESTS \
+		-DDEBUG
 	QEMUFLAGS += \
 		-D qemu-log.txt \
 		-d int -M smm=off
