@@ -65,6 +65,8 @@ auto assertNeq(Arg1 arg1, Arg2 arg2) -> void {
   }
   if (arg1 == arg2) {
     Tester::Internal::invokeTestFailure();
+  } else {
+    Tester::Internal::invokeTestSuccess();
   }
 }
 
