@@ -20,10 +20,14 @@ making one from scratch.
 - [ ] Serial Output
 - [ ] Use APIC instead of PIC
 - [x] Keyboard Support
-- [ ] Memory Management
+- [x] Memory Management
     - [x] Physical Memory Manager (Bitmap for now)
     - [x] Virtual Memory Manager (Bump Allocator for now)
-    - [ ] Heap Allocation (`malloc` and friends)
+    - [x] Heap Allocation (`malloc` and friends)
+        - [ ] Implement Block Coalescing
+- [ ] Kernel STL
+    - [ ] Vector
+    - [ ] Spin Mutex
 - [ ] Scheduler
 - [ ] Virtual File System
     - [ ] Ext2
