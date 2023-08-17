@@ -74,16 +74,16 @@ class MemoryMap {
     
     struct Iterator {
       // this is used 
-      using IteratorCategory = std::forward_iterator_tag;
-      using DifferenceType = std::ptrdiff_t;
+      using iterator_category = std::forward_iterator_tag;
+      using difference_type = std::ptrdiff_t;
       
-      using ValueType = limine_memmap_entry*;
-      using Pointer = ValueType*;
-      using Reference = ValueType&;
+      using value_type = limine_memmap_entry*;
+      using pointer = value_type*;
+      using reference = value_type&;
 
-      Pointer ptr;
+      pointer ptr;
 
-      Iterator(Pointer ptr) : ptr(ptr) {};
+      Iterator(pointer ptr) : ptr(ptr) {};
 
       // prefix increment
       auto operator++() -> Iterator {
@@ -98,11 +98,11 @@ class MemoryMap {
         return tmp;
       }
 
-      auto operator*() const -> Reference& {
+      auto operator*() const -> reference& {
         return *ptr;
       }
 
-      auto operator->() const -> Pointer {
+      auto operator->() const -> pointer {
         return ptr;
       }
 
