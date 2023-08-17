@@ -20,7 +20,7 @@ public:
 
   struct Block {
   private:
-    Address start;
+    Address address;
     size_t size;
 
   public:

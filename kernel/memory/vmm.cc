@@ -11,7 +11,7 @@
 
 #include <kernel/arch/platform.h>
 
-using Memory::PAGE_SIZE;
+using Arch::PAGE_SIZE;
 
 static volatile auto hhdmRequest = limine_hhdm_request {
   .id = LIMINE_HHDM_REQUEST,

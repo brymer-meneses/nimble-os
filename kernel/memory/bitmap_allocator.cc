@@ -3,13 +3,14 @@
 
 #include <kernel/utils/panic.h>
 #include <kernel/utils/assert.h>
+#include <kernel/arch/platform.h>
 #include <lib/bit.h>
 #include <lib/math.h>
 
 #include "memory_map.h"
 #include "memory.h"
 
-using Memory::PAGE_SIZE;
+using Arch::PAGE_SIZE;
 
 #define BITMAP_FREE 0
 #define BITMAP_USED 1

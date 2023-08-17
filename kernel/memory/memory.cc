@@ -1,16 +1,22 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
+#include <kernel/arch/platform.h>
+#include <lib/math.h>
 
 #include <limine.h>
 
 #include "memory.h"
-#include "memory_map.h"
 #include "pmm.h"
 #include "vmm.h"
 
 #include "heap_allocator.h"
 
+using Arch::PAGE_SIZE;
+
 static HeapAllocator kernelHeapAllocator;
+
+// this should be defined at `linker.ld`
+extern "C" uintptr_t kernel_end;
 
 auto Memory::initialize() -> void {
   PMM::initialize();
@@ -22,7 +28,9 @@ auto Memory::initialize() -> void {
     .executable = true,
   };
 
-  kernelHeapAllocator.initialize(VMM::addHHDM(0), 5 * PAGE_SIZE, flags);
+  const auto kernelHeapAddress = Math::alignUp((u64) &kernel_end, PAGE_SIZE) + PAGE_SIZE;
+
+  kernelHeapAllocator.initialize(kernelHeapAddress, 30 * PAGE_SIZE, flags);
 }
 
 auto Kernel::malloc(size_t size) -> void* {
@@ -31,4 +39,8 @@ auto Kernel::malloc(size_t size) -> void* {
 
 auto Kernel::free(void* address) -> void {
   return kernelHeapAllocator.free(address);
+}
+
+auto Kernel::getHeapAllocator() -> HeapAllocator& {
+  return kernelHeapAllocator;
 }

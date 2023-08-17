@@ -14,7 +14,7 @@
 #include "paging.h"
 
 using namespace x86_64;
-using Memory::PAGE_SIZE;
+using Paging::PAGE_SIZE;
 using Interrupt::InterruptFrame;
 
 static auto pageFaultHandler(InterruptFrame* frame) -> void {
@@ -71,8 +71,8 @@ static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool s
 }
 
 auto Paging::map(uintptr_t virtualAddress, uintptr_t physicalAddress, VMFlag vmflags) -> void {
-  Kernel::assert(virtualAddress % Memory::PAGE_SIZE == 0, "virtual address should be page-aligned!");
-  Kernel::assert(physicalAddress % Memory::PAGE_SIZE == 0, "physical address should be page-aligned!");
+  Kernel::assert(virtualAddress % PAGE_SIZE == 0, "virtual address should be page-aligned!");
+  Kernel::assert(physicalAddress % PAGE_SIZE == 0, "physical address should be page-aligned!");
 
   std::memset((void*) VMM::addHHDM(physicalAddress), 0, PAGE_SIZE);
 
@@ -98,7 +98,7 @@ auto Paging::map(uintptr_t virtualAddress, uintptr_t physicalAddress, VMFlag vmf
 
 
 auto Paging::unmap(uintptr_t virtualAddress) -> void {
-  Kernel::assert(virtualAddress % Memory::PAGE_SIZE == 0, "virtual address should be page-aligned!");
+  Kernel::assert(virtualAddress % PAGE_SIZE == 0, "virtual address should be page-aligned!");
 
   auto pml4Index = (virtualAddress >> 39) & 0x1ff;
   auto pdpIndex = (virtualAddress >> 30) & 0x1ff;

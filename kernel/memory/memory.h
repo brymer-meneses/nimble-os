@@ -1,9 +1,9 @@
 #pragma once
 
 #include <lib/types.h>
+#include <kernel/memory/heap_allocator.h>
 
 namespace Memory {
-  constexpr u64 PAGE_SIZE = 0x1000;
 
   auto initialize() -> void;
 }
@@ -11,4 +11,5 @@ namespace Memory {
 namespace Kernel {
   auto malloc(size_t size) -> void*;
   auto free(void* address) -> void;
+  auto getHeapAllocator() -> HeapAllocator&;
 }

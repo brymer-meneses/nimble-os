@@ -3,8 +3,6 @@
 #include <lib/types.h>
 #include <optional>
 
-#include "memory.h"
-
 struct VMFlag {
   bool userAccessible;
   bool writeable;
@@ -17,7 +15,7 @@ namespace VMM {
   auto addHHDM(const u64 physicalAddress) -> u64;
 
   auto alloc(size_t length, VMFlag flags) -> void*;
-  auto free(uintptr_t address, size_t length=Memory::PAGE_SIZE) -> void;
+  auto free(uintptr_t address, size_t length) -> void;
 
   auto map(uintptr_t virtualAddr, uintptr_t physicalAddr, VMFlag flags) -> void;
   auto unmap(uintptr_t virtualAddr) -> void;

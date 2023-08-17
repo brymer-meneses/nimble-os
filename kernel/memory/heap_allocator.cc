@@ -1,16 +1,17 @@
 #include <kernel/utils/assert.h>
 #include <lib/math.h>
+#include <kernel/arch/platform.h>
 #include "heap_allocator.h"
 #include "pmm.h"
 
-using Memory::PAGE_SIZE;
+using Arch::PAGE_SIZE;
 
 using Block = HeapAllocator::Block;
 using Header = HeapAllocator::Header;
 using FreeListNode = HeapAllocator::FreeListNode;
 
 auto FreeListNode::getBlock() const -> Block {
-  const auto* header = (Header*) ((u8*) this - sizeof(FreeListNode) - sizeof(Header));
+  const auto* header = (Header*) ((u64) this - sizeof(Header));
   return {(u64) header, header->getSize()};
 }
 
@@ -32,11 +33,11 @@ auto Header::setIsUsed(bool value) -> void {
 }
 
 
-Block::Block(Address startAddress, size_t size) : start(startAddress), size(size) { }
+Block::Block(Address startAddress, size_t size) : address(startAddress), size(size) { }
 
 auto Block::installHeaders() -> void {
-  auto* leftEndHeader= (Header*) start;
-  auto* rightEndHeader = (Header*) (start + sizeof(Header) + size);
+  auto* leftEndHeader= (Header*) address;
+  auto* rightEndHeader = (Header*) (address + sizeof(Header) + size);
 
   Kernel::assert(rightEndHeader != nullptr);
   Kernel::assert(leftEndHeader != nullptr);
@@ -49,34 +50,33 @@ auto Block::installHeaders() -> void {
 }
 
 auto Block::getPayloadSize() const -> size_t {
-  const auto* header = (Header*) start;
+  const auto* header = (Header*) address;
   return header->getSize();
 }
 
 auto Block::getBlockSize() const -> size_t {
-  const auto* header = (Header*) start;
-  return header->getSize() + 2 * sizeof(Header);
+  return size + 2 * sizeof(Header);
 }
 
 auto Block::isUsed() const -> bool {
-  const auto* header = (Header*) start;
+  const auto* header = (Header*) address;
   return header->isUsed();
 }
 
 auto Block::setIsUsed(bool value) -> void {
-  auto* leftEndHeader = (Header*) start;
-  auto* rightEndHeader = (Header*) ((u8*) start + sizeof(Header) + leftEndHeader->getSize());
+  auto* leftEndHeader = (Header*) address;
+  auto* rightEndHeader = (Header*) (address + sizeof(Header) + size);
 
   leftEndHeader->setIsUsed(value);
   rightEndHeader->setIsUsed(value);
 }
 
 auto Block::getPayload() -> void* {
-  return (u8*) start + sizeof(Header);
+  return (void*) (address + sizeof(Header));
 }
 
 auto Block::fromAddress(void* addr) -> Block {
-  auto* header = (Header*) ((u8*) addr - sizeof(Header));
+  auto* header = (Header*) ((u64) addr - sizeof(Header));
   return {(u64) header,  header->getSize()};
 }
 
@@ -95,21 +95,31 @@ auto HeapAllocator::initialize(Address start, size_t size, VMFlag flags) -> void
 }
 
 auto HeapAllocator::alloc(size_t size) -> void* {
-  Kernel::assert(isInitialized);
-
   size = Math::alignUp(size, 8);
+
+  Kernel::assert(isInitialized);
   Kernel::assert(current + sizeof(Header) + size < end, "Cannot allocate memory when range is full");
 
-  auto* node = freeListHead;
+  auto* currentNode = freeListHead;
 
-  while (node != nullptr) {
-    auto block = node->getBlock();
+  while (currentNode != nullptr) {
+    auto block = currentNode->getBlock();
 
     if (block.getPayloadSize() == size and not block.isUsed()) {
+      auto* previousNode = currentNode->prev;
+
+      // we are at the head of the freelist
+      if (previousNode == nullptr) {
+        freeListHead  = currentNode->next;
+      } else {
+        previousNode->next = currentNode->next;
+      }
+
+      block.setIsUsed(true);
       return block.getPayload();
     }
 
-    node = node->next;
+    currentNode = currentNode->next;
   }
 
   if (current > current + pagesAllocated * PAGE_SIZE) {
@@ -136,14 +146,14 @@ auto HeapAllocator::free(void* addr) -> void {
   Kernel::assert((u64) addr > start and (u64) addr < end, "Tried to free invalid address");
 
   auto block = Block::fromAddress(addr);
-
   Kernel::assert(block.isUsed(), "Tried to free an address that is not used");
+  block.setIsUsed(false);
 
   auto* node = (FreeListNode*) block.getPayload();
   Kernel::assert(node != nullptr);
 
   node->next = nullptr;
-  node->prev = nullptr;
+  node->prev = freeListCurrent;
 
   if (!freeListHead) {
     freeListHead = node;
@@ -153,5 +163,4 @@ auto HeapAllocator::free(void* addr) -> void {
 
   freeListCurrent->next = node;
   freeListCurrent = node;
-  block.setIsUsed(false);
 }

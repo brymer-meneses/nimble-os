@@ -13,6 +13,7 @@ namespace Arch {
 #ifdef __x86_64__
   namespace Interrupt = x86_64::Interrupt;
   namespace Paging = x86_64::Paging;
+  constexpr u64 PAGE_SIZE = 0x1000;
 #endif
 
 }

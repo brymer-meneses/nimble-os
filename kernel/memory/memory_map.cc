@@ -7,6 +7,7 @@
 
 #include <kernel/utils/print.h>
 #include <kernel/utils/panic.h>
+#include <kernel/arch/platform.h>
 
 #include <lib/math.h>
 
@@ -15,7 +16,7 @@ static volatile auto memmapRequest = limine_memmap_request {
     .revision = 0,
 };
 
-using Memory::PAGE_SIZE;
+using Arch::PAGE_SIZE;
 
 MemoryMap::MemoryMap() {
 
