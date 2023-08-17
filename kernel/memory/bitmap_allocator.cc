@@ -61,6 +61,8 @@ Bitmap::Bitmap(u8* data, size_t offset, size_t maxPages) : data(data), maxPages(
 
 
 auto BitmapAllocator::initialize() -> void { 
+  auto& memoryMap = MemoryMap::get();
+  entryIndex = memoryMap.usable.first;
 
   // I'm an idiot, it took me a whole day to figure out this computation.
   const auto totalPages = memoryMap.usable.pages;
@@ -173,6 +175,7 @@ auto BitmapAllocator::freeContiguousPages(uintptr_t address, size_t numPages) ->
 }
 
 auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std::optional<size_t> {
+  auto& memoryMap = MemoryMap::get();
 
   // calculate how many pages each entry has
   size_t numPages = 0;
@@ -189,6 +192,7 @@ auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std
 }
 
 auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<limine_memmap_entry*> {
+  auto& memoryMap = MemoryMap::get();
 
   for (auto* entry : memoryMap.usable) {
     const auto pagesInEntry = entry->length / PAGE_SIZE;
@@ -206,6 +210,7 @@ auto BitmapAllocator::getEntryFromBitmapIndex(size_t index) -> std::optional<lim
 }
 
 auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<uintptr_t> {
+  auto& memoryMap = MemoryMap::get();
 
   for (auto* entry : memoryMap.usable) {
     const auto pagesInEntry = entry->length / PAGE_SIZE;
@@ -223,6 +228,7 @@ auto BitmapAllocator::getAddressFromBitmapIndex(size_t index) -> std::optional<u
 }
 
 auto BitmapAllocator::getBitmapIndexFromAddress(uintptr_t address) -> std::optional<size_t> {
+  auto& memoryMap = MemoryMap::get();
 
   limine_memmap_entry* entry = nullptr;
   for (auto* current : memoryMap.usable) {

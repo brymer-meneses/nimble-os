@@ -47,8 +47,7 @@ class BitmapAllocator {
     auto getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std::optional<size_t>;
 
   private:
-    MemoryMap& memoryMap = MemoryMap::get();
     Bitmap bitmap{};
-    size_t entryIndex = memoryMap.usable.first;
+    size_t entryIndex;
     size_t lastIndexUsed = 0;
 };
