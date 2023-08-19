@@ -2,7 +2,8 @@
 #include <cstddef>
 #include <type_traits>
 #include <lib/libc.h>
-#include <kernel/utils/string.h>
+#include <lib/syslib/format.h>
+#include <lib/syslib/string.h>
 
 namespace {
 
@@ -20,12 +21,12 @@ constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
     if constexpr (specifier == FormatSpecifier::Hexadecimal) {
       char temp_buffer[256];
 
-      int length = String::copy(buffer, bpos, "0x", 0, 3);
+      int length = sl::string::copy(buffer, bpos, "0x", 0, 3);
       bpos += length;
 
-      length += String::fromIntegral(value, temp_buffer, 16);
+      length += sl::string::fromIntegral(value, temp_buffer, 16);
 
-      String::copy(buffer, bpos, temp_buffer, 0, length+1);
+      sl::string::copy(buffer, bpos, temp_buffer, 0, length+1);
 
       return length;
     }
@@ -33,23 +34,23 @@ constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
     if constexpr (specifier == FormatSpecifier::Octal) {
       char temp_buffer[256];
 
-      int length = String::copy(buffer, bpos, "0o", 0, 3);
+      int length = sl::string::copy(buffer, bpos, "0o", 0, 3);
       bpos += length;
 
-      length += String::fromIntegral(value, temp_buffer, 8);
+      length += sl::string::fromIntegral(value, temp_buffer, 8);
 
-      String::copy(buffer, bpos, temp_buffer, 0, length+1);
+      sl::string::copy(buffer, bpos, temp_buffer, 0, length+1);
 
       return length;
     }
 
     if constexpr (specifier == FormatSpecifier::Binary) {
       char temp_buffer[256];
-      int length = String::copy(buffer, bpos, "0b", 0, 3);
+      int length = sl::string::copy(buffer, bpos, "0b", 0, 3);
       bpos += length;
 
-      length += String::fromIntegral(value, temp_buffer, 2);
-      String::copy(buffer, bpos, temp_buffer, 0, length+1);
+      length += sl::string::fromIntegral(value, temp_buffer, 2);
+      sl::string::copy(buffer, bpos, temp_buffer, 0, length+1);
 
       return length;
     }
@@ -69,7 +70,7 @@ constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
 
     if constexpr (std::is_integral_v<T>) {
       char temp_buffer[256];
-      int length = String::fromIntegral(value, temp_buffer, 10); // Use base 10 as default
+      int length = sl::string::fromIntegral(value, temp_buffer, 10); // Use base 10 as default
 
       // Copy the characters to the buffer
       for (int i = 0; i < length; i++) {
@@ -119,13 +120,13 @@ constexpr void formatImpl(char *buffer, const char *string, size_t bpos,
     }
 
     if (string[spos] == '\0') {
-      String::copy(buffer, bpos, string, spos, specifier_length);
+      sl::string::copy(buffer, bpos, string, spos, specifier_length);
       return;
     }
 
     if (string[spos] == '}') {
       char specifier[16];
-      String::copy(specifier, 0, string, specifier_start+1, specifier_start + specifier_length);
+      sl::string::copy(specifier, 0, string, specifier_start+1, specifier_start + specifier_length);
       spos += 1;
 
       if (specifier_length == 1) {
@@ -150,7 +151,7 @@ constexpr void formatImpl(char *buffer, const char *string, size_t bpos,
 
 }
 
-namespace Format {
+namespace sl {
 
 struct FormatArgument {
   virtual auto toString() const -> const char* = 0;

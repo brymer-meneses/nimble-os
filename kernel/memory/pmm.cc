@@ -6,7 +6,6 @@
 #include <kernel/utils/assert.h>
 #include <lib/thirdparty/limine.h>
 #include <lib/types.h>
-#include <lib/math.h>
 
 #include <cstddef>
 

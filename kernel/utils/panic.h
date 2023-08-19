@@ -2,7 +2,7 @@
 
 #include <kernel/graphics/framebuffer.h>
 #include <kernel/utils/panic.h>
-#include <lib/format.h>
+#include <lib/syslib/format.h>
 #include <lib/types.h>
 #include "halt.h"
 
@@ -19,7 +19,7 @@ namespace Kernel {
   template<typename Arg, typename ...Args>
   [[noreturn]] auto panic(const char* string, Arg arg, Args ...args) -> void {
     char buffer[256];
-    Format::format(buffer, string, arg, args...);
+    sl::format(buffer, string, arg, args...);
     panic(buffer);
   }
 

@@ -4,8 +4,8 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/assert.h>
 #include <kernel/arch/platform.h>
-#include <lib/bit.h>
-#include <lib/math.h>
+#include <lib/syslib/bit.h>
+#include <lib/syslib/math.h>
 
 #include "memory_map.h"
 #include "memory.h"
@@ -20,14 +20,14 @@ using Bitmap = BitmapAllocator::Bitmap;
 auto Bitmap::setFree(size_t index) -> void {
   auto row = index / 8;
   auto col = index % 8;
-  Bit::unsetMut(data[row], col);
+  sl::bit::unsetMut(data[row], col);
   usedPages -= 1;
 }
 
 auto Bitmap::setUsed(size_t index) -> void {
   auto row = index / 8;
   auto col = index % 8;
-  Bit::setMut(data[row], col);
+  sl::bit::setMut(data[row], col);
   usedPages += 1;
 }
 
@@ -41,7 +41,7 @@ auto Bitmap::freeAll() -> void {
 auto Bitmap::isPageFree(size_t index) -> bool {
   auto row = index / 8;
   auto col = index % 8;
-  return Bit::get(data[row], col) == 0;
+  return sl::bit::get(data[row], col) == 0;
 }
 
 auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
@@ -51,8 +51,8 @@ auto Bitmap::setContiguousPagesAsUsed(size_t start, size_t end) {
 }
 
 Bitmap::Bitmap(u8* data, size_t offset, size_t maxPages) : data(data), maxPages(maxPages)  {
-  const auto dataSize = Math::ceilDiv(maxPages, 8);
-  const auto pagesAllocateToBitmap = Math::ceilDiv(dataSize, PAGE_SIZE);
+  const auto dataSize = sl::math::ceilDiv(maxPages, 8);
+  const auto pagesAllocateToBitmap = sl::math::ceilDiv(dataSize, PAGE_SIZE);
 
   reservedPages = pagesAllocateToBitmap;
 
@@ -67,7 +67,7 @@ auto BitmapAllocator::initialize() -> void {
 
   // I'm an idiot, it took me a whole day to figure out this computation.
   const auto totalPages = memoryMap.usable.pages;
-  const auto bitmapSize = Math::ceilDiv(totalPages, 8);
+  const auto bitmapSize = sl::math::ceilDiv(totalPages, 8);
 
   // find a place for the bitmap
   size_t skippedPages = 0;

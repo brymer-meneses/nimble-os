@@ -1,9 +1,9 @@
 #pragma once
 
 #include <type_traits>
-#include "types.h"
+#include <lib/types.h>
 
-namespace Math {
+namespace sl::math {
 
   template <typename T>
   concept Integral = std::is_integral_v<T>;

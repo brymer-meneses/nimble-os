@@ -1,7 +1,7 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
 #include <kernel/arch/platform.h>
-#include <lib/math.h>
+#include <lib/syslib/math.h>
 
 #include <limine.h>
 
@@ -28,7 +28,7 @@ auto Memory::initialize() -> void {
     .executable = true,
   };
 
-  const auto kernelHeapAddress = Math::alignUp((u64) &kernel_end, PAGE_SIZE) + PAGE_SIZE;
+  const auto kernelHeapAddress = sl::math::alignUp((u64) &kernel_end, PAGE_SIZE) + PAGE_SIZE;
 
   kernelHeapAllocator.initialize(kernelHeapAddress, 30 * PAGE_SIZE, flags);
 }

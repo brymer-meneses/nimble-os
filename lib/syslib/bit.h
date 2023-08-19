@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <cstddef>
 
-namespace Bit {
+namespace sl::bit {
 
   template<typename T>
   concept Unsigned = std::is_unsigned_v<T>;

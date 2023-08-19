@@ -1,7 +1,7 @@
 #include <type_traits>
 #include <cstddef>
 
-namespace String {
+namespace sl::string {
   
 template<typename T>
 constexpr auto fromIntegral(T value, char* buffer, int base) -> int {

@@ -1,6 +1,5 @@
 #pragma once
 #include <lib/types.h>
-#include <lib/bit.h>
 #include "vmm.h"
 
 class HeapAllocator {

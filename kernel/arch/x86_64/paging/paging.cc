@@ -7,8 +7,6 @@
 #include <kernel/arch/x86_64/interrupt/interrupt.h>
 #include <kernel/arch/cpu.h>
 
-#include <lib/bit.h>
-
 #include <array>
 
 #include "paging.h"

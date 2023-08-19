@@ -1,7 +1,6 @@
 
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
-#include <lib/format.h>
 #include <array>
 
 #include "idt.h"

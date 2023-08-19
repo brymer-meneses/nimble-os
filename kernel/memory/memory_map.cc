@@ -9,7 +9,7 @@
 #include <kernel/utils/panic.h>
 #include <kernel/arch/platform.h>
 
-#include <lib/math.h>
+#include <lib/syslib/math.h>
 
 static volatile auto memmapRequest = limine_memmap_request {
     .id = LIMINE_MEMMAP_REQUEST,
@@ -53,49 +53,49 @@ auto MemoryMap::initializeRange() -> void {
       case LIMINE_MEMMAP_USABLE:
         usable.last = std::max(usable.last, i);
         usable.first = std::min(usable.first, i);
-        usable.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        usable.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         usable.count += 1;
         break;
       case LIMINE_MEMMAP_RESERVED:
         reserved.last = std::max(reserved.last, i);
         reserved.first = std::min(reserved.first, i);
-        reserved.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        reserved.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         reserved.count += 1;
         break;
       case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
         acpiReclaimable.last = std::max(acpiReclaimable.last, i);
         acpiReclaimable.first = std::min(acpiReclaimable.first, i);
-        acpiReclaimable.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        acpiReclaimable.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         acpiReclaimable.count += 1;
         break;
       case LIMINE_MEMMAP_ACPI_NVS:
         acpiNvs.last = std::max(acpiNvs.last, i);
         acpiNvs.first = std::min(acpiNvs.first, i);
-        acpiNvs.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        acpiNvs.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         acpiNvs.count += 1;
         break;
       case LIMINE_MEMMAP_BAD_MEMORY:
         badMemory.last = std::max(badMemory.last, i);
         badMemory.first = std::min(badMemory.first, i);
-        badMemory.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        badMemory.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         badMemory.count += 1;
         break;
       case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
         bootloaderReclaimable.last = std::max(bootloaderReclaimable.last, i);
         bootloaderReclaimable.first = std::min(bootloaderReclaimable.first, i);
-        bootloaderReclaimable.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        bootloaderReclaimable.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         bootloaderReclaimable.count += 1;
         break;
       case LIMINE_MEMMAP_KERNEL_AND_MODULES:
         kernelAndModules.last = std::max(kernelAndModules.last, i);
         kernelAndModules.first = std::min(kernelAndModules.first, i);
-        kernelAndModules.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        kernelAndModules.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         kernelAndModules.count += 1;
         break;
       case LIMINE_MEMMAP_FRAMEBUFFER:
         framebuffer.last = std::max(framebuffer.last, i);
         framebuffer.first = std::min(framebuffer.first, i);
-        framebuffer.pages += Math::ceilDiv(entry->length, PAGE_SIZE);
+        framebuffer.pages += sl::math::ceilDiv(entry->length, PAGE_SIZE);
         framebuffer.count += 1;
         break;
     };

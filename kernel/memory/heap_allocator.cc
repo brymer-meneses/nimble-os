@@ -1,6 +1,7 @@
 #include <kernel/utils/assert.h>
-#include <lib/math.h>
 #include <kernel/arch/platform.h>
+#include <lib/syslib/bit.h>
+#include <lib/syslib/math.h>
 #include "heap_allocator.h"
 #include "pmm.h"
 
@@ -25,11 +26,11 @@ auto Header::getSize() const -> size_t {
 }
 
 auto Header::isUsed() const -> bool {
-  return Bit::get(data, 0);
+  return sl::bit::get(data, 0);
 }
 
 auto Header::setIsUsed(bool value) -> void {
-  Bit::setMut(data, 0, value);
+  sl::bit::setMut(data, 0, value);
 }
 
 
@@ -50,8 +51,7 @@ auto Block::installHeaders() -> void {
 }
 
 auto Block::getPayloadSize() const -> size_t {
-  const auto* header = (Header*) address;
-  return header->getSize();
+  return size;
 }
 
 auto Block::getBlockSize() const -> size_t {
@@ -95,13 +95,13 @@ auto HeapAllocator::initialize(Address start, size_t size, VMFlag flags) -> void
 }
 
 auto HeapAllocator::alloc(size_t size) -> void* {
-  size = Math::alignUp(size, 8);
+  size = sl::math::alignUp(size, 8);
 
-  Kernel::assert(isInitialized);
+  Kernel::assert(isInitialized, "Heap allocator not initialized");
+  Kernel::assert(size < PAGE_SIZE, "Cannot allocate bigger than page size!");
   Kernel::assert(current + sizeof(Header) + size < end, "Cannot allocate memory when range is full");
 
   auto* currentNode = freeListHead;
-
   while (currentNode != nullptr) {
     auto block = currentNode->getBlock();
 
@@ -111,6 +111,7 @@ auto HeapAllocator::alloc(size_t size) -> void* {
       // we are at the head of the freelist
       if (previousNode == nullptr) {
         freeListHead  = currentNode->next;
+        freeListCurrent = freeListHead;
       } else {
         previousNode->next = currentNode->next;
       }
@@ -122,9 +123,9 @@ auto HeapAllocator::alloc(size_t size) -> void* {
     currentNode = currentNode->next;
   }
 
-  if (current > current + pagesAllocated * PAGE_SIZE) {
+  if (current - start + size > pagesAllocated * PAGE_SIZE) {
     const auto page = (u64) PMM::allocatePage();
-    const auto address = Math::alignDown(current, PAGE_SIZE);
+    const auto address = sl::math::alignUp(current, PAGE_SIZE);
     VMM::map(address, page, flags);
 
     pagesAllocated += 1;
@@ -142,7 +143,7 @@ auto HeapAllocator::alloc(size_t size) -> void* {
 
 auto HeapAllocator::free(void* addr) -> void {
   // TODO: perform coalescing
-  Kernel::assert(isInitialized);
+  Kernel::assert(isInitialized, "Heap allocator not initialized");
   Kernel::assert((u64) addr > start and (u64) addr < end, "Tried to free invalid address");
 
   auto block = Block::fromAddress(addr);
@@ -158,9 +159,8 @@ auto HeapAllocator::free(void* addr) -> void {
   if (!freeListHead) {
     freeListHead = node;
     freeListCurrent = freeListHead;
-    return;
+  } else {
+    freeListCurrent->next = node;
+    freeListCurrent = node;
   }
-
-  freeListCurrent->next = node;
-  freeListCurrent = node;
 }

@@ -2,8 +2,8 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
 #include <kernel/utils/assert.h>
-#include <lib/math.h>
-#include <lib/bit.h>
+#include <lib/syslib/math.h>
+#include <lib/syslib/bit.h>
 
 #include "vmm.h"
 #include "pmm.h"
@@ -56,7 +56,7 @@ public:
   BumpAllocator(uintptr_t base) : mBase(base) {}
 
   auto allocate(size_t length, VMFlag flags) -> uintptr_t {
-    const auto pages = Math::ceilDiv(length, PAGE_SIZE);
+    const auto pages = sl::math::ceilDiv(length, PAGE_SIZE);
     const auto address = mBase + mCurrent * PAGE_SIZE;
 
     for (size_t i = 0; i < pages; i++) {
@@ -70,7 +70,7 @@ public:
   }
 
   auto free(size_t length, uintptr_t address) -> void {
-    const auto pages = Math::ceilDiv(length, PAGE_SIZE);
+    const auto pages = sl::math::ceilDiv(length, PAGE_SIZE);
     Kernel::assert(mCurrent - pages >= 0, "tried to free with length surpassing the amount of allocated memory");
 
     if (address != mBase + (mCurrent - pages) * PAGE_SIZE) {
