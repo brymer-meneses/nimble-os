@@ -1,5 +1,6 @@
 #pragma once
 #include <lib/types.h>
+#include <lib/syslib/linkedList.h>
 #include "vmm.h"
 
 class HeapAllocator {
@@ -8,14 +9,9 @@ public:
   using Address = u64;
 
   struct Header {
-    u64 data;
-
-    auto getSize() const -> size_t;
-    auto setSize(size_t size) -> void;
-
-    auto isUsed() const -> bool;
-    auto setIsUsed(bool value) -> void;
-  } __attribute__((packed));
+    bool isUsed;
+    u64 size;
+  };
 
   struct Block {
   private:
@@ -27,7 +23,6 @@ public:
     auto setIsUsed(bool value) -> void;
 
     auto getPayloadSize() const -> size_t;
-    auto getBlockSize() const -> size_t;
     
     auto getPayload() -> void*;
     auto getNext() -> Block*;
@@ -45,25 +40,20 @@ public:
     FreeListNode* prev = nullptr;
 
     auto getBlock() const -> Block;
-  } __attribute__((packed));
+  };
 
-
-  FreeListNode* freeListHead = nullptr;
-  FreeListNode* freeListCurrent = nullptr;
-  size_t pagesAllocated = 0;
-
-  Address start;
-  Address current;
-  Address end;
-  VMFlag flags;
-
-  bool isInitialized = false;
+  FreeListNode* mFreeListHead = nullptr;
+  FreeListNode* mFreeListEnd = nullptr;
+  VMObject* mVMObject = nullptr;
+  size_t mTotalAllocated = 0;
+  VMM* mVMM;
 
 public:
   HeapAllocator() = default;
 
-  auto initialize(Address start, size_t size, VMFlag flags) -> void;
+  auto initialize(VMM* vmm) -> void;
   auto alloc(size_t size) -> void*;
+  auto realloc(void* addr, size_t size) -> void*;
   auto free(void* addr) -> void;
 };
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/syslib/allocator.h>
+#include <kernel/utils/print.h>
 #include <iterator>
 #include <optional>
 

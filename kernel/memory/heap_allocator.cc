@@ -1,5 +1,6 @@
 #include <kernel/utils/assert.h>
 #include <kernel/arch/platform.h>
+#include <algorithm>
 #include <lib/syslib/bit.h>
 #include <lib/syslib/math.h>
 #include "heap_allocator.h"
@@ -13,26 +14,8 @@ using FreeListNode = HeapAllocator::FreeListNode;
 
 auto FreeListNode::getBlock() const -> Block {
   const auto* header = (Header*) ((u64) this - sizeof(Header));
-  return {(u64) header, header->getSize()};
+  return {(u64) header, header->size};
 }
-
-
-auto Header::setSize(size_t value) -> void {
-  data |= value & ~0b111;
-}
-
-auto Header::getSize() const -> size_t {
-  return data &~ 0b111;
-}
-
-auto Header::isUsed() const -> bool {
-  return sl::bit::get(data, 0);
-}
-
-auto Header::setIsUsed(bool value) -> void {
-  sl::bit::setMut(data, 0, value);
-}
-
 
 Block::Block(Address startAddress, size_t size) : address(startAddress), size(size) { }
 
@@ -43,32 +26,29 @@ auto Block::installHeaders() -> void {
   Kernel::assert(rightEndHeader != nullptr);
   Kernel::assert(leftEndHeader != nullptr);
 
-  rightEndHeader->setSize(size);
-  leftEndHeader->setSize(size);
-
-  Kernel::assert(rightEndHeader->getSize() == size);
-  Kernel::assert(leftEndHeader->getSize() == size);
+  leftEndHeader->isUsed = false;
+  leftEndHeader->size = size;
+  rightEndHeader->isUsed = false;
+  rightEndHeader->size = size;
 }
 
 auto Block::getPayloadSize() const -> size_t {
   return size;
 }
 
-auto Block::getBlockSize() const -> size_t {
-  return size + 2 * sizeof(Header);
-}
-
 auto Block::isUsed() const -> bool {
-  const auto* header = (Header*) address;
-  return header->isUsed();
+  const auto* header1 = (Header*) address;
+  auto* header2 = (Header*) (address + sizeof(Header) + size);
+  Kernel::assert(header1->isUsed == header2->isUsed);
+  return header1->isUsed && header2->isUsed;
 }
 
 auto Block::setIsUsed(bool value) -> void {
   auto* leftEndHeader = (Header*) address;
   auto* rightEndHeader = (Header*) (address + sizeof(Header) + size);
 
-  leftEndHeader->setIsUsed(value);
-  rightEndHeader->setIsUsed(value);
+  leftEndHeader->isUsed = value;
+  rightEndHeader->isUsed = value;
 }
 
 auto Block::getPayload() -> void* {
@@ -77,90 +57,84 @@ auto Block::getPayload() -> void* {
 
 auto Block::fromAddress(void* addr) -> Block {
   auto* header = (Header*) ((u64) addr - sizeof(Header));
-  return {(u64) header,  header->getSize()};
+  return {(u64) header,  header->size};
 }
 
-
-auto HeapAllocator::initialize(Address start, size_t size, VMFlag flags) -> void {
-  this->start = start;
-  this->current = start;
-  this->end = start + size;
-  this->flags = flags;
-  
-  this->isInitialized = true;
-  this->pagesAllocated = 1;
-
-  auto page = (u64) PMM::allocatePage();
-  VMM::map(start, page, flags);
+auto HeapAllocator::initialize(VMM* vmm) -> void {
+  mVMM = vmm;
+  mVMObject = vmm->alloc(1);
+  mTotalAllocated = 0;
 }
 
-auto HeapAllocator::alloc(size_t size) -> void* {
-  size = sl::math::alignUp(size, 8);
+auto HeapAllocator::alloc(size_t payloadSize) -> void* {
 
-  Kernel::assert(isInitialized, "Heap allocator not initialized");
-  Kernel::assert(size < PAGE_SIZE, "Cannot allocate bigger than page size!");
-  Kernel::assert(current + sizeof(Header) + size < end, "Cannot allocate memory when range is full");
+  payloadSize = std::max(payloadSize, sizeof(FreeListNode));
 
-  auto* currentNode = freeListHead;
-  while (currentNode != nullptr) {
-    auto block = currentNode->getBlock();
+  auto* node = mFreeListHead;
+  while (node != nullptr) {
+    auto block = node->getBlock();
 
-    if (block.getPayloadSize() == size and not block.isUsed()) {
-      auto* previousNode = currentNode->prev;
+    // this is an explicit free list so block must not be used
+    Kernel::assert(not block.isUsed());
 
-      // we are at the head of the freelist
-      if (previousNode == nullptr) {
-        freeListHead  = currentNode->next;
-        freeListCurrent = freeListHead;
-      } else {
-        previousNode->next = currentNode->next;
-      }
-
-      block.setIsUsed(true);
-      return block.getPayload();
+    if (block.getPayloadSize() != payloadSize) {
+      node = node->next;
+      continue;
     }
 
-    currentNode = currentNode->next;
+    // once we find a block with the appropriate size
+    // we could then remove it from the freelist
+    auto* prevNode = node->prev;
+    auto* nextNode = node->next;
+
+    if (prevNode == nullptr) {
+      mFreeListHead = node->next;
+      mFreeListEnd = node->next;
+    } else if (nextNode == nullptr) {
+      mFreeListEnd = prevNode;
+      mFreeListEnd->next = nullptr;
+    } else {
+      prevNode->next = nextNode;
+      nextNode->prev = prevNode;
+    }
+
+    block.setIsUsed(true);
+    return block.getPayload();
   }
 
-  if (current - start + size > pagesAllocated * PAGE_SIZE) {
-    const auto page = (u64) PMM::allocatePage();
-    const auto address = sl::math::alignUp(current, PAGE_SIZE);
-    VMM::map(address, page, flags);
+  const auto blockSize = payloadSize + 2 * sizeof(Header);
 
-    pagesAllocated += 1;
+  if (not mVMObject->canFit(mTotalAllocated + blockSize)) {
+    mVMObject = mVMM->alloc(sl::math::ceilDiv(blockSize, PAGE_SIZE));
+    mTotalAllocated = 0;
   }
 
-
-  // we can store this object to the stack since the constructor writes the
-  // data to the usable memory
-  auto block = Block(current, size);
+  auto block = Block(mVMObject->base + mTotalAllocated, payloadSize);
   block.installHeaders();
   block.setIsUsed(true);
-  current += block.getBlockSize();
+  mTotalAllocated += blockSize;
   return block.getPayload();
 }
 
 auto HeapAllocator::free(void* addr) -> void {
-  // TODO: perform coalescing
-  Kernel::assert(isInitialized, "Heap allocator not initialized");
-  Kernel::assert((u64) addr > start and (u64) addr < end, "Tried to free invalid address");
 
   auto block = Block::fromAddress(addr);
   Kernel::assert(block.isUsed(), "Tried to free an address that is not used");
+
   block.setIsUsed(false);
 
-  auto* node = (FreeListNode*) block.getPayload();
-  Kernel::assert(node != nullptr);
+  auto* freeListNode = (FreeListNode*) block.getPayload();
+  Kernel::assert(freeListNode != nullptr);
 
-  node->next = nullptr;
-  node->prev = freeListCurrent;
+  freeListNode->next = nullptr;
+  freeListNode->prev = nullptr;
 
-  if (!freeListHead) {
-    freeListHead = node;
-    freeListCurrent = freeListHead;
+  if (mFreeListHead == nullptr) {
+    mFreeListHead = freeListNode;
+    mFreeListEnd = freeListNode;
   } else {
-    freeListCurrent->next = node;
-    freeListCurrent = node;
+    freeListNode->prev = mFreeListEnd;
+    mFreeListEnd->next = freeListNode;
+    mFreeListEnd = freeListNode;
   }
 }

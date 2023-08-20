@@ -13,8 +13,7 @@ namespace Kernel {
   auto assert(bool condition, FormatArg arg, FormatArgs... args, const std::source_location loc = std::source_location::current()) -> void {
     if (condition) [[likely]] return;
 
-    Kernel::print("[ Assertion Failed ]: {}:{} {}:{} ", 
-                  loc.file_name(), loc.function_name(), loc.line(), loc.column());
+    Kernel::print("[ Assertion Failed ]: {}:{} {} ", loc.file_name(), loc.function_name(), loc.line());
     Kernel::println(arg, args...);
     Kernel::halt();
   }
@@ -22,8 +21,7 @@ namespace Kernel {
   inline auto assert(bool condition, const std::source_location loc = std::source_location::current()) -> void {
     if (condition) [[likely]] return;
 
-    Kernel::println("[ Assertion Failed ]: {} {} {} {}", loc.function_name(),
-                    loc.file_name(), loc.line(), loc.column());
+    Kernel::println("[ Assertion Failed ]: {} {} {}", loc.function_name(), loc.file_name(), loc.line());
     Kernel::halt();
   }
 #else

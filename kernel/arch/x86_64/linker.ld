@@ -69,7 +69,7 @@ SECTIONS
         *(.bss .bss.*)
     } :data
 
-    kernel_end = .;
+    kernel_address_end  = .;
 
     /* Discard .note.* and .eh_frame since they may cause issues on some hosts. */
     /DISCARD/ : {

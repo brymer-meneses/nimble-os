@@ -9,12 +9,12 @@ TEST(SystemLibrary, Vector) {
   auto& allocator = Kernel::getHeapAllocator();
   auto vector = sl::Vector<int, HeapAllocator>(allocator, 1);
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 1000; i++) {
     vector.push(i);
     assertEq(vector[i], i);
   }
 
-  vector.free();
+  // vector.free();
 }
 
 // TODO: Currently broken :<
@@ -22,7 +22,7 @@ TEST(SystemLibrary, Vector) {
 //   auto& allocator = Kernel::getHeapAllocator();
 //   auto vector = sl::Vector<int, HeapAllocator>(allocator, 1);
 //
-//   for (int i = 0; i < 10; i++) {
+//   for (int i = 0; i < 1000; i++) {
 //     vector.push(i);
 //   }
 //
@@ -31,6 +31,5 @@ TEST(SystemLibrary, Vector) {
 //     assertEq(elem, i++);
 //   }
 //
-//
-//   vector.free();
+//   // vector.free();
 // }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/types.h>
-#include <optional>
 
 struct VMFlag {
   bool userAccessible;
@@ -9,14 +8,32 @@ struct VMFlag {
   bool executable;
 };
 
-namespace VMM {
-  auto initialize() -> void;
-  auto subHHDM(const u64 virtualAddress) -> u64;
-  auto addHHDM(const u64 physicalAddress) -> u64;
+struct VMObject {
+  uintptr_t base;
+  size_t totalPages;
+  bool isUsed;
+  VMObject* next;
 
-  auto alloc(size_t length, VMFlag flags) -> void*;
-  auto free(uintptr_t address, size_t length) -> void;
+  auto canFit(size_t length) const -> bool;
+};
 
-  auto map(uintptr_t virtualAddr, uintptr_t physicalAddr, VMFlag flags) -> void;
-  auto unmap(uintptr_t virtualAddr) -> void;
-}
+class VMM {
+
+public:
+
+  VMObject* mRoot = nullptr;
+  VMObject* mCurrent = nullptr;
+  uintptr_t mBaseAddress;
+  uintptr_t mCurrentAddress;
+  VMFlag mFlags;
+
+public:
+  VMM() = default;
+
+  auto initialize(uintptr_t baseAddress, VMFlag flags) -> void;
+  auto alloc(size_t length) -> VMObject*;
+  auto free(uintptr_t virtualAddress) -> bool;
+
+  struct HeapAllocator;
+  friend HeapAllocator;
+};

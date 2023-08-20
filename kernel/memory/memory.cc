@@ -1,5 +1,6 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
+#include <kernel/utils/assert.h>
 #include <kernel/arch/platform.h>
 #include <lib/syslib/math.h>
 
@@ -13,14 +14,38 @@
 
 using Arch::PAGE_SIZE;
 
-static HeapAllocator kernelHeapAllocator;
-
 // this should be defined at `linker.ld`
-extern "C" uintptr_t kernel_end;
+extern uintptr_t kernel_address_end;
+
+static HeapAllocator kernelHeap;
+static VMM kernelVMM;
+
+static volatile auto hhdmRequest = limine_hhdm_request {
+  .id = LIMINE_HHDM_REQUEST,
+  .revision = 0,
+};
+
+static u64 hhdmOffset = 0;
+
+auto Memory::addHHDM(u64 physicalAddress) -> u64 {
+  Kernel::assert(hhdmOffset, "VMM not initialized");
+
+  return physicalAddress + hhdmOffset;
+}
+
+auto Memory::subHHDM(u64 virtualAddress) -> u64 {
+  Kernel::assert(hhdmOffset, "VMM not initialized");
+
+  return virtualAddress - hhdmOffset;
+}
 
 auto Memory::initialize() -> void {
   PMM::initialize();
-  VMM::initialize();
+
+  if (!hhdmRequest.response) {
+    Kernel::panic("HHDM Request is null");
+  }
+  hhdmOffset = hhdmRequest.response->offset;
 
   auto flags = VMFlag {
     .userAccessible = false,
@@ -28,19 +53,23 @@ auto Memory::initialize() -> void {
     .executable = true,
   };
 
-  const auto kernelHeapAddress = sl::math::alignUp((u64) &kernel_end, PAGE_SIZE) + PAGE_SIZE;
+  auto kernelHeapStart = sl::math::alignUp((u64) &kernel_address_end, PAGE_SIZE) + 2 * PAGE_SIZE;
 
-  kernelHeapAllocator.initialize(kernelHeapAddress, 30 * PAGE_SIZE, flags);
+  Kernel::println("Heap start {hex}", kernelHeapStart);
+
+  kernelVMM.initialize(kernelHeapStart, flags);
+  kernelHeap.initialize(&kernelVMM);
 }
 
+
 auto Kernel::malloc(size_t size) -> void* {
-  return kernelHeapAllocator.alloc(size);
+  return kernelHeap.alloc(size);
 }
 
 auto Kernel::free(void* address) -> void {
-  return kernelHeapAllocator.free(address);
+  return kernelHeap.free(address);
 }
 
 auto Kernel::getHeapAllocator() -> HeapAllocator& {
-  return kernelHeapAllocator;
+  return kernelHeap;
 }
