@@ -49,6 +49,9 @@ auto Block::setIsUsed(bool value) -> void {
 
   leftEndHeader->isUsed = value;
   rightEndHeader->isUsed = value;
+
+  Kernel::assert(leftEndHeader->isUsed == rightEndHeader->isUsed);
+  Kernel::assert(leftEndHeader->size == rightEndHeader->size);
 }
 
 auto Block::getPayload() -> void* {
@@ -56,8 +59,13 @@ auto Block::getPayload() -> void* {
 }
 
 auto Block::fromAddress(void* addr) -> Block {
-  auto* header = (Header*) ((u64) addr - sizeof(Header));
-  return {(u64) header,  header->size};
+  auto* leftEndHeader = (Header*) ((u64) addr - sizeof(Header));
+  auto* rightEndHeader = (Header*) ((u64) addr + leftEndHeader->size);
+
+  Kernel::assert(leftEndHeader->size == rightEndHeader->size);
+  Kernel::assert(leftEndHeader->isUsed == rightEndHeader->isUsed);
+
+  return {(u64) leftEndHeader,  leftEndHeader->size};
 }
 
 auto HeapAllocator::initialize(VMM* vmm) -> void {
@@ -68,6 +76,7 @@ auto HeapAllocator::initialize(VMM* vmm) -> void {
 
 auto HeapAllocator::alloc(size_t payloadSize) -> void* {
 
+  // ensure that we can fit a freeListNode in the payload
   payloadSize = std::max(payloadSize, sizeof(FreeListNode));
 
   auto* node = mFreeListHead;
@@ -77,7 +86,7 @@ auto HeapAllocator::alloc(size_t payloadSize) -> void* {
     // this is an explicit free list so block must not be used
     Kernel::assert(not block.isUsed());
 
-    if (block.getPayloadSize() != payloadSize) {
+    if (block.getPayloadSize() < payloadSize) {
       node = node->next;
       continue;
     }
@@ -88,8 +97,18 @@ auto HeapAllocator::alloc(size_t payloadSize) -> void* {
     auto* nextNode = node->next;
 
     if (prevNode == nullptr) {
-      mFreeListHead = node->next;
-      mFreeListEnd = node->next;
+      mFreeListHead = nextNode;
+
+      // This caused some really nasty bugs when I didn't take account for this
+      if (mFreeListHead != nullptr) {
+        // set the previous node to nullptr
+        mFreeListHead->prev = nullptr;
+      } else {
+        // if the next node is a nullptr
+        // then we can assume that this is the end of the list
+        mFreeListEnd = nextNode;
+      }
+
     } else if (nextNode == nullptr) {
       mFreeListEnd = prevNode;
       mFreeListEnd->next = nullptr;
@@ -105,7 +124,8 @@ auto HeapAllocator::alloc(size_t payloadSize) -> void* {
   const auto blockSize = payloadSize + 2 * sizeof(Header);
 
   if (not mVMObject->canFit(mTotalAllocated + blockSize)) {
-    mVMObject = mVMM->alloc(sl::math::ceilDiv(blockSize, PAGE_SIZE));
+    const auto pages = sl::math::ceilDiv(blockSize, PAGE_SIZE);
+    mVMObject = mVMM->alloc(pages);
     mTotalAllocated = 0;
   }
 

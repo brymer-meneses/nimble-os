@@ -18,6 +18,7 @@ making one from scratch.
     - [ ] Window Management
 - [x] Custom Testing Framework (inspired by GTest)
 - [ ] Serial Output
+- [ ] Robust Logger
 - [ ] Use APIC instead of PIC
 - [x] Keyboard Support
 - [x] Memory Management
@@ -26,7 +27,8 @@ making one from scratch.
     - [x] Heap Allocation (`malloc` and friends)
         - [ ] Implement Block Coalescing
 - [ ] Kernel STL
-    - [ ] Vector
+    - [x] Vector
+    - [x] Linked List
     - [ ] Spin Mutex
 - [ ] Scheduler
 - [ ] Virtual File System

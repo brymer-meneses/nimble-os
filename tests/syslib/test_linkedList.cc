@@ -21,7 +21,7 @@ TEST(SystemLibrary, LinkedList) {
   for (size_t i = 0; i < size; i++) {
     assertEq(list[i].value(), i);
   }
-  // list.free();
+  list.free();
 }
 
 TEST(SystemLibrary, LinkedListIterator) {
@@ -37,5 +37,5 @@ TEST(SystemLibrary, LinkedListIterator) {
     assertEq(elem, i++);
   }
 
-  // list.free();
+  list.free();
 }

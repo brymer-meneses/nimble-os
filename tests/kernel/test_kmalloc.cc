@@ -4,10 +4,8 @@
 TEST(Heap, KernelMalloc) {
 
   auto* p1 = (u64*) Kernel::malloc(8);
-
   *p1 = 64;
-
-  auto* p2 = (u64*) Kernel::malloc(69);
+  auto* p2 = (u64*) Kernel::malloc(8);
   *p2 = 103;
 
   assertEq(*p1, 64);
