@@ -17,8 +17,8 @@ making one from scratch.
     - [x] Print strings to the screen 
     - [ ] Window Management
 - [x] Custom Testing Framework (inspired by GTest)
-- [ ] Serial Output
-- [ ] Robust Logger
+- [x] Serial Output
+- [x] Robust Logger
 - [ ] Use APIC instead of PIC
 - [x] Keyboard Support
 - [x] Memory Management
