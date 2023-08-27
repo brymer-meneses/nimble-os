@@ -22,12 +22,10 @@ extern "C" auto kmain(void) -> void {
 
   LibCXX::callGlobalConstructors();
 
-  Framebuffer::clearScreen();
+  Framebuffer::initialize();
 
   PS2::Keyboard::initialize();
   Memory::initialize();
-
-  Log::info(Mod::VMM, "hi there");
 
 #ifdef ENABLE_TESTS
   Tester::main();

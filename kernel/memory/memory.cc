@@ -2,6 +2,7 @@
 #include <kernel/utils/print.h>
 #include <kernel/utils/assert.h>
 #include <kernel/arch/platform.h>
+#include <kernel/boot/boot.h>
 #include <lib/syslib/math.h>
 
 #include <limine.h>
@@ -20,10 +21,6 @@ extern uintptr_t kernel_address_end;
 static HeapAllocator kernelHeap;
 static VMM kernelVMM;
 
-static volatile auto hhdmRequest = limine_hhdm_request {
-  .id = LIMINE_HHDM_REQUEST,
-  .revision = 0,
-};
 
 static u64 hhdmOffset = 0;
 
@@ -42,10 +39,10 @@ auto Memory::subHHDM(u64 virtualAddress) -> u64 {
 auto Memory::initialize() -> void {
   PMM::initialize();
 
-  if (!hhdmRequest.response) {
+  if (!boot::hhdmRequest.response) {
     Kernel::panic("HHDM Request is null");
   }
-  hhdmOffset = hhdmRequest.response->offset;
+  hhdmOffset = boot::hhdmRequest.response->offset;
 
   auto flags = VMFlag {
     .userAccessible = false,

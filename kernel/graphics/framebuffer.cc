@@ -7,6 +7,7 @@
 
 #include <lib/thirdparty/limine.h>
 #include <assets/fonts/fonts.h>
+#include <kernel/boot/boot.h>
 
 #include "framebuffer.h"
 
@@ -86,25 +87,27 @@ struct Writer {
     }
   }
 
-  Writer() {
-
-    static volatile auto framebuffer_request = limine_framebuffer_request {
-      .id = LIMINE_FRAMEBUFFER_REQUEST,
-      .revision = 0
-    };
-
-    if (framebuffer_request.response == nullptr ||
-        framebuffer_request.response->framebuffer_count < 1)
-      Kernel::halt();
-
-    this->framebuffer = framebuffer_request.response->framebuffers[0];
+  auto initialize(limine_framebuffer* framebuffer) -> void {
+    this->framebuffer = framebuffer;
     this->base = (uintptr_t) framebuffer->address;
-
   }
+
+  Writer() = default;
 };
 
 static Writer gWriter;
 
+auto Framebuffer::initialize() -> void {
+
+  if (boot::framebufferRequest.response == nullptr ||
+      boot::framebufferRequest.response->framebuffer_count < 1) {
+   Kernel::halt();
+  }
+
+  gWriter.initialize(boot::framebufferRequest.response->framebuffers[0]);
+
+  Framebuffer::clearScreen();
+}
 
 auto Framebuffer::writeNewLine() -> void {
   gWriter.writeNewLine();

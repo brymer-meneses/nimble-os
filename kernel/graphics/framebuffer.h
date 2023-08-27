@@ -3,6 +3,8 @@
 #include <type_traits>
 
 namespace Framebuffer {
+
+  auto initialize() -> void;
   
   auto writeString(const char* string) -> void;
   auto writeCharacter(const char character) -> void;

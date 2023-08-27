@@ -8,19 +8,16 @@
 #include <kernel/utils/print.h>
 #include <kernel/utils/panic.h>
 #include <kernel/arch/platform.h>
+#include <kernel/boot/boot.h>
 
 #include <lib/syslib/math.h>
 
-static volatile auto memmapRequest = limine_memmap_request {
-    .id = LIMINE_MEMMAP_REQUEST,
-    .revision = 0,
-};
 
 using Arch::PAGE_SIZE;
 
 MemoryMap::MemoryMap() {
 
-  memmapResponse = memmapRequest.response;
+  memmapResponse = boot::memmapRequest.response;
 
   if (!memmapResponse) {
     Kernel::panic("memmapResponse is null");

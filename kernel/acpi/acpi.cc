@@ -4,11 +4,8 @@
 #include <kernel/acpi/acpi.h>
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
+#include <kernel/boot/boot.h>
 
-static volatile auto rsdpRequest = limine_rsdp_request {
-  .id = LIMINE_RSDP_REQUEST, 
-  .revision = 0
-};
 
 struct RSDP {
   char signature[8];
@@ -46,7 +43,7 @@ auto validateChecksum(u8* byteArray, size_t size) -> bool {
 
 auto ACPI::initialize() -> void { 
   
-  limine_rsdp_response* rsdpResponse = rsdpRequest.response;
+  limine_rsdp_response* rsdpResponse = boot::rsdpRequest.response;
 
   if (rsdpResponse == nullptr || rsdpResponse->address == nullptr) {
     Kernel::panic("ACPI not supported.");
