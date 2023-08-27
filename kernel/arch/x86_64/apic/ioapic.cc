@@ -29,13 +29,13 @@
 using ACPI::MADT::IoApic;
 
 static auto read(IoApic* ioApic, u32 reg) -> u32 {
-  IO::Mem::write<u32>(ioApic->addressBase, reg);
-  return IO::Mem::read<u32>(ioApic->addressBase + 0x10);
+  MMIO::write<u32>(ioApic->addressBase, reg);
+  return MMIO::read<u32>(ioApic->addressBase + 0x10);
 }
 
 static auto write(IoApic* ioApic, u32 reg, u32 value) -> void {
-  IO::Mem::write<u32>(ioApic->addressBase, reg);
-  IO::Mem::write<u32>(ioApic->addressBase + 0x10, value);
+  MMIO::write<u32>(ioApic->addressBase, reg);
+  MMIO::write<u32>(ioApic->addressBase + 0x10, value);
 }
 
 static auto getIoApicEntries(IoApic* ioApic) -> size_t {

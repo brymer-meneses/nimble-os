@@ -69,7 +69,7 @@ struct Writer {
 
   auto writePixel(const u32 posX, const u32 posY, const u32 color) -> void {
     u64 offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
-    IO::Mem::write<u32>(this->base + offset, color);
+    MMIO::write<u32>(this->base + offset, color);
   };
 
   auto writeString(const char* string) -> void {

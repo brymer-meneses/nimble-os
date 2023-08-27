@@ -14,11 +14,11 @@
 static uintptr_t localApicAddress = 0;
 
 static void lapicWrite(u32 reg, u32 value) {
-  IO::Mem::write<u32>(localApicAddress + reg, value);
+  MMIO::write<u32>(localApicAddress + reg, value);
 }
 
 static auto lapicRead(u32 reg) -> u32 {
-  return IO::Mem::read<u32>(localApicAddress + reg);
+  return MMIO::read<u32>(localApicAddress + reg);
 }
 
 void LAPIC::initialize() {

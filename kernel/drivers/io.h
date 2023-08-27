@@ -21,20 +21,18 @@ namespace IO {
   extern inline auto wait() -> void {
     outb(0x80, 0);
   }
+}
 
-  namespace Mem {
+namespace MMIO {
 
-    template<Integral T>
-    extern inline auto read(uintptr_t address) -> T {
-      return *(T volatile*) address;
-    }
-
-    template<Integral T>
-    extern inline auto write(uintptr_t address, T value) -> void {
-      *(T volatile*) address = value;
-    }
-
+  template<Integral T>
+  extern inline auto read(uintptr_t address) -> T {
+    return *(T volatile*) address;
   }
 
+  template<Integral T>
+  extern inline auto write(uintptr_t address, T value) -> void {
+    *(T volatile*) address = value;
+  }
 
 }
