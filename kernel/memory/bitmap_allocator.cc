@@ -112,45 +112,6 @@ auto BitmapAllocator::allocatePage() -> std::optional<uintptr_t> {
   return std::nullopt;
 }
 
-auto BitmapAllocator::allocateContiguousPages(size_t requiredPages) -> std::optional<uintptr_t> {
-
-  if (requiredPages > bitmap.maxPages) {
-    Kernel::panic("Can't allocate that much memory");
-  }
-
-  size_t numPages = 0;
-  size_t index = lastIndexUsed;
-  size_t baseIndex = index;
-
-  while (numPages < requiredPages) {
-
-    // TODO:
-    // this should really start from the beginning and try again
-    if (index > bitmap.maxPages) {
-      return std::nullopt;
-    }
-
-    if (getEntryFromBitmapIndex(baseIndex) != getEntryFromBitmapIndex(index)) {
-      baseIndex = index;
-      numPages = 0;
-    }
-
-    if (bitmap.isPageFree(index)) {
-      numPages += 1;
-    } else {
-      baseIndex = index;
-      numPages = 0;
-    }
-
-    index += 1;
-  }
-
-  lastIndexUsed = index;
-  auto address = getAddressFromBitmapIndex(baseIndex);
-  bitmap.setContiguousPagesAsUsed(baseIndex, index);
-  return address;
-}
-
 auto BitmapAllocator::freePage(uintptr_t address) -> void {
   const auto index = getBitmapIndexFromAddress(address);
 
@@ -159,20 +120,6 @@ auto BitmapAllocator::freePage(uintptr_t address) -> void {
   }
 
   bitmap.setFree(index.value());
-}
-
-auto BitmapAllocator::freeContiguousPages(uintptr_t address, size_t numPages) -> void {
-  const auto index = getBitmapIndexFromAddress(address);
-
-  Kernel::println("index {}", index.value());
-  if (!index) {
-    Kernel::panic("Failed to free page, since it is out of range");
-    return;
-  }
-
-  for (size_t i = index.value(); i < index.value() + numPages; i++) {
-    bitmap.setFree(i);
-  }
 }
 
 auto BitmapAllocator::getBitmapIndexFromEntry(limine_memmap_entry* entry) -> std::optional<size_t> {

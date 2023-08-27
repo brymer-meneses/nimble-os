@@ -8,19 +8,26 @@
 
 namespace Kernel {
 
+  struct PanicWriter : sl::FormatWriter {
+    auto writeChar(const char character) -> void final {
+      Framebuffer::setForeground(0xBF616A);
+      Framebuffer::writeCharacter(character);
+    }
+  };
+
+  namespace {
+    PanicWriter panicWriter{};
+  }
+
   [[noreturn]] inline auto panic(const char* string) -> void {
-    Framebuffer::setForeground(0xBF616A);
-    Framebuffer::writeString("[Kernel Panic]: ");
-    Framebuffer::writeString(string);
-    Framebuffer::writeCharacter('\n');
+    panicWriter.writeString(string);
     Kernel::halt();
   }
 
-  template<typename Arg, typename ...Args>
-  [[noreturn]] auto panic(const char* string, Arg arg, Args ...args) -> void {
-    char buffer[256];
-    sl::format(buffer, string, arg, args...);
-    panic(buffer);
+  template<typename ...Args>
+  [[noreturn]] auto panic(const char* string, Args... args) -> void {
+    sl::format(panicWriter, string, args...);
+    Kernel::halt();
   }
 
 }

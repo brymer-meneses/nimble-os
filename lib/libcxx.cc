@@ -1,5 +1,6 @@
 
 #include "types.h"
+#include <kernel/utils/panic.h>
 
 // these functions need to be defined since clang expects them
 extern "C" {
@@ -17,6 +18,11 @@ extern "C" {
   void* __dso_handle;
   auto __cxa_atexit(void (*)(void*), void*, void*) -> int {
     return 0;
+  }
+
+  auto __cxa_pure_virtual(void) -> void {
+    Kernel::halt();
+    return;
   }
 }
 

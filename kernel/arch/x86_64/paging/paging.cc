@@ -14,15 +14,15 @@ using Interrupt::InterruptFrame;
 
 static auto pageFaultHandler(InterruptFrame* frame) -> void {
   Kernel::println("Exception: Page Fault");
-  Kernel::println("Accessed Address: {hex}", CPU::readCR2());
-  Kernel::println("Error Code: {hex}", frame->error_code);
+  Kernel::println("Accessed Address: {#0x16}", CPU::readCR2());
+  Kernel::println("Error Code: {#0x16}", frame->error_code);
   Kernel::halt();
 }
 
 static auto genPageFaultHandler(InterruptFrame* frame) -> void {
   Kernel::println("Exception: General Page Fault");
-  Kernel::println("Accessed Address: {hex}", CPU::readCR2());
-  Kernel::println("Error Code: {hex}", frame->error_code);
+  Kernel::println("Accessed Address: {#0x16}", CPU::readCR2());
+  Kernel::println("Error Code: {#0x16}", frame->error_code);
   Kernel::halt();
 }
 

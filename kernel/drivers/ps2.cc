@@ -1,8 +1,7 @@
 #include <kernel/drivers/ps2.h>
-#include <kernel/drivers/apic/ioapic.h>
+#include <kernel/arch/x86_64/interrupt/pic.h>
 #include <kernel/drivers/io.h>
 #include <kernel/utils/print.h>
-#include <kernel/drivers/pic.h>
 
 #include <kernel/arch/platform.h>
 
@@ -60,15 +59,12 @@ auto keyboardHandler() -> void;
 auto parseScancode(u8 scancode) -> std::optional<Key>;
 
 auto PS2::Keyboard::initialize() -> void {
-
-  PIC::initialize();
-  PIC::clearMask(1);
-
+  x86_64::PIC::clearMask(1);
   Arch::Interrupt::setIrqHandler(33, keyboardHandler);
 }
 
 auto keyboardHandler() -> void {
-  PIC::sendEndOfInterrupt(33);
+  x86_64::PIC::sendEndOfInterrupt(33);
 
   u8 scancode = IO::inb(0x60);
 

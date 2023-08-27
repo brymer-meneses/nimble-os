@@ -26,6 +26,8 @@
 #define PIC2_OFFSET         0x28
 #define PIC_EOI             0x20
 
+using namespace x86_64;
+
 auto PIC::initialize() -> void {
   
   u8 a1, a2;

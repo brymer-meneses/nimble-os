@@ -2,9 +2,8 @@
 #include <kernel/acpi/madt.h>
 #include <kernel/utils/panic.h>
 #include <kernel/utils/assert.h>
-#include <kernel/drivers/pic.h>
-#include <kernel/drivers/apic/lapic.h>
-#include <kernel/drivers/apic/ioapic.h>
+// #include <kernel/drivers/pic.h>
+#include "lapic.h"
 
 void APIC::initialize() {
 
@@ -14,9 +13,9 @@ void APIC::initialize() {
 
   // initialize the PIC make sure it is remapped and not touch the exception
   // vectors
-  PIC::initialize();
+  // PIC::initialize();
   // mask all the interrupts since we're using the APIC
-  PIC::maskAll();
+  // PIC::maskAll();
 
   LAPIC::initialize();
 }

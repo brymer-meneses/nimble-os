@@ -66,4 +66,13 @@ auto std::strcmp(const char* s1, const char* s2) -> int {
   return (*(const unsigned char *)s1 - *(const unsigned char *)(s2 - 1));
 }
 
+constexpr auto std::strlen(const char* string) -> size_t {
+  size_t i = 0;
+  while (string[i] != '\0') {
+    i++;
+  }
+
+  return i;
+}
+
 }

@@ -33,9 +33,7 @@ class BitmapAllocator {
     auto initialize() -> void;
 
     [[nodiscard]] auto allocatePage() -> std::optional<uintptr_t>;
-    [[nodiscard]] auto allocateContiguousPages(size_t pages) -> std::optional<uintptr_t>;
     auto freePage(uintptr_t address) -> void;
-    auto freeContiguousPages(uintptr_t, size_t pages) -> void;
     auto getBitmapData(size_t index) -> u8;
 
     auto printInfo() -> void;

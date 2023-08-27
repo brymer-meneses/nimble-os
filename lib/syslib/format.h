@@ -1,165 +1,187 @@
 #pragma once
 #include <cstddef>
+#include <optional>
 #include <type_traits>
 #include <lib/libc.h>
-#include <lib/syslib/format.h>
+
 #include <lib/syslib/string.h>
+#include <lib/types.h>
+#include <lib/libc.h>
+
+namespace sl {
+  struct FormatWriter {
+    virtual auto writeChar(const char character) -> void = 0;
+    virtual auto writeString(const char* string) -> void {
+      for (size_t i = 0; string[i] != '\0'; i++) {
+        writeChar(string[i]);
+      }
+    }
+  };
+}
 
 namespace {
 
-enum class FormatSpecifier {
-  Hexadecimal,
-  Octal,
-  Binary,
-  Inferred,
-};
+  struct FormatSpec {
+    u8 base = 10;
+    u8 padding = 0;
+    char paddingChar = '0';
+    u8 precision = 0;
+    bool forcePlusSign = false;
+    bool addBasePrefix = false;
+  };
 
-template <typename T, FormatSpecifier specifier = FormatSpecifier::Inferred>
-constexpr auto appendValue(char *buffer, size_t bpos, T value) -> int {
+  template <typename T>
+  inline auto formatArg(sl::FormatWriter& writer, const FormatSpec& spec, T arg) -> void { 
+    constexpr auto isString = std::is_same_v<T, const char*> or std::is_same_v<T, char*>;
 
-  if constexpr (std::is_integral_v<T>) {
-    if constexpr (specifier == FormatSpecifier::Hexadecimal) {
-      char temp_buffer[256];
+    if constexpr (isString) {
+      writer.writeString(arg);
+    } else if constexpr (std::is_pointer_v<T> and not isString) {
 
-      int length = sl::string::copy(buffer, bpos, "0x", 0, 3);
-      bpos += length;
+      // pass to the number formatter
+      formatArg(writer, spec, (u64)(u64*) arg);
+    } else if constexpr (std::is_integral_v<T>) {
 
-      length += sl::string::fromIntegral(value, temp_buffer, 16);
-
-      sl::string::copy(buffer, bpos, temp_buffer, 0, length+1);
-
-      return length;
-    }
-
-    if constexpr (specifier == FormatSpecifier::Octal) {
-      char temp_buffer[256];
-
-      int length = sl::string::copy(buffer, bpos, "0o", 0, 3);
-      bpos += length;
-
-      length += sl::string::fromIntegral(value, temp_buffer, 8);
-
-      sl::string::copy(buffer, bpos, temp_buffer, 0, length+1);
-
-      return length;
-    }
-
-    if constexpr (specifier == FormatSpecifier::Binary) {
-      char temp_buffer[256];
-      int length = sl::string::copy(buffer, bpos, "0b", 0, 3);
-      bpos += length;
-
-      length += sl::string::fromIntegral(value, temp_buffer, 2);
-      sl::string::copy(buffer, bpos, temp_buffer, 0, length+1);
-
-      return length;
-    }
-  }
-
-
-  if constexpr (specifier == FormatSpecifier::Inferred) {
-    if constexpr (std::is_same_v<const char *, T>) {
-      int i = 0;
-      while (value[i] != '\0') {
-        buffer[bpos] = value[i];
-        bpos += 1;
-        i++;
-      }
-      return i;
-    }
-
-    if constexpr (std::is_integral_v<T>) {
-      char temp_buffer[256];
-      int length = sl::string::fromIntegral(value, temp_buffer, 10); // Use base 10 as default
-
-      // Copy the characters to the buffer
-      for (int i = 0; i < length; i++) {
-        buffer[bpos] = temp_buffer[i];
-        bpos += 1;
+      auto number = arg;
+      if (number == 0) {
+        writer.writeChar('0');
+        return;
       }
 
-      return length;
+      static constexpr auto digits = "0123456789ABCDEF";
+
+      // if (number < 0) {
+      //   number *= -1;
+      //   writer.writeChar('-');
+      // }
+
+      if (spec.addBasePrefix) {
+        switch (spec.base) {
+          case 2:
+            writer.writeString("0b");
+            break;
+          case 8:
+            writer.writeString("0o");
+            break;
+          case 16:
+            writer.writeString("0x");
+            break;
+        }
+      }
+
+      char buffer[64];
+
+      u8 width = 0;
+      while (number > 0) {
+        const auto digit = number % spec.base;
+        buffer[width] = digits[digit];
+        width += 1;
+        number /= spec.base;
+      }
+
+      for (u8 i = width; i < spec.padding; i++) {
+        writer.writeChar(spec.paddingChar);
+      }
+
+      for (u8 i = width; i > 0; i--) {
+        writer.writeChar(buffer[i-1]);
+      }
+
+    } 
+  }
+
+  inline auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos) -> void { 
+    while (string[strPos] != '\0') {
+      writer.writeChar(string[strPos]);
+      strPos += 1;
     }
   }
-  return 0;
-}
-
-constexpr void formatImpl(char *buffer, const char *string, size_t bpos,
-                           size_t spos) {
-
-  while (string[spos] != '\0') {
-    buffer[bpos] = string[spos];
-
-    bpos += 1;
-    spos += 1;
-  }
-
-  // terminate the buffer with a null character
-  buffer[bpos] = '\0';
-  return;
-}
-
-template <typename Arg, typename... Args>
-constexpr void formatImpl(char *buffer, const char *string, size_t bpos,
-                           size_t spos, Arg arg, Args... args) {
-
-  while (string[spos] != '\0') {
-
-    if (string[spos] != '{') {
-      buffer[bpos] = string[spos];
-      bpos += 1;
-      spos += 1;
-      continue;
+  
+  inline auto parseSpec(const char* string, size_t& strPos) -> std::optional<FormatSpec> {
+    static constexpr auto isDigit = [](char character) -> bool {
+      return '0' <= character and character <= '9';
     };
 
-    int specifier_length = 0;
-    int specifier_start = spos;
-    while (string[spos] != '}' && string[spos] != '\0') {
-      specifier_length++;
-      spos += 1;
+    // eat the '{'
+    strPos += 1;
+    FormatSpec spec;
+
+    // if we get '{}' return the default spec
+    if (string[strPos] == '}') {
+      strPos += 1;
+      return spec;
+    }
+    
+    if (string[strPos] == '#') {
+      spec.addBasePrefix = true;
     }
 
-    if (string[spos] == '\0') {
-      sl::string::copy(buffer, bpos, string, spos, specifier_length);
-      return;
+    const auto paddingChar = string[strPos];
+    if (paddingChar != '}' and paddingChar != '\0') {
+      spec.paddingChar = paddingChar;
     }
 
-    if (string[spos] == '}') {
-      char specifier[16];
-      sl::string::copy(specifier, 0, string, specifier_start+1, specifier_start + specifier_length);
-      spos += 1;
+    strPos += 1;
 
-      if (specifier_length == 1) {
-        bpos += appendValue<Arg, FormatSpecifier::Inferred>(buffer, bpos, arg);
-      } else if (std::strcmp(specifier, "hex") == 0) {
-        bpos += appendValue<Arg, FormatSpecifier::Hexadecimal>(buffer, bpos, arg);
-      } else if (std::strcmp(specifier, "oct") == 0) {
-        bpos += appendValue<Arg, FormatSpecifier::Octal>(buffer, bpos, arg);
-      } else if (std::strcmp(specifier, "bin") == 0) {
-        bpos += appendValue<Arg, FormatSpecifier::Binary>(buffer, bpos, arg);
+    const auto base = string[strPos];
+
+    if (base != '}' and base != '\0') {
+      strPos += 1;
+      switch (base) {
+        case 'b':
+          spec.base = 2;
+          break;
+        case 'o':
+          spec.base = 8;
+          break;
+        case 'x':
+          spec.base = 16;
+          break;
       }
     }
 
-    formatImpl(buffer, string, bpos, spos, args...);
-    return;
+    if (string[strPos] == '}') {
+      strPos += 1;
+      return spec;
+    }
+
+    while (isDigit(string[strPos])) {
+      const auto digit = string[strPos] - '0';
+      spec.padding = spec.padding * 10 + digit;
+      strPos += 1;
+    }
+
+    if (string[strPos] == '}') {
+      strPos += 1;
+      return spec;
+    }
+
+    return spec;
   }
 
-  // terminate the buffer with a null character
-  buffer[bpos] = '\0';
-  return;
-}
+  template <typename Arg, typename ...Args>
+  auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos, Arg arg, Args... args) -> void {
+    while (string[strPos] != '\0') {
+      if (string[strPos] == '{') {
+        auto spec = parseSpec(string, strPos);
 
+        if (!spec) { continue; }
+
+        formatArg(writer, spec.value(), arg);
+        formatImpl(writer, string, strPos, args...);
+        return;
+      }
+
+      writer.writeChar(string[strPos]);
+      strPos += 1;
+    }
+  }
 }
 
 namespace sl {
-
-struct FormatArgument {
-  virtual auto toString() const -> const char* = 0;
-};
-
-template <typename... Args>
-constexpr auto format(char *buffer, const char *string, Args... args) -> void {
-  formatImpl(buffer, string, 0, 0, args...);
-}
+  template <typename ...Args>
+  auto format(FormatWriter& writer, const char* string, Args... args) -> void {
+    formatImpl(writer, string, 0, args...);
+  }
 
 }

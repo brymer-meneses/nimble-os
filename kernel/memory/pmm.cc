@@ -26,19 +26,8 @@ auto PMM::allocatePage() -> void* {
   return reinterpret_cast<void*>(page.value());
 }
 
-auto PMM::allocateContiguousPages(size_t num) -> void* {
-  auto pages = allocator.allocateContiguousPages(num);
-  if (!pages) {
-    Kernel::panic("PMM: cannot allocate page");
-  }
-  return reinterpret_cast<void*>(pages.value());
-}
-
 auto PMM::freePage(uintptr_t address) -> void {
   allocator.freePage(address);
 }
 
-auto PMM::freeContiguousPages(uintptr_t address, size_t num) -> void {
-  allocator.freeContiguousPages(address, num);
-}
 

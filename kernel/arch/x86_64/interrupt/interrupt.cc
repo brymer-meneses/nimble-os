@@ -51,36 +51,31 @@ static std::array<IrqHandler, 256 - 32> irqHandlers;
 
 static auto dumpInterruptFrame(const InterruptFrame* context) -> void {
   u16 interruptNumber = context->vector_number;
-  Framebuffer::withForeground(
-    0xD08770,
-    [&]() {
-      Kernel::println("----------------------------");
-      Kernel::println("Received Exception {hex}", interruptNumber);
-      Kernel::println("Description: {}", exceptionMessages[interruptNumber]);
-      Kernel::println("Error Code : {hex}", context->error_code);
-      Kernel::println("----------------------------");
-      Kernel::println("rax : {hex}", context->rax);
-      Kernel::println("rbx : {hex}", context->rbx);
-      Kernel::println("rcx : {hex}", context->rcx);
-      Kernel::println("rdx : {hex}", context->rdx);
-      Kernel::println("rsi : {hex}", context->rsi);
-      Kernel::println("rdi : {hex}", context->rdi);
-      Kernel::println("r8 : {hex}", context->r8);
-      Kernel::println("r9 : {hex}", context->r9);
-      Kernel::println("r10 : {hex}", context->r10);
-      Kernel::println("r11 : {hex}", context->r11);
-      Kernel::println("r12 : {hex}", context->r12);
-      Kernel::println("r13 : {hex}", context->r13);
-      Kernel::println("r14 : {hex}", context->r14);
-      Kernel::println("r15 : {hex}", context->r15);
-      Kernel::println("rip : {hex}", context->iret_rip);
-      Kernel::println("cs : {hex}", context->iret_cs);
-      Kernel::println("flags : {hex}", context->iret_flags);
-      Kernel::println("rsp: {hex}", context->iret_rsp);
-      Kernel::println("ss : {hex}", context->iret_ss);
-      Kernel::println("----------------------------");
-    }
-  );
+  Kernel::println("----------------------------");
+  Kernel::println("Received Exception {#0x1}", interruptNumber);
+  Kernel::println("Description: {}", exceptionMessages[interruptNumber]);
+  Kernel::println("Error Code : {#0x16}", context->error_code);
+  Kernel::println("----------------------------");
+  Kernel::println("rax : {#0x16}", context->rax);
+  Kernel::println("rbx : {#0x16}", context->rbx);
+  Kernel::println("rcx : {#0x16}", context->rcx);
+  Kernel::println("rdx : {#0x16}", context->rdx);
+  Kernel::println("rsi : {#0x16}", context->rsi);
+  Kernel::println("rdi : {#0x16}", context->rdi);
+  Kernel::println("r8 : {#0x16}", context->r8);
+  Kernel::println("r9 : {#0x16}", context->r9);
+  Kernel::println("r10 : {#0x16}", context->r10);
+  Kernel::println("r11 : {#0x16}", context->r11);
+  Kernel::println("r12 : {#0x16}", context->r12);
+  Kernel::println("r13 : {#0x16}", context->r13);
+  Kernel::println("r14 : {#0x16}", context->r14);
+  Kernel::println("r15 : {#0x16}", context->r15);
+  Kernel::println("rip : {#0x16}", context->iret_rip);
+  Kernel::println("cs : {#0x16}", context->iret_cs);
+  Kernel::println("flags : {#0x16}", context->iret_flags);
+  Kernel::println("rsp: {#0x16}", context->iret_rsp);
+  Kernel::println("ss : {#0x16}", context->iret_ss);
+  Kernel::println("----------------------------");
 
   Kernel::halt();
 }

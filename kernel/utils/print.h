@@ -2,28 +2,38 @@
 #include <kernel/graphics/framebuffer.h>
 #include <lib/syslib/format.h>
 
+namespace {
+  struct PrintWriter : sl::FormatWriter {
+    auto writeChar(const char character) -> void final {
+      Framebuffer::writeCharacter(character);
+    }
+  };
+
+}
+
 namespace Kernel {
-  template<typename Arg, typename ...Args>
-  auto print(const char* string, Arg arg, Args ...args) -> void {
-    char buffer[256];
-    sl::format(buffer, string, arg, args...);
-    Framebuffer::writeString(buffer);
+
+  template<typename ...Args>
+  auto print(const char* string, Args ...args) -> void {
+    PrintWriter writer{};
+    if constexpr (sizeof...(args) == 0) {
+      writer.writeString(string);
+    } else {
+      sl::format(writer, string, args...);
+    }
   }
 
-  template<typename Arg, typename ...Args>
-  auto println(const char* string, Arg arg, Args ...args) -> void {
-    char buffer[256];
-    sl::format(buffer, string, arg, args...);
-    Framebuffer::writeString(buffer);
-    Framebuffer::writeCharacter('\n');
+  template<typename ...Args>
+  auto println(const char* string, Args ...args) -> void {
+    PrintWriter writer{};
+    if constexpr (sizeof...(args) == 0) {
+      writer.writeString(string);
+      writer.writeChar('\n');
+    } else {
+      sl::format(writer, string, args...);
+      writer.writeChar('\n');
+    }
+
   }
 
-  inline auto print(const char* string) -> void {
-    Framebuffer::writeString(string);
-  }
-
-  inline auto println(const char* string) -> void {
-    Framebuffer::writeString(string);
-    Framebuffer::writeCharacter('\n');
-  }
 }

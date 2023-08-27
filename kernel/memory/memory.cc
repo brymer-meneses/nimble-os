@@ -55,10 +55,10 @@ auto Memory::initialize() -> void {
 
   auto kernelHeapStart = sl::math::alignUp((u64) &kernel_address_end, PAGE_SIZE) + 2 * PAGE_SIZE;
 
-  Kernel::println("Heap start {hex}", kernelHeapStart);
 
   kernelVMM.initialize(kernelHeapStart, flags);
   kernelHeap.initialize(&kernelVMM);
+
 }
 
 

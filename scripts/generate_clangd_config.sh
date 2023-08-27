@@ -39,6 +39,7 @@ Diagnostics:
     Remove:
       - misc-unused-alias-decls
       - modernize-use-nodiscard
+      - modernize-avoid-c-arrays
 
 CompileFlags:
   Add:

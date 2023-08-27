@@ -2,7 +2,7 @@
 
 #include <lib/types.h>
 
-namespace PIC {
+namespace x86_64::PIC {
   
   auto initialize() -> void;
   auto maskAll() -> void;
