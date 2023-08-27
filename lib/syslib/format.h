@@ -114,6 +114,7 @@ namespace {
     
     if (string[strPos] == '#') {
       spec.addBasePrefix = true;
+      strPos += 1;
     }
 
     const auto paddingChar = string[strPos];
@@ -122,7 +123,6 @@ namespace {
     }
 
     strPos += 1;
-
     const auto base = string[strPos];
 
     if (base != '}' and base != '\0') {
@@ -138,6 +138,8 @@ namespace {
           spec.base = 16;
           break;
       }
+    } else {
+      return {};
     }
 
     if (string[strPos] == '}') {
