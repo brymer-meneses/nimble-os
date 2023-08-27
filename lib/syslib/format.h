@@ -156,16 +156,27 @@ namespace {
       return spec;
     }
 
-    return spec;
+    return {};
   }
 
   template <typename Arg, typename ...Args>
   auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos, Arg arg, Args... args) -> void {
     while (string[strPos] != '\0') {
       if (string[strPos] == '{') {
+        
+        auto originalStrPos = strPos;
         auto spec = parseSpec(string, strPos);
 
-        if (!spec) { continue; }
+        // we got an invalid spec
+        if (not spec) {
+            // write the '{' and move strPos to the
+            // position after this character so that
+            // we don't get caught to a never-ending loop 
+            // because of the to the outer if condition
+            writer.writeChar('{');
+            strPos = originalStrPos + 1;
+            continue; 
+        }
 
         formatArg(writer, spec.value(), arg);
         formatImpl(writer, string, strPos, args...);
