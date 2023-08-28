@@ -8,6 +8,26 @@ namespace Serial {
     SerialWriter() {};
   };
 
+  struct Colored {
+    const char* mData;
+
+    enum Color {
+      Black,
+      Red,
+      Green,
+      Yellow,
+      Blue,
+      Magenta,
+      Cyan,
+      White
+    };
+
+    Color mColor;
+    Colored(const char* data, Color color) : mData(data), mColor(color) {}
+
+    auto format(sl::FormatWriter& writer) -> void;
+};
+
   auto initialize() -> void;
   auto getWriter() -> SerialWriter&;
 

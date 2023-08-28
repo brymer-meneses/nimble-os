@@ -41,3 +41,41 @@ auto Serial::initialize() -> void {
 auto Serial::getWriter() -> SerialWriter& {
   return writer;
 }
+
+using Colored = Serial::Colored;
+
+auto Colored::format(sl::FormatWriter& writer) -> void {
+  const char* colorCode = "\x1b[0m";  // Default: Reset color at the end
+
+  switch (mColor) {
+    case Color::Black:
+      colorCode = "\x1b[30m";
+      break;
+    case Color::Red:
+      colorCode = "\x1b[31m";
+      break;
+    case Color::Green:
+      colorCode = "\x1b[32m";
+      break;
+    case Color::Yellow:
+      colorCode = "\x1b[33m";
+      break;
+    case Color::Blue:
+      colorCode = "\x1b[34m";
+      break;
+    case Color::Magenta:
+      colorCode = "\x1b[35m";
+      break;
+    case Color::Cyan:
+      colorCode = "\x1b[36m";
+      break;
+    case Color::White:
+      colorCode = "\x1b[37m";
+      break;
+  }
+
+  writer.writeString(colorCode);
+  writer.writeString(mData);
+  writer.writeString("\x1b[0m");  // Reset color at the end
+}
+
