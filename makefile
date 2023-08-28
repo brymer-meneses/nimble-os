@@ -22,6 +22,8 @@ CXXFLAGS := \
 	--target=x86_64-unknown-elf \
 	-std=c++20 \
 	-Wall \
+	-Wfatal-errors \
+	-Wshadow \
 	-Wextra \
 	-Wpedantic \
 	-pedantic-errors \
@@ -39,6 +41,7 @@ CXXFLAGS := \
 	-mno-sse \
 	-mno-sse2 \
 	-mno-red-zone \
+	-MMD \
 	-I lib/thirdparty/libc++/include \
 	-I lib/thirdparty/ \
 	-I lib/ \
@@ -105,6 +108,10 @@ OBJECTS := $(filter-out $(foreach arch,$(filter-out $(ARCH),$(SUPPORTED_ARCHS)),
 ifneq ($(MODE), test)
   OBJECTS := $(filter-out $(BUILD_DIR)/tests/%.cc.o, $(OBJECTS))
 endif
+
+HEADER_DEPS := $(OBJECTS:%.o=%.d)
+
+-include $(HEADER_DEPS)
 
 .PHONY: clean .clangd build
 
