@@ -15,17 +15,15 @@ namespace Kernel {
     }
   };
 
-  namespace {
-    PanicWriter panicWriter{};
-  }
-
   [[noreturn]] inline auto panic(const char* string) -> void {
+    PanicWriter panicWriter{};
     panicWriter.writeString(string);
     Kernel::halt();
   }
 
   template<typename ...Args>
   [[noreturn]] auto panic(const char* string, Args... args) -> void {
+    PanicWriter panicWriter{};
     sl::format(panicWriter, string, args...);
     Kernel::halt();
   }

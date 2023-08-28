@@ -16,11 +16,10 @@
 #include <kernel/utils/logger.h>
 
 extern "C" auto kmain(void) -> void {
+  LibCXX::callGlobalConstructors();
 
   Arch::initialize();
   serial::initialize();
-
-  LibCXX::callGlobalConstructors();
 
   Framebuffer::initialize();
 

@@ -20,8 +20,8 @@ struct Writer {
   u32 background = Color::encodeHEX(0x11111B);
   u32 foreground = Color::encodeHEX(0xD9E0EE);
 
-  limine_framebuffer* volatile framebuffer;
-  uintptr_t base;
+  limine_framebuffer* framebuffer = nullptr;
+  uintptr_t base = 0;
 
   auto writeCharacter(const char character) -> void {
 
@@ -92,21 +92,21 @@ struct Writer {
     this->base = (uintptr_t) framebuffer->address;
   }
 
-  Writer() = default;
+  // Using `Writer() = default` causes a page-fault somehow on 16.0.6 using -O3
+  // weird
+  Writer() {};
 };
 
 static Writer gWriter;
 
 auto Framebuffer::initialize() -> void {
-
-  if (boot::framebufferRequest.response == nullptr ||
-      boot::framebufferRequest.response->framebuffer_count < 1) {
-   Kernel::halt();
+  auto response = boot::framebufferRequest.response;
+  if (response == nullptr || response->framebuffer_count == 0) {
+    Kernel::halt();
   }
 
-  gWriter.initialize(boot::framebufferRequest.response->framebuffers[0]);
-
-  Framebuffer::clearScreen();
+  gWriter.initialize(response->framebuffers[0]);
+  gWriter.clearScreen();
 }
 
 auto Framebuffer::writeNewLine() -> void {
