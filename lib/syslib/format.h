@@ -17,6 +17,12 @@ namespace sl {
       }
     }
   };
+
+  template <typename T>
+  concept CustomFormatArg = requires(T a, FormatWriter& writer) {
+    { a.format(writer) } -> std::same_as<void>;
+  };
+
 }
 
 namespace {
@@ -31,11 +37,36 @@ namespace {
   };
 
   template <typename T>
+  constexpr auto isFormatArgumentSupported() -> bool {
+    constexpr auto isString = std::is_same_v<T, const char*> or std::is_same_v<T, char*>;
+    
+    if (isString) {
+      return true;
+    }
+
+    if (std::is_integral_v<T>) {
+      return true;
+    }
+
+    if (std::is_pointer_v<T> and not isString) {
+      return true;
+    }
+
+    if (sl::CustomFormatArg<T>) {
+      return true;
+    }
+
+    return false;
+  }
+
+  template <typename T>
   inline auto formatArg(sl::FormatWriter& writer, const FormatSpec& spec, T arg) -> void { 
     constexpr auto isString = std::is_same_v<T, const char*> or std::is_same_v<T, char*>;
 
     if constexpr (isString) {
       writer.writeString(arg);
+    } else if constexpr (sl::CustomFormatArg<T>) {
+      arg.format(writer);
     } else if constexpr (std::is_pointer_v<T> and not isString) {
 
       // pass to the number formatter
@@ -87,7 +118,9 @@ namespace {
         writer.writeChar(buffer[i-1]);
       }
 
-    } 
+    } else {
+      static_assert(isFormatArgumentSupported<T>(), "Formatter does not know how to format the argument");
+    }
   }
 
   inline auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos) -> void { 

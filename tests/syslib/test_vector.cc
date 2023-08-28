@@ -11,7 +11,7 @@ TEST(SystemLibrary, Vector) {
 
   for (int i = 0; i < 1000; i++) {
     vector.push(i);
-    assertEq(vector[i], i);
+    assertEq(vector[i].value(), i);
   }
 
   vector.free();
@@ -23,7 +23,7 @@ TEST(SystemLibrary, VectorIterator) {
 
   for (int i = 0; i < 1000; i++) {
     vector.push(i);
-    assertEq(vector[i], i);
+    assertEq(vector[i].value(), i);
   }
 
   int i = 0;

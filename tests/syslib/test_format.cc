@@ -57,3 +57,22 @@ TEST(Format, Width) {
   sl::format(writer, "{#0x16}", 0xffff);
   assertEq(writer.buffer, "0x000000000000FFFF");
 }
+
+TEST(Format, CustomFormatArg) {
+
+  struct Dashed {
+    const char* mData;
+    Dashed(const char* data) : mData(data) {}; 
+    
+    auto format(sl::FormatWriter& writer) -> void {
+      writer.writeString("--");
+      writer.writeString(mData);
+      writer.writeString("--");
+    }
+  };
+
+  writer.reset();
+
+  sl::format(writer, "{}", Dashed("THIS IS A TEST"));
+  assertEq(writer.buffer, "--THIS IS A TEST--");
+}
