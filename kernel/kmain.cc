@@ -16,7 +16,7 @@
 #endif
 
 extern "C" auto kmain(void) -> void {
-  serial::initialize();
+  Serial::initialize();
   LibCXX::callGlobalConstructors();
 
   Arch::initialize();

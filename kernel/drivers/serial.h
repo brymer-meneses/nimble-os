@@ -1,7 +1,7 @@
 #pragma once
 #include <lib/syslib/format.h>
 
-namespace serial {
+namespace Serial {
 
   struct SerialWriter : public sl::FormatWriter {
     auto writeChar(const char character) -> void final;

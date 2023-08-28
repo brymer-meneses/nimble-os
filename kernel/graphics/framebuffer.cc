@@ -101,7 +101,7 @@ struct Writer {
 static Writer gWriter;
 
 auto Framebuffer::initialize() -> void {
-  auto response = boot::framebufferRequest.response;
+  auto response = Boot::framebufferRequest.response;
   if (response == nullptr || response->framebuffer_count == 0) {
     Kernel::halt();
   }

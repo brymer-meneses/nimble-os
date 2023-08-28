@@ -18,7 +18,7 @@ namespace Log {
   namespace internal {
     template <LogLevel level, typename ...Args>
     auto logImpl(const char* string, Args... args) -> void {
-      auto writer = serial::getWriter();
+      auto writer = Serial::getWriter();
       switch (level) {
         case LogLevel::Debug:
           writer.writeString("[ DEBUG ]: ");

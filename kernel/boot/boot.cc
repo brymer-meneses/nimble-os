@@ -1,6 +1,6 @@
 #include <limine.h>
 
-namespace boot {
+namespace Boot {
 
   volatile auto hhdmRequest = limine_hhdm_request {
     .id = LIMINE_HHDM_REQUEST,

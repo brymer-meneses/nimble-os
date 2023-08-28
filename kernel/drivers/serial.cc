@@ -8,7 +8,7 @@
 
 static constexpr u16 PORT = 0x3f8;
 
-using SerialWriter = serial::SerialWriter;
+using SerialWriter = Serial::SerialWriter;
 
 auto SerialWriter::writeChar(const char character) -> void {
   if (character == '\0') {
@@ -19,7 +19,7 @@ auto SerialWriter::writeChar(const char character) -> void {
 
 static SerialWriter writer;
 
-auto serial::initialize() -> void {
+auto Serial::initialize() -> void {
   IO::outb(PORT + 1, 0x00);
   IO::outb(PORT + 3, 0x80);
   IO::outb(PORT + 0, 0x03);
@@ -38,6 +38,6 @@ auto serial::initialize() -> void {
   Log::info("Initialized serial printing");
 }
 
-auto serial::getWriter() -> SerialWriter& {
+auto Serial::getWriter() -> SerialWriter& {
   return writer;
 }

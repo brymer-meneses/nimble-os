@@ -40,10 +40,10 @@ auto Memory::subHHDM(u64 virtualAddress) -> u64 {
 auto Memory::initialize() -> void {
   PMM::initialize();
 
-  if (!boot::hhdmRequest.response) {
+  if (!Boot::hhdmRequest.response) {
     Kernel::panic("HHDM Request is null");
   }
-  hhdmOffset = boot::hhdmRequest.response->offset;
+  hhdmOffset = Boot::hhdmRequest.response->offset;
 
   auto flags = VMFlag {
     .userAccessible = false,

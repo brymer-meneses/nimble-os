@@ -17,7 +17,7 @@ using Arch::PAGE_SIZE;
 
 MemoryMap::MemoryMap() {
 
-  memmapResponse = boot::memmapRequest.response;
+  memmapResponse = Boot::memmapRequest.response;
 
   if (!memmapResponse) {
     Kernel::panic("memmapResponse is null");

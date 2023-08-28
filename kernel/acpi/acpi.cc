@@ -43,7 +43,7 @@ auto validateChecksum(u8* byteArray, size_t size) -> bool {
 
 auto ACPI::initialize() -> void { 
   
-  limine_rsdp_response* rsdpResponse = boot::rsdpRequest.response;
+  limine_rsdp_response* rsdpResponse = Boot::rsdpRequest.response;
 
   if (rsdpResponse == nullptr || rsdpResponse->address == nullptr) {
     Kernel::panic("ACPI not supported.");
