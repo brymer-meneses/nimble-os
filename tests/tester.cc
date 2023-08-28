@@ -1,4 +1,6 @@
-#include <kernel/utils/print.h>
+#include <kernel/drivers/serial.h>
+#include <kernel/drivers/io.h>
+
 #include <assets/themes/themes.h>
 
 #include "tester.h"
@@ -8,37 +10,41 @@ static constexpr u16 TEST_MAX = 100;
 static Tester::Internal::TestFunction g_tests[TEST_MAX];
 
 static u16 g_testCount = 0;
-
 static u16 g_numTestPass = 0;
-
 static bool g_didCurrentTestPass = true;
 
+static constexpr u8 QEMU_PORT = 0xf4;
+static constexpr u8 QEMU_EXIT_SUCCESS = 0x10;
+static constexpr u8 QEMU_EXIT_FAILURE = 0x11;
+
 auto Tester::main() -> void{
-  Kernel::println("--------------------------");
+  Serial::println("--------------------------");
   // TODO: some number casting is going haywire here
-  Kernel::println(">> Running {} tests...", g_testCount);
+  Serial::println(">> Running {} tests...", g_testCount);
   
   for (int i=0; i<g_testCount; i++) {
-    Kernel::print("{} ...  ", g_tests[i].testName);
+    Serial::print("{} ...  ", g_tests[i].testName);
 
     g_tests[i].function();
 
     if (g_didCurrentTestPass) {
-      Framebuffer::withForeground(0xA3BE8C, []() {
-        Kernel::println("[ok]");
-      });
+      Serial::println("[ok]");
       g_numTestPass += 1;
     } else {
-      Framebuffer::withForeground(0xBF616A, []() {
-        Kernel::println("[error]");
-      });
+      Serial::println("[error]");
     }
   }
 
 
-  Kernel::println(">> Summary");
-  Kernel::println("Test Passed: {}/{}", g_numTestPass, g_testCount);
-  Kernel::println("--------------------------");
+  Serial::println(">> Summary");
+  Serial::println("Test Passed: {}/{}", g_numTestPass, g_testCount);
+  Serial::println("--------------------------");
+
+  if (g_testCount == g_numTestPass) {
+    IO::outb(QEMU_PORT, QEMU_EXIT_SUCCESS);
+  } else {
+    IO::outb(QEMU_PORT, QEMU_EXIT_FAILURE);
+  }
 }
 
 auto Tester::Internal::registerTest(Tester::Internal::TestFunction test) -> void {

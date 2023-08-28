@@ -63,6 +63,7 @@ LDFLAGS := \
 
 QEMUFLAGS := \
 	-m 512M \
+	-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 	-smp cpus=2 \
 	-serial stdio 
 
@@ -86,6 +87,7 @@ else ifeq ($(MODE), test)
 	MACROS := -DDEBUG -DENABLE_TESTS
 	QEMUFLAGS += \
 		-D qemu-log.txt \
+		-display none \
 		-d int -M smm=off
 else ifeq ($(MODE), release)
 	BUILD_DIR := build/release
@@ -130,7 +132,7 @@ debug-address:
 	echo $(address) | x86_64-elf-addr2line -e $(BUILD_DIR)/kernel.elf
 
 run: build
-	$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso
+	@$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso || true
 
 build: .clangd dependencies $(OBJECTS)
 	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf

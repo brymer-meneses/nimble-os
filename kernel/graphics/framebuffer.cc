@@ -21,7 +21,7 @@ struct Writer {
   u32 background = Color::encodeHEX(0x11111B);
   u32 foreground = Color::encodeHEX(0xD9E0EE);
 
-  limine_framebuffer* volatile framebuffer = nullptr;
+  limine_framebuffer* framebuffer = nullptr;
   uintptr_t volatile base = 0;
 
   auto writeCharacter(const char character) -> void {
@@ -69,7 +69,7 @@ struct Writer {
   };
 
   auto writePixel(const u32 posX, const u32 posY, const u32 color) -> void {
-    u64 offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
+    u32 offset = posY*framebuffer->pitch + posX*framebuffer->bpp/8;
     MMIO::write<u32>(this->base + offset, color);
   };
 
@@ -95,7 +95,7 @@ struct Writer {
 
   // Using `Writer() = default` causes a page-fault somehow on 16.0.6 using -O3
   // weird
-  Writer() {}
+  Writer() {};
 };
 
 static Writer gWriter;
