@@ -3,6 +3,7 @@
 #include <kernel/utils/halt.h>
 #include <kernel/utils/panic.h>
 #include <kernel/utils/color.h>
+#include <kernel/utils/logger.h>
 #include <kernel/drivers/io.h>
 
 #include <lib/thirdparty/limine.h>
@@ -94,7 +95,7 @@ struct Writer {
 
   // Using `Writer() = default` causes a page-fault somehow on 16.0.6 using -O3
   // weird
-  Writer() {};
+  Writer() {}
 };
 
 static Writer gWriter;

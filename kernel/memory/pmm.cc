@@ -1,6 +1,7 @@
 #include "pmm.h"
 
 #include <kernel/utils/print.h>
+#include <kernel/utils/logger.h>
 #include <kernel/utils/panic.h>
 
 #include <kernel/utils/assert.h>
@@ -16,6 +17,7 @@ static BitmapAllocator allocator;
 
 auto PMM::initialize() -> void {
   allocator.initialize();
+  Log::info("Initialized PMM");
 }
 
 auto PMM::allocatePage() -> void* {

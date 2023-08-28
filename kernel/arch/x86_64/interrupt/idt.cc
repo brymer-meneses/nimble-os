@@ -1,5 +1,6 @@
 #include <kernel/utils/print.h>
 #include <kernel/utils/panic.h>
+#include <kernel/utils/logger.h>
 
 #include "idt.h"
 #include <array>
@@ -67,6 +68,8 @@ auto IDT::initialize() -> void {
 
   asm volatile ("lidt %0" :: "m" (idtptr));
   asm volatile ("sti");
+
+  Log::info("Initialized IDT");
 }
 
 auto IDT::allocateVector() -> u8 {

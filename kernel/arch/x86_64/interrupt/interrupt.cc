@@ -1,6 +1,7 @@
 
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
+#include <kernel/utils/logger.h>
 #include <array>
 
 #include "idt.h"
@@ -136,4 +137,5 @@ auto Interrupt::setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> 
 auto Interrupt::initialize() -> void {
   irqHandlers.fill(nullptr);
   exceptionHandlers.fill(nullptr);
+  Log::info("Initialized Interrupts");
 }

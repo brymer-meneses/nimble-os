@@ -2,6 +2,7 @@
 #include <kernel/memory/memory.h>
 
 #include <kernel/utils/assert.h>
+#include <kernel/utils/logger.h>
 
 #include <kernel/arch/x86_64/interrupt/interrupt.h>
 #include <kernel/arch/cpu.h>
@@ -114,4 +115,6 @@ auto Paging::unmap(uintptr_t virtualAddress) -> void {
 auto Paging::initialize() -> void {
   Interrupt::setExceptionHandler(0xE, pageFaultHandler);
   Interrupt::setExceptionHandler(0xD, genPageFaultHandler);
+
+  Log::info("Initialized Paging");
 }

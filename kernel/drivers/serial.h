@@ -5,6 +5,7 @@ namespace serial {
 
   struct SerialWriter : public sl::FormatWriter {
     auto writeChar(const char character) -> void final;
+    SerialWriter() {};
   };
 
   auto initialize() -> void;

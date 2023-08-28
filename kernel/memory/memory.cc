@@ -1,6 +1,7 @@
 #include <kernel/utils/panic.h>
 #include <kernel/utils/print.h>
 #include <kernel/utils/assert.h>
+#include <kernel/utils/logger.h>
 #include <kernel/arch/platform.h>
 #include <kernel/boot/boot.h>
 #include <lib/syslib/math.h>
@@ -52,10 +53,10 @@ auto Memory::initialize() -> void {
 
   auto kernelHeapStart = sl::math::alignUp((u64) &kernel_address_end, PAGE_SIZE) + 2 * PAGE_SIZE;
 
-
   kernelVMM.initialize(kernelHeapStart, flags);
   kernelHeap.initialize(&kernelVMM);
 
+  Log::info("Initialized Kernel Heap at {#0x16}", kernelHeapStart);
 }
 
 

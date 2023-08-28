@@ -1,6 +1,7 @@
 #include <lib/types.h>
 #include <lib/syslib/format.h>
 #include <kernel/utils/halt.h>
+#include <kernel/utils/logger.h>
 
 #include "serial.h"
 #include "io.h"
@@ -34,6 +35,7 @@ auto serial::initialize() -> void {
   }
 
   IO::outb(PORT + 4, 0x0F);
+  Log::info("Initialized serial printing");
 }
 
 auto serial::getWriter() -> SerialWriter& {

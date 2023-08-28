@@ -1,25 +1,25 @@
-#define LOG_ALL
-
-#include <kernel/utils/halt.h>
 #include <kernel/drivers/ps2.h>
 #include <kernel/drivers/serial.h>
+#include <kernel/arch/platform.h>
+#include <kernel/utils/halt.h>
 #include <kernel/graphics/framebuffer.h>
 #include <kernel/memory/memory.h>
-#include <kernel/arch/platform.h>
 
 #include <lib/libcxx.h>
+
+#define LOG_LEVEL 1
+
+#include <kernel/utils/logger.h>
 
 #ifdef ENABLE_TESTS
 #include "tests/tester.h"
 #endif
 
-#include <kernel/utils/logger.h>
-
 extern "C" auto kmain(void) -> void {
+  serial::initialize();
   LibCXX::callGlobalConstructors();
 
   Arch::initialize();
-  serial::initialize();
 
   Framebuffer::initialize();
 
@@ -29,6 +29,7 @@ extern "C" auto kmain(void) -> void {
 #ifdef ENABLE_TESTS
   Tester::main();
 #endif
+  Log::debug("this shall not be shown!");
 
   Kernel::halt();
 }

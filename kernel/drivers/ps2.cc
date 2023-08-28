@@ -1,4 +1,5 @@
 #include <kernel/drivers/ps2.h>
+#include <kernel/utils/logger.h>
 #include <kernel/arch/x86_64/interrupt/pic.h>
 #include <kernel/drivers/io.h>
 #include <kernel/utils/print.h>
@@ -61,6 +62,7 @@ auto parseScancode(u8 scancode) -> std::optional<Key>;
 auto PS2::Keyboard::initialize() -> void {
   x86_64::PIC::clearMask(1);
   Arch::Interrupt::setIrqHandler(33, keyboardHandler);
+  Log::info("Initialized PS2 Keyboard");
 }
 
 auto keyboardHandler() -> void {
