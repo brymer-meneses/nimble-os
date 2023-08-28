@@ -1,5 +1,6 @@
 #include <kernel/utils/assert.h>
 #include <kernel/arch/platform.h>
+#include <kernel/utils/logger.h>
 #include <algorithm>
 #include <lib/syslib/bit.h>
 #include <lib/syslib/math.h>
@@ -80,7 +81,12 @@ auto HeapAllocator::alloc(size_t payloadSize) -> void* {
   payloadSize = std::max(payloadSize, sizeof(FreeListNode));
 
   auto* node = mFreeListHead;
+  int i = 0;
   while (node != nullptr) {
+    if (i++ >= 1000) {
+      Serial::println("wtf");
+      break;
+    }
     auto block = node->getBlock();
 
     // this is an explicit free list so block must not be used

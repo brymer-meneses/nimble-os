@@ -3,11 +3,15 @@
 
 #include <assets/themes/themes.h>
 
+#include <algorithm>
+
 #include "tester.h"
 
 static constexpr u16 TEST_MAX = 100;
 
-static Tester::Internal::TestFunction g_tests[TEST_MAX];
+using Tester::Internal::TestFunction;
+
+static TestFunction g_tests[TEST_MAX];
 
 static u16 g_testCount = 0;
 static u16 g_numTestPass = 0;
@@ -17,13 +21,32 @@ static constexpr u8 QEMU_PORT = 0xf4;
 static constexpr u8 QEMU_EXIT_SUCCESS = 0x10;
 static constexpr u8 QEMU_EXIT_FAILURE = 0x11;
 
-auto Tester::main() -> void{
+auto Tester::main() -> void {
+  std::sort(&g_tests[0], &g_tests[g_testCount],
+            [](const TestFunction &a, const TestFunction &b) {
+              return std::lexicographical_compare(
+                a.suiteName, a.suiteName + std::strlen(a.suiteName), 
+                b.suiteName, b.suiteName + std::strlen(b.suiteName));
+            });
+
   Serial::println("--------------------------");
   // TODO: some number casting is going haywire here
   Serial::println(">> Running {} tests...", g_testCount);
   
+  const char* currentSuite = "";
   for (int i=0; i<g_testCount; i++) {
-    Serial::print("{} ...  ", g_tests[i].testName);
+
+    // TODO:
+    // add hooks to println probably using constexpr requires
+    // to define custom structs that can hook into this
+    // so that we can format structs as we like
+    const auto suite = g_tests[i].suiteName;
+    if (std::strcmp(currentSuite, suite) != 0) {
+      Serial::println("\x1b[33m\n{} \x1b[0m", suite);
+      currentSuite = suite;
+    }
+
+    Serial::print("  {} ...  ", g_tests[i].testName);
 
     g_tests[i].function();
 
@@ -38,7 +61,7 @@ auto Tester::main() -> void{
   }
 
 
-  Serial::println(">> Summary");
+  Serial::println("\n>> Summary");
   Serial::println("Test Passed: {}/{}", g_numTestPass, g_testCount);
   Serial::println("--------------------------");
 

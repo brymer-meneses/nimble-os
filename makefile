@@ -81,7 +81,7 @@ else ifeq ($(MODE), test)
 	BUILD_DIR := build/test
 	NASMFLAGS += -g -dwarf 
 	CXXFLAGS += \
-		-g -O0 \
+		-g -O3 \
 		-DENABLE_TESTS \
 		-DDEBUG
 	MACROS := -DDEBUG -DENABLE_TESTS
