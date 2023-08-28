@@ -28,10 +28,12 @@ auto Tester::main() -> void{
     g_tests[i].function();
 
     if (g_didCurrentTestPass) {
-      Serial::println("[ok]");
+      // [ok] in green
+      Serial::println("\x1b[32m[ok]\x1b[0m"); 
       g_numTestPass += 1;
     } else {
-      Serial::println("[error]");
+      // [error] in red
+      Serial::println("\x1b[31m[error]\x1b[0m");
     }
   }
 
