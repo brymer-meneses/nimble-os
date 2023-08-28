@@ -51,3 +51,9 @@ TEST(Format, Octal) {
   sl::format(writer, "{}-{#0o}", 2048, 2048);
   assertEq(writer.buffer, "2048-0o4000");
 }
+
+TEST(Format, Width) {
+  writer.reset();
+  sl::format(writer, "{#0x16}", 0xffff);
+  assertEq(writer.buffer, "0x000000000000FFFF");
+}
