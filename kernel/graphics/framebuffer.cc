@@ -20,8 +20,8 @@ struct Writer {
   u32 background = Color::encodeHEX(0x11111B);
   u32 foreground = Color::encodeHEX(0xD9E0EE);
 
-  limine_framebuffer* framebuffer = nullptr;
-  uintptr_t base = 0;
+  limine_framebuffer* volatile framebuffer = nullptr;
+  uintptr_t volatile base = 0;
 
   auto writeCharacter(const char character) -> void {
 
@@ -80,8 +80,8 @@ struct Writer {
 
   auto clearScreen() -> void {
 
-    for (size_t y = 0; y < framebuffer->height; ++y) {
-      for (size_t x = 0; x < framebuffer->width; ++x) {
+    for (u32 y = 0; y < framebuffer->height; ++y) {
+      for (u32 x = 0; x < framebuffer->width; ++x) {
         writePixel(x, y, background);
       }
     }
@@ -107,6 +107,8 @@ auto Framebuffer::initialize() -> void {
 
   gWriter.initialize(response->framebuffers[0]);
   gWriter.clearScreen();
+
+  Log::info("Initialized Framebuffer");
 }
 
 auto Framebuffer::writeNewLine() -> void {
