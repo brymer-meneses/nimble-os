@@ -94,7 +94,7 @@ auto PIC::clearMask(u8 irq) -> void {
   if (irq < 8) {
     port = PIC1_DATA;
   } else {
-    port = PIC1_DATA;
+    port = PIC2_DATA;
     irq -= 8;
   }
 

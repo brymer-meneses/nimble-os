@@ -1,17 +1,23 @@
 #include "arch.h"
 #include "x86_64/interrupt/pic.h"
+#include "x86_64/timer/pit.h"
 #include <kernel/utils/logger.h>
 
 auto arch::initialize() -> void {
 
 #ifdef __x86_64__
-  x86_64::PIC::initialize();
-  x86_64::PIC::maskAll();
-  x86_64::GDT::initialize();
-  x86_64::IDT::initialize();
+  using namespace x86_64;
 
-  x86_64::interrupt::initialize();
-  x86_64::paging::initialize();
+  PIC::initialize();
+  PIC::maskAll();
+
+  GDT::initialize();
+  IDT::initialize();
+
+  interrupt::initialize();
+
+  paging::initialize();
+  PIT::initialize();
 
   log::info("Successfully Initialized x86_64 components");
 #endif

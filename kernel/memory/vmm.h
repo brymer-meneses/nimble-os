@@ -3,9 +3,9 @@
 #include <lib/types.h>
 
 struct VMFlag {
-  bool userAccessible;
-  bool writeable;
-  bool executable;
+  bool userAccessible = false;
+  bool writeable = false;
+  bool executable = false;
 };
 
 struct VMObject {

@@ -84,8 +84,6 @@ static auto dumpInterruptFrame(const InterruptFrame* context) -> void {
 
 // this is called from `idt.asm`
 extern "C" auto interruptDispatch(InterruptFrame *context) -> void {
-  log::debug("Receieved interrupt");
-
   u16 interruptNumber = context->vector_number;
 
   if (interruptNumber < 32) {

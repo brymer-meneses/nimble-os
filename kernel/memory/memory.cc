@@ -186,3 +186,7 @@ auto kernel::free(void* address) -> void {
 auto kernel::getHeapAllocator() -> HeapAllocator& {
   return kernelHeap;
 }
+
+auto kernel::getKernelVMM() -> VMM& {
+  return kernelVMM;
+}
