@@ -10,21 +10,21 @@
 #include "paging.h"
 
 using namespace x86_64;
-using Paging::PAGE_SIZE;
-using Interrupt::InterruptFrame;
+using paging::PAGE_SIZE;
+using interrupt::InterruptFrame;
 
 static auto pageFaultHandler(InterruptFrame* frame) -> void {
-  Kernel::println("Exception: Page Fault");
-  Kernel::println("Accessed Address: {#0x16}", CPU::readCR2());
-  Kernel::println("Error Code: {#0x16}", frame->error_code);
-  Kernel::halt();
+  kernel::println("Exception: Page Fault");
+  kernel::println("Accessed Address: {#0x16}", arch::cpu::readCR2());
+  kernel::println("Error Code: {#0x16}", frame->error_code);
+  kernel::halt();
 }
 
 static auto genPageFaultHandler(InterruptFrame* frame) -> void {
-  Kernel::println("Exception: General Page Fault");
-  Kernel::println("Accessed Address: {#0x16}", CPU::readCR2());
-  Kernel::println("Error Code: {#0x16}", frame->error_code);
-  Kernel::halt();
+  kernel::println("Exception: General Page Fault");
+  kernel::println("Accessed Address: {#0x16}", arch::cpu::readCR2());
+  kernel::println("Error Code: {#0x16}", frame->error_code);
+  kernel::halt();
 }
 
 static auto invalidateTLBCache(uintptr_t address) -> void {
@@ -37,10 +37,11 @@ static constexpr u64 PTE_USER_ACCESSIBLE = 1ull << 2;
 static constexpr u64 PTE_NOT_EXECUTABLE = 1ull << 63;
 static constexpr u64 PTE_ADDRESS_MASK = 0x000ffffffffff000;
 
-static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool shouldAllocate) -> uintptr_t* {
+
+auto paging::getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool shouldAllocate) -> uintptr_t* {
   auto entry = topLevel[index];
   if ((entry & PTE_PRESENT) != 0) {
-    return (uintptr_t*) Memory::addHHDM(entry & PTE_ADDRESS_MASK);
+    return (uintptr_t*) memory::addHHDM(entry & PTE_ADDRESS_MASK);
   }
 
   if (!shouldAllocate) {
@@ -48,10 +49,10 @@ static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool s
   }
 
   const auto page = (uintptr_t) PMM::allocatePage();
-  Kernel::assert(page != 0, "allocated page is a nullptr");
-  Kernel::assert(page % PAGE_SIZE == 0, "allocated page must be page-aligned");
+  kernel::assert(page != 0, "allocated page is a nullptr");
+  kernel::assert(page % PAGE_SIZE == 0, "allocated page must be page-aligned");
 
-  std::memset((void*) Memory::addHHDM(page), 0, PAGE_SIZE);
+  std::memset((void*) memory::addHHDM(page), 0, PAGE_SIZE);
 
   auto newLevel = page;
   newLevel |= PTE_PRESENT;
@@ -63,19 +64,18 @@ static auto getNextLevel(uintptr_t* topLevel, size_t index, VMFlag flags, bool s
 
   // can't believe i spent a couple of days not being able to figure out that
   // that I am supposed to mask the bits here
-  return (uintptr_t*) Memory::addHHDM(newLevel & PTE_ADDRESS_MASK);
+  return (uintptr_t*) memory::addHHDM(newLevel & PTE_ADDRESS_MASK);
 }
 
-auto Paging::map(uintptr_t virtualAddress, uintptr_t physicalAddress, VMFlag vmflags) -> void {
-  Kernel::assert(virtualAddress % PAGE_SIZE == 0, "virtual address should be page-aligned!");
-  Kernel::assert(physicalAddress % PAGE_SIZE == 0, "physical address should be page-aligned!");
+auto paging::map(uintptr_t* pml4, uintptr_t virtualAddress, uintptr_t physicalAddress, VMFlag vmflags) -> void {
+  kernel::assert(virtualAddress % PAGE_SIZE == 0, "virtual address should be page-aligned!");
+  kernel::assert(physicalAddress % PAGE_SIZE == 0, "physical address should be page-aligned!");
 
   auto pml4Index = (virtualAddress >> 39) & 0x1ff;
   auto pdpIndex = (virtualAddress >> 30) & 0x1ff;
   auto pdIndex = (virtualAddress >> 21) & 0x1ff;
   auto ptIndex = (virtualAddress >> 12) & 0x1ff;
 
-  auto* pml4 = (uintptr_t*) Memory::addHHDM(CPU::readCR3() & PTE_ADDRESS_MASK);
   auto* pdp = getNextLevel(pml4, pml4Index, vmflags, true);
   auto* pd = getNextLevel(pdp, pdpIndex, vmflags, true);
   auto* pt = getNextLevel(pd, pdIndex, vmflags, true);
@@ -91,8 +91,8 @@ auto Paging::map(uintptr_t virtualAddress, uintptr_t physicalAddress, VMFlag vmf
 }
 
 
-auto Paging::unmap(uintptr_t virtualAddress) -> void {
-  Kernel::assert(virtualAddress % PAGE_SIZE == 0, "virtual address should be page-aligned!");
+auto paging::unmap(uintptr_t* pml4, uintptr_t virtualAddress) -> void {
+  kernel::assert(virtualAddress % PAGE_SIZE == 0, "virtual address should be page-aligned!");
 
   auto pml4Index = (virtualAddress >> 39) & 0x1ff;
   auto pdpIndex = (virtualAddress >> 30) & 0x1ff;
@@ -100,21 +100,36 @@ auto Paging::unmap(uintptr_t virtualAddress) -> void {
   auto ptIndex = (virtualAddress >> 12) & 0x1ff;
 
   VMFlag flags;
-
-  auto* pml4 = (uintptr_t*) Memory::addHHDM(CPU::readCR3() & PTE_ADDRESS_MASK);
   auto* pdp = getNextLevel(pml4, pml4Index, flags, false);
   auto* pd = getNextLevel(pdp, pdpIndex, flags, false);
   auto* pt = getNextLevel(pd, pdIndex, flags, false);
 
-  PMM::freePage(Memory::addHHDM((uintptr_t) &pt[ptIndex]));
+  PMM::freePage(memory::addHHDM((uintptr_t) &pt[ptIndex]));
   pt[ptIndex] = 0;
 
   invalidateTLBCache(virtualAddress);
 }
 
-auto Paging::initialize() -> void {
-  Interrupt::setExceptionHandler(0xE, pageFaultHandler);
-  Interrupt::setExceptionHandler(0xD, genPageFaultHandler);
+extern uintptr_t text_start_addr, text_end_addr;
+extern uintptr_t rodata_start_addr, rodata_end_addr;
+extern uintptr_t data_start_addr, data_end_addr;
 
-  Log::info("Initialized Paging");
+auto paging::initialize() -> void {
+  interrupt::setExceptionHandler(0xE, pageFaultHandler);
+  interrupt::setExceptionHandler(0xD, genPageFaultHandler);
+
+  log::info("Initialized Paging");
+}
+
+auto paging::getInitialPageMap() -> uintptr_t* {
+  return (uintptr_t*) memory::addHHDM(arch::cpu::readCR3() & PTE_ADDRESS_MASK);
+}
+
+auto paging::switchPageMap(uintptr_t* root) -> void {
+  asm volatile (
+    "mov %0, %%cr3"
+    : 
+    : "r" (memory::subHHDM((uintptr_t) root))
+    : "memory"
+  );
 }

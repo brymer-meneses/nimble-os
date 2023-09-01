@@ -1,6 +1,6 @@
 #include <tests/prelude.h>
 #include <kernel/memory/memory.h>
-#include <kernel/arch/platform.h>
+#include <kernel/arch/arch.h>
 #include <kernel/memory/heap_allocator.h>
 #include <lib/syslib/linkedList.h>
 #include <lib/syslib/allocator.h>
@@ -9,7 +9,7 @@
 // TODO: freeing linked list results to segfault somehow :<
 
 TEST(SystemLibrary, LinkedList) {
-  auto& allocator = Kernel::getHeapAllocator();
+  auto& allocator = kernel::getHeapAllocator();
   auto list = sl::LinkedList<int, HeapAllocator>(allocator);
 
   const auto size = 1000;
@@ -25,7 +25,7 @@ TEST(SystemLibrary, LinkedList) {
 }
 
 TEST(SystemLibrary, LinkedListIterator) {
-  auto& allocator = Kernel::getHeapAllocator();
+  auto& allocator = kernel::getHeapAllocator();
   auto list = sl::LinkedList<int, HeapAllocator>(allocator);
 
   for (size_t i = 0; i < 1000; i++) {

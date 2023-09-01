@@ -2,7 +2,7 @@
 #include <lib/types.h>
 #include <type_traits>
 
-namespace Framebuffer {
+namespace framebuffer {
 
   auto initialize() -> void;
   

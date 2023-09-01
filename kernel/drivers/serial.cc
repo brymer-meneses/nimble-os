@@ -8,7 +8,7 @@
 
 static constexpr u16 PORT = 0x3f8;
 
-using SerialWriter = Serial::SerialWriter;
+using SerialWriter = serial::SerialWriter;
 
 auto SerialWriter::writeChar(const char character) -> void {
   if (character == '\0') {
@@ -19,7 +19,7 @@ auto SerialWriter::writeChar(const char character) -> void {
 
 static SerialWriter writer;
 
-auto Serial::initialize() -> void {
+auto serial::initialize() -> void {
   IO::outb(PORT + 1, 0x00);
   IO::outb(PORT + 3, 0x80);
   IO::outb(PORT + 0, 0x03);
@@ -31,18 +31,18 @@ auto Serial::initialize() -> void {
   IO::outb(PORT + 0, 0xAE);
 
   if (IO::inb(PORT + 0) != 0xAE) {
-    Kernel::halt();
+    kernel::halt();
   }
 
   IO::outb(PORT + 4, 0x0F);
-  Log::info("Initialized serial printing");
+  log::info("Initialized serial printing");
 }
 
-auto Serial::getWriter() -> SerialWriter& {
+auto serial::getWriter() -> SerialWriter& {
   return writer;
 }
 
-using Colored = Serial::Colored;
+using Colored = serial::Colored;
 
 auto Colored::format(sl::FormatWriter& writer) -> void {
   const char* colorCode = "\x1b[0m";  // Default: Reset color at the end

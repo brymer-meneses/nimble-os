@@ -1,5 +1,5 @@
 #include <kernel/utils/assert.h>
-#include <kernel/arch/platform.h>
+#include <kernel/arch/arch.h>
 #include <kernel/utils/logger.h>
 #include <algorithm>
 #include <lib/syslib/bit.h>
@@ -7,7 +7,7 @@
 #include "heap_allocator.h"
 #include "pmm.h"
 
-using Arch::PAGE_SIZE;
+using arch::PAGE_SIZE;
 
 using Block = HeapAllocator::Block;
 using Header = HeapAllocator::Header;
@@ -24,8 +24,8 @@ auto Block::installHeaders() -> void {
   auto* leftEndHeader= (Header*) address;
   auto* rightEndHeader = (Header*) (address + sizeof(Header) + size);
 
-  Kernel::assert(rightEndHeader != nullptr);
-  Kernel::assert(leftEndHeader != nullptr);
+  kernel::assert(rightEndHeader != nullptr);
+  kernel::assert(leftEndHeader != nullptr);
 
   leftEndHeader->isUsed = false;
   leftEndHeader->size = size;
@@ -40,7 +40,7 @@ auto Block::getPayloadSize() const -> size_t {
 auto Block::isUsed() const -> bool {
   const auto* header1 = (Header*) address;
   auto* header2 = (Header*) (address + sizeof(Header) + size);
-  Kernel::assert(header1->isUsed == header2->isUsed);
+  kernel::assert(header1->isUsed == header2->isUsed);
   return header1->isUsed && header2->isUsed;
 }
 
@@ -51,8 +51,8 @@ auto Block::setIsUsed(bool value) -> void {
   leftEndHeader->isUsed = value;
   rightEndHeader->isUsed = value;
 
-  Kernel::assert(leftEndHeader->isUsed == rightEndHeader->isUsed);
-  Kernel::assert(leftEndHeader->size == rightEndHeader->size);
+  kernel::assert(leftEndHeader->isUsed == rightEndHeader->isUsed);
+  kernel::assert(leftEndHeader->size == rightEndHeader->size);
 }
 
 auto Block::getPayload() -> void* {
@@ -63,8 +63,8 @@ auto Block::fromAddress(void* addr) -> Block {
   auto* leftEndHeader = (Header*) ((u64) addr - sizeof(Header));
   auto* rightEndHeader = (Header*) ((u64) addr + leftEndHeader->size);
 
-  Kernel::assert(leftEndHeader->size == rightEndHeader->size);
-  Kernel::assert(leftEndHeader->isUsed == rightEndHeader->isUsed);
+  kernel::assert(leftEndHeader->size == rightEndHeader->size);
+  kernel::assert(leftEndHeader->isUsed == rightEndHeader->isUsed);
 
   return {(u64) leftEndHeader,  leftEndHeader->size};
 }
@@ -81,16 +81,11 @@ auto HeapAllocator::alloc(size_t payloadSize) -> void* {
   payloadSize = std::max(payloadSize, sizeof(FreeListNode));
 
   auto* node = mFreeListHead;
-  int i = 0;
   while (node != nullptr) {
-    if (i++ >= 1000) {
-      Serial::println("wtf");
-      break;
-    }
     auto block = node->getBlock();
 
     // this is an explicit free list so block must not be used
-    Kernel::assert(not block.isUsed());
+    kernel::assert(not block.isUsed());
 
     if (block.getPayloadSize() < payloadSize) {
       node = node->next;
@@ -145,12 +140,12 @@ auto HeapAllocator::alloc(size_t payloadSize) -> void* {
 auto HeapAllocator::free(void* addr) -> void {
 
   auto block = Block::fromAddress(addr);
-  Kernel::assert(block.isUsed(), "Tried to free an address that is not used");
+  kernel::assert(block.isUsed(), "Tried to free an address that is not used");
 
   block.setIsUsed(false);
 
   auto* freeListNode = (FreeListNode*) block.getPayload();
-  Kernel::assert(freeListNode != nullptr);
+  kernel::assert(freeListNode != nullptr);
 
   freeListNode->next = nullptr;
   freeListNode->prev = nullptr;

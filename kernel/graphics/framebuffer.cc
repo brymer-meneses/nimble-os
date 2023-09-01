@@ -100,55 +100,56 @@ struct Writer {
 
 static Writer gWriter;
 
-auto Framebuffer::initialize() -> void {
-  auto response = Boot::framebufferRequest.response;
+auto framebuffer::initialize() -> void {
+  auto response = boot::framebufferRequest.response;
   if (response == nullptr || response->framebuffer_count == 0) {
-    Kernel::halt();
+    kernel::halt();
   }
 
   gWriter.initialize(response->framebuffers[0]);
   gWriter.clearScreen();
 
-  Log::info("Initialized Framebuffer");
+  log::info("Initialized Framebuffer");
+  log::debug("Framebuffer at {#0x16}", response->framebuffers[0]->address);
 }
 
-auto Framebuffer::writeNewLine() -> void {
+auto framebuffer::writeNewLine() -> void {
   gWriter.writeNewLine();
 }
 
-auto Framebuffer::writeCharacter(const char character) -> void {
+auto framebuffer::writeCharacter(const char character) -> void {
   gWriter.writeCharacter(character);
 }
 
-auto Framebuffer::writeString(const char* string) -> void {
+auto framebuffer::writeString(const char* string) -> void {
   gWriter.writeString(string);
 }
 
-auto Framebuffer::clearScreen() -> void {
+auto framebuffer::clearScreen() -> void {
   gWriter.clearScreen();
 }
 
-auto Framebuffer::getBackground() -> u32 {
+auto framebuffer::getBackground() -> u32 {
   return gWriter.background;
 }
 
-auto Framebuffer::getForeground() -> u32 {
+auto framebuffer::getForeground() -> u32 {
   return gWriter.foreground;
 }
 
-auto Framebuffer::setForeground(const u32 color) -> void {
+auto framebuffer::setForeground(const u32 color) -> void {
   gWriter.foreground = color;
 }
 
-auto Framebuffer::setForeground(const u8 r, const u8 g, const u8 b) -> void {
+auto framebuffer::setForeground(const u8 r, const u8 g, const u8 b) -> void {
   gWriter.foreground = Color::encodeRGB(r, g, b);
 }
 
-auto Framebuffer::setBackground(const u32 color) -> void {
+auto framebuffer::setBackground(const u32 color) -> void {
   gWriter.background = Color::encodeHEX(color);
 }
 
-auto Framebuffer::setBackground(const u8 r, const u8 g, const u8 b) -> void {
+auto framebuffer::setBackground(const u8 r, const u8 g, const u8 b) -> void {
   gWriter.background = Color::encodeRGB(r, g, b);
 }
 

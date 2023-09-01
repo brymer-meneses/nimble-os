@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Kernel {
+namespace kernel {
   [[noreturn]] extern inline auto halt() -> void {
     for (;;) {
       asm volatile ("hlt");

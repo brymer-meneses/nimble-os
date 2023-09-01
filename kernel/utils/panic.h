@@ -6,26 +6,26 @@
 #include <lib/types.h>
 #include "halt.h"
 
-namespace Kernel {
+namespace kernel {
 
   struct PanicWriter : sl::FormatWriter {
     auto writeChar(const char character) -> void final {
-      Framebuffer::setForeground(0xBF616A);
-      Framebuffer::writeCharacter(character);
+      framebuffer::setForeground(0xBF616A);
+      framebuffer::writeCharacter(character);
     }
   };
 
   [[noreturn]] inline auto panic(const char* string) -> void {
     PanicWriter panicWriter{};
     panicWriter.writeString(string);
-    Kernel::halt();
+    kernel::halt();
   }
 
   template<typename ...Args>
   [[noreturn]] auto panic(const char* string, Args... args) -> void {
     PanicWriter panicWriter{};
     sl::format(panicWriter, string, args...);
-    Kernel::halt();
+    kernel::halt();
   }
 
 }

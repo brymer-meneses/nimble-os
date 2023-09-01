@@ -25,14 +25,17 @@ public:
   VMObject* mCurrent = nullptr;
   uintptr_t mBaseAddress;
   uintptr_t mCurrentAddress;
+  uintptr_t* mPageMap;
   VMFlag mFlags;
 
 public:
   VMM() = default;
 
-  auto initialize(uintptr_t baseAddress, VMFlag flags) -> void;
+  auto initialize(uintptr_t* pageMap, uintptr_t baseAddress, VMFlag flags) -> void;
   auto alloc(size_t length) -> VMObject*;
   auto free(uintptr_t virtualAddress) -> bool;
+
+  auto makeMain() -> void;
 
   struct HeapAllocator;
   friend HeapAllocator;

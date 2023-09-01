@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernel/utils/print.h>
+#include <kernel/drivers/serial.h>
 #include <tests/tester.h>
 #include <lib/libc.h>
 
@@ -12,44 +12,42 @@
 void test_##test_suite##_##test_name(); \
 __attribute__((constructor)) \
 void register_##test_suite##_##test_name() { \
-  Tester::Internal::TestFunction test; \
+  tester::internal::TestFunction test; \
   test.suiteName = #test_suite; \
   test.testName = #test_name; \
   test.function = test_##test_suite##_##test_name; \
-  Tester::Internal::registerTest(test); \
+  tester::internal::registerTest(test); \
 }; \
 void test_##test_suite##_##test_name() \
 
 template<typename Arg1, typename Arg2>
 auto assertEq(Arg1 arg1, Arg2 arg2) -> void {
   if constexpr (!std::is_same_v<Arg1, Arg2>) {
-    Tester::Internal::invokeTestFailure();
+    tester::internal::invokeTestFailure();
   }
 
 
   if constexpr (std::is_same_v<Arg1, const char*>) {
     if (std::strcmp(arg1, arg2) == 0) {
-      Tester::Internal::invokeTestSuccess();
+      tester::internal::invokeTestSuccess();
       return;
     }
   }
 
   if constexpr (std::is_same_v<Arg1, char*>) {
     if (std::strcmp(arg1, arg2) == 0) {
-      Tester::Internal::invokeTestSuccess();
+      tester::internal::invokeTestSuccess();
       return;
     }
   }
 
   if (arg1 != arg2) {
-    Framebuffer::withForeground(0xBF616A, [&arg1, &arg2](){
-      Kernel::println("Test failed");
-      Kernel::println("Left {}", arg1);
-      Kernel::println("Right {}", arg2);
-    });
-    Tester::Internal::invokeTestFailure();
+    serial::println("Test failed");
+    serial::println("Left {}", arg1);
+    serial::println("Right {}", arg2);
+    tester::internal::invokeTestFailure();
   } else {
-    Tester::Internal::invokeTestSuccess();
+    tester::internal::invokeTestSuccess();
   }
 
 }
@@ -57,20 +55,20 @@ auto assertEq(Arg1 arg1, Arg2 arg2) -> void {
 template<typename Arg1, typename Arg2>
 auto assertNeq(Arg1 arg1, Arg2 arg2) -> void {
   if constexpr (std::is_same_v<Arg1, Arg2>) {
-    Tester::Internal::invokeTestFailure();
+    tester::internal::invokeTestFailure();
   }
   if (arg1 == arg2) {
-    Tester::Internal::invokeTestFailure();
+    tester::internal::invokeTestFailure();
   } else {
-    Tester::Internal::invokeTestSuccess();
+    tester::internal::invokeTestSuccess();
   }
 }
 
 template<typename Arg1>
 auto assert(Arg1 arg1) -> void {
   if (arg1) {
-    Tester::Internal::invokeTestSuccess();
+    tester::internal::invokeTestSuccess();
   } else {
-    Tester::Internal::invokeTestFailure();
+    tester::internal::invokeTestFailure();
   }
 }

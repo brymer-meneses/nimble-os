@@ -1,11 +1,11 @@
 #include <cstddef>
 #include "libc.h"
-#include <kernel/utils/panic.h>
+#include <kernel/utils/logger.h>
 
 extern "C" {
 
 auto abort() -> void {
-  Kernel::panic("LIBC Abort");
+  log::warn("LIBC Abort");
 };
 
 auto std::memcpy(void *dest, const void *src, size_t n) -> void* {

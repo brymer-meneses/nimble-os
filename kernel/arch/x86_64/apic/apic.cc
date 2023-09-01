@@ -9,7 +9,7 @@ void APIC::initialize() {
 
   auto [ioApics, ioApicsCount] = ACPI::MADT::getIoApics();
 
-  Kernel::assert(ioApicsCount != 0);
+  kernel::assert(ioApicsCount != 0);
 
   // initialize the PIC make sure it is remapped and not touch the exception
   // vectors

@@ -7,12 +7,12 @@
 #include "x86_64/paging/paging.h"
 #endif
 
-namespace Arch {
+namespace arch {
   auto initialize() -> void;
 
 #ifdef __x86_64__
-  namespace Interrupt = x86_64::Interrupt;
-  namespace Paging = x86_64::Paging;
+  namespace interrupt = x86_64::interrupt;
+  namespace paging = x86_64::paging;
   constexpr u64 PAGE_SIZE = 0x1000;
 #endif
 

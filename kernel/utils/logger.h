@@ -7,7 +7,7 @@
 #define LOG_LEVEL 0
 #endif
 
-namespace Log {
+namespace log {
 
   enum class LogLevel : u8 {
     Debug = 0,
@@ -18,7 +18,7 @@ namespace Log {
   namespace internal {
     template <LogLevel level, typename ...Args>
     auto logImpl(const char* string, Args... args) -> void {
-      auto writer = Serial::getWriter();
+      auto writer = serial::getWriter();
       switch (level) {
         case LogLevel::Debug:
           writer.writeString("[ DEBUG ]: ");
@@ -44,7 +44,7 @@ namespace Log {
   }
 
   template <typename ...Args>
-  auto warning(const char* string, Args... args) -> void {
+  auto warn(const char* string, Args... args) -> void {
     if constexpr (LOG_LEVEL <= (u8) LogLevel::Warning) {
       internal::logImpl<LogLevel::Warning>(string, args...);
     }

@@ -6,7 +6,7 @@
 
 TEST(SystemLibrary, Vector) {
 
-  auto& allocator = Kernel::getHeapAllocator();
+  auto& allocator = kernel::getHeapAllocator();
   auto vector = sl::Vector<int, HeapAllocator>(allocator, 1);
 
   for (int i = 0; i < 1000; i++) {
@@ -18,7 +18,7 @@ TEST(SystemLibrary, Vector) {
 }
 
 TEST(SystemLibrary, VectorIterator) {
-  auto& allocator = Kernel::getHeapAllocator();
+  auto& allocator = kernel::getHeapAllocator();
   auto vector = sl::Vector<int, HeapAllocator>(allocator, 1);
 
   for (int i = 0; i < 1000; i++) {

@@ -1,12 +1,12 @@
 #pragma once
 
-namespace PS2 {
+namespace ps2 {
 
-  namespace Keyboard {
+  namespace keyboard {
     auto initialize() -> void;
   }
 
-  namespace Mouse {
+  namespace mouse {
     auto initialize() -> void;
   }
 

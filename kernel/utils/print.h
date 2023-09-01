@@ -5,13 +5,13 @@
 namespace {
   struct PrintWriter : sl::FormatWriter {
     auto writeChar(const char character) -> void final {
-      Framebuffer::writeCharacter(character);
+      framebuffer::writeCharacter(character);
     }
   };
 
 }
 
-namespace Kernel {
+namespace kernel {
 
   template<typename ...Args>
   auto print(const char* string, Args ...args) -> void {

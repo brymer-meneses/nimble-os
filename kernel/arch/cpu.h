@@ -1,7 +1,7 @@
 #pragma once
 #include <lib/types.h>
 
-namespace CPU {
+namespace arch::cpu {
 
 #ifdef __x86_64__
   extern inline auto readCR2() -> u64 {

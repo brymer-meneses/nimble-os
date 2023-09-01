@@ -17,13 +17,13 @@ static BitmapAllocator allocator;
 
 auto PMM::initialize() -> void {
   allocator.initialize();
-  Log::info("Initialized PMM");
+  log::info("Initialized PMM");
 }
 
 auto PMM::allocatePage() -> void* {
   auto page = allocator.allocatePage();
   if (!page) {
-    Kernel::panic("PMM: cannot allocate page");
+    kernel::panic("PMM: cannot allocate page");
   }
   return reinterpret_cast<void*>(page.value());
 }

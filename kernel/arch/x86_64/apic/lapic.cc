@@ -24,7 +24,7 @@ static auto lapicRead(u32 reg) -> u32 {
 void LAPIC::initialize() {
   localApicAddress = ACPI::MADT::getLocalApicAddress();
 
-  Kernel::assert(localApicAddress);
+  kernel::assert(localApicAddress);
 
   lapicWrite(LAPIC_SPURIOUS_REG, lapicRead(LAPIC_SPURIOUS_REG) | (1<<8) | 0xff);
 }

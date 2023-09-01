@@ -69,7 +69,7 @@ auto IDT::initialize() -> void {
   asm volatile ("lidt %0" :: "m" (idtptr));
   asm volatile ("sti");
 
-  Log::info("Initialized IDT");
+  log::info("Initialized IDT at {#0x16}", idtptr.base);
 }
 
 auto IDT::allocateVector() -> u8 {
@@ -78,7 +78,7 @@ auto IDT::allocateVector() -> u8 {
   static u16 vector = 32;
 
   if (vector == MAX_ENTRIES) {
-    Kernel::panic("Cannot allocate interrupt vector reached maximum");
+    kernel::panic("Cannot allocate interrupt vector reached maximum");
   } 
 
   return vector;

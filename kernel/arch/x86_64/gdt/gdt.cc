@@ -46,6 +46,6 @@ auto x86_64::GDT::initialize() -> void {
   setEntry(4, 0xF2, 0xC0);
 
   loadGDT(&gdtptr);
-  Log::info("Initialized GDT");
+  log::info("Initialized GDT at {#0x16}", &gdt);
 }
 

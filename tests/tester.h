@@ -1,10 +1,10 @@
 #pragma once
 
-namespace Tester {
+namespace tester {
 
   auto main() -> void;
 
-  namespace Internal {
+  namespace internal {
     struct TestFunction {
       const char* testName;
       const char* suiteName;

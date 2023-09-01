@@ -62,9 +62,9 @@ LDFLAGS := \
 	-T kernel/arch/$(ARCH)/linker.ld
 
 QEMUFLAGS := \
-	-m 512M \
 	-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 	-smp cpus=2 \
+	-no-reboot \
 	-serial stdio 
 
 ifeq ($(MODE), debug)

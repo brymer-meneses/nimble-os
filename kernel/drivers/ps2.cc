@@ -4,7 +4,7 @@
 #include <kernel/drivers/io.h>
 #include <kernel/utils/print.h>
 
-#include <kernel/arch/platform.h>
+#include <kernel/arch/arch.h>
 
 #include <limine.h>
 #include <lib/types.h>
@@ -59,10 +59,10 @@ struct Key {
 auto keyboardHandler() -> void;
 auto parseScancode(u8 scancode) -> std::optional<Key>;
 
-auto PS2::Keyboard::initialize() -> void {
+auto ps2::keyboard::initialize() -> void {
   x86_64::PIC::clearMask(1);
-  Arch::Interrupt::setIrqHandler(33, keyboardHandler);
-  Log::info("Initialized PS2 Keyboard");
+  arch::interrupt::setIrqHandler(33, keyboardHandler);
+  log::info("Initialized PS2 Keyboard");
 }
 
 auto keyboardHandler() -> void {
@@ -75,7 +75,7 @@ auto keyboardHandler() -> void {
   if (!key) return;
 
   if (key->type == Key::Enter) {
-    Framebuffer::writeNewLine();
+    framebuffer::writeNewLine();
     return;
   }
  
@@ -89,7 +89,7 @@ auto keyboardHandler() -> void {
 
   if (key->type != Key::Printable) return;
 
-  Kernel::print(key->input);
+  kernel::print(key->input);
 }
 
 auto parseScancode(u8 scancode) -> std::optional<Key> {

@@ -9,7 +9,7 @@
 
 static constexpr u16 TEST_MAX = 100;
 
-using Tester::Internal::TestFunction;
+using tester::internal::TestFunction;
 
 static TestFunction g_tests[TEST_MAX];
 
@@ -21,9 +21,9 @@ static constexpr u8 QEMU_PORT = 0xf4;
 static constexpr u8 QEMU_EXIT_SUCCESS = 0x10;
 static constexpr u8 QEMU_EXIT_FAILURE = 0x11;
 
-using Serial::Colored;
+using serial::Colored;
 
-auto Tester::main() -> void {
+auto tester::main() -> void {
   std::sort(&g_tests[0], &g_tests[g_testCount],
             [](const TestFunction &a, const TestFunction &b) {
               return std::lexicographical_compare(
@@ -31,9 +31,9 @@ auto Tester::main() -> void {
                 b.suiteName, b.suiteName + std::strlen(b.suiteName));
             });
 
-  Serial::println("--------------------------");
+  serial::println("--------------------------");
   // TODO: some number casting is going haywire here
-  Serial::println("Running {} tests...", g_testCount);
+  serial::println("Running {} tests...", g_testCount);
   
   const char* currentSuite = "";
   for (int i=0; i<g_testCount; i++) {
@@ -44,26 +44,26 @@ auto Tester::main() -> void {
     // so that we can format structs as we like
     const auto suite = g_tests[i].suiteName;
     if (std::strcmp(currentSuite, suite) != 0) {
-      Serial::println("{}", Colored(g_tests[i].suiteName, Colored::Yellow));
+      serial::println("{}", Colored(g_tests[i].suiteName, Colored::Yellow));
       currentSuite = suite;
     }
 
-    Serial::print("  {} ... ", g_tests[i].testName);
+    serial::print("  {} ... ", g_tests[i].testName);
 
     g_tests[i].function();
 
     if (g_didCurrentTestPass) {
-      Serial::println("{}", Colored("[ok]", Colored::Green)); 
+      serial::println("{}", Colored("[ok]", Colored::Green)); 
       g_numTestPass += 1;
     } else {
-      Serial::println("{}", Colored("[error]", Colored::Red)); 
+      serial::println("{}", Colored("[error]", Colored::Red)); 
     }
   }
 
 
-  Serial::println("\nSummary");
-  Serial::println("Test Passed: {}/{}", g_numTestPass, g_testCount);
-  Serial::println("--------------------------");
+  serial::println("\nSummary");
+  serial::println("Test Passed: {}/{}", g_numTestPass, g_testCount);
+  serial::println("--------------------------");
 
   if (g_testCount == g_numTestPass) {
     IO::outb(QEMU_PORT, QEMU_EXIT_SUCCESS);
@@ -72,15 +72,15 @@ auto Tester::main() -> void {
   }
 }
 
-auto Tester::Internal::registerTest(Tester::Internal::TestFunction test) -> void {
+auto tester::internal::registerTest(TestFunction test) -> void {
   g_tests[g_testCount] = test;
   g_testCount += 1;
 }
 
-auto Tester::Internal::invokeTestFailure() -> void {
+auto tester::internal::invokeTestFailure() -> void {
   g_didCurrentTestPass = false;
 }
 
-auto Tester::Internal::invokeTestSuccess() -> void {
+auto tester::internal::invokeTestSuccess() -> void {
   g_didCurrentTestPass = true;
 }

@@ -1,6 +1,6 @@
 #include <limine.h>
 
-namespace Boot {
+namespace boot {
 
   volatile auto hhdmRequest = limine_hhdm_request {
     .id = LIMINE_HHDM_REQUEST,
@@ -19,6 +19,11 @@ namespace Boot {
   
   volatile auto rsdpRequest = limine_rsdp_request {
     .id = LIMINE_RSDP_REQUEST,
+    .revision = 0,
+  };
+
+  volatile auto kernelAddressRequest = limine_kernel_address_request {
+    .id = LIMINE_KERNEL_ADDRESS_REQUEST,
     .revision = 0,
   };
 

@@ -52,7 +52,7 @@ static auto findIoApicWithGsi(u32 gsi) -> IoApic* {
       return current;
   };
 
-  Kernel::panic("Cannot find IOAPIC that handles the GSI: {}", gsi);
+  kernel::panic("Cannot find IOAPIC that handles the GSI: {}", gsi);
   __builtin_unreachable();
 }
 
@@ -98,8 +98,8 @@ static auto setGsiRedirect(u32 lapicId, u8 vector, u8 gsi, u16 isoFlags, bool st
   redirect |= (u64) lapicId << 56;
   u32 redirectEntry = (gsi - ioApic->globalInterruptBase) * 2 + 16;
 
-  Kernel::println("ioredtbl entry {bin}", redirect);
-  Kernel::println("redirection entry {}", redirectEntry);
+  kernel::println("ioredtbl entry {bin}", redirect);
+  kernel::println("redirection entry {}", redirectEntry);
 
   write(ioApic, redirectEntry,     (u32) (redirect));
   write(ioApic, redirectEntry + 1, (u32) (redirect >> 32));

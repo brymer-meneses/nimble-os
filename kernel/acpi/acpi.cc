@@ -43,10 +43,10 @@ auto validateChecksum(u8* byteArray, size_t size) -> bool {
 
 auto ACPI::initialize() -> void { 
   
-  limine_rsdp_response* rsdpResponse = Boot::rsdpRequest.response;
+  limine_rsdp_response* rsdpResponse = boot::rsdpRequest.response;
 
   if (rsdpResponse == nullptr || rsdpResponse->address == nullptr) {
-    Kernel::panic("ACPI not supported.");
+    kernel::panic("ACPI not supported.");
   }
 
   rsdp = (RSDP*) rsdpResponse->address;
@@ -61,11 +61,11 @@ auto ACPI::initialize() -> void {
 
 
   if (!isChecksumValid) {
-    Kernel::panic("Failed to validate RSDP");
+    kernel::panic("Failed to validate RSDP");
   }
-  Kernel::println("ACPI {}", rsdpResponse->revision);
-  Kernel::println("Uses XSDT {}", usesVersionTwo() ? "true" : "false");
-  Kernel::println("Address {hex}", (uintptr_t) rsdt);
+  kernel::println("ACPI {}", rsdpResponse->revision);
+  kernel::println("Uses XSDT {}", usesVersionTwo() ? "true" : "false");
+  kernel::println("Address {hex}", (uintptr_t) rsdt);
 };
 
 auto ACPI::findAcpiHeader(const char signature[4]) -> std::optional<AcpiHeader*> {

@@ -1,6 +1,7 @@
 
 #include "types.h"
-#include <kernel/utils/panic.h>
+#include <kernel/utils/halt.h>
+#include <kernel/utils/logger.h>
 
 // these functions need to be defined since clang expects them
 extern "C" {
@@ -21,7 +22,8 @@ extern "C" {
   }
 
   auto __cxa_pure_virtual(void) -> void {
-    Kernel::halt();
+    log::warn("pure virtual function invoked");
+    kernel::halt();
     return;
   }
 }
@@ -30,7 +32,7 @@ using ConstructorFn = void(*)();
 extern ConstructorFn start_ctors;
 extern ConstructorFn end_ctors;
 
-namespace LibCXX {
+namespace libcxx {
   auto callGlobalConstructors() -> void {
     for (ConstructorFn* i = &start_ctors;i != &end_ctors; i++) {
       (*i)();

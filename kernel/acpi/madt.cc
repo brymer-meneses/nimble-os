@@ -69,13 +69,13 @@ auto ACPI::MADT::getLocalApicAddress() -> uintptr_t {
 auto ACPI::MADT::initialize() -> void {
   std::optional<AcpiHeader*> madtHeader = ACPI::findAcpiHeader("APIC");
   if (!madtHeader) {
-    Kernel::panic("Cannot find APIC");
+    kernel::panic("Cannot find APIC");
   };
 
   MadtHeader* madt = (MadtHeader*) madtHeader.value();
 
   gLocalApicAddress = madt->localApicAddress;
-  Kernel::println("Found Local APIC at {hex}",  gLocalApicAddress);
+  kernel::println("Found Local APIC at {hex}",  gLocalApicAddress);
 
   // the madt record is found after the madt header
   MadtRecord* madtRecord = (MadtRecord*) ((u8*) madt + sizeof(MadtHeader));
@@ -103,7 +103,7 @@ auto ACPI::MADT::initialize() -> void {
         nonMaskableInterrupts[nonMaskableInterruptCount++] = (NonMaskableInterrupt*) record;
       } break; 
       default: {
-        Kernel::panic("Unknown record type {}", record->type);
+        kernel::panic("Unknown record type {}", record->type);
       } break;
     }
 

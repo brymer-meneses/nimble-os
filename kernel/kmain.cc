@@ -1,13 +1,13 @@
 #include <kernel/drivers/ps2.h>
 #include <kernel/drivers/serial.h>
-#include <kernel/arch/platform.h>
+#include <kernel/arch/arch.h>
 #include <kernel/utils/halt.h>
 #include <kernel/graphics/framebuffer.h>
 #include <kernel/memory/memory.h>
 
 #include <lib/libcxx.h>
 
-#define LOG_LEVEL 1
+#define LOG_LEVEL 0
 
 #include <kernel/utils/logger.h>
 
@@ -16,20 +16,19 @@
 #endif
 
 extern "C" auto kmain(void) -> void {
-  Serial::initialize();
-  LibCXX::callGlobalConstructors();
+  serial::initialize();
+  libcxx::callGlobalConstructors();
 
-  Arch::initialize();
+  arch::initialize();
 
-  Framebuffer::initialize();
+  framebuffer::initialize();
 
-  PS2::Keyboard::initialize();
-  Memory::initialize();
+  ps2::keyboard::initialize();
+  memory::initialize();
 
 #ifdef ENABLE_TESTS
-  Tester::main();
+  tester::main();
 #endif
-  Log::debug("this shall not be shown!");
 
-  Kernel::halt();
+  kernel::halt();
 }

@@ -1,6 +1,6 @@
 
 #pragma once
 
-namespace LibCXX {
+namespace libcxx {
   auto callGlobalConstructors() -> void;
 }

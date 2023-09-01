@@ -2,15 +2,16 @@
 #include "pmm.h"
 
 #include <kernel/utils/panic.h>
+#include <kernel/utils/logger.h>
 #include <kernel/utils/assert.h>
-#include <kernel/arch/platform.h>
+#include <kernel/arch/arch.h>
 #include <lib/syslib/bit.h>
 #include <lib/syslib/math.h>
 
 #include "memory_map.h"
 #include "memory.h"
 
-using Arch::PAGE_SIZE;
+using arch::PAGE_SIZE;
 
 #define BITMAP_FREE 0
 #define BITMAP_USED 1
@@ -83,7 +84,7 @@ auto BitmapAllocator::initialize() -> void {
   }
 
   // ensure that bitmap.data is not a nullptr
-  Kernel::assert(bitmap.data != nullptr);
+  kernel::assert(bitmap.data != nullptr);
 
   // the bitmap marks the first `n` pages as used since this is occuped by the
   // bitmap data itself
@@ -116,7 +117,7 @@ auto BitmapAllocator::freePage(uintptr_t address) -> void {
   const auto index = getBitmapIndexFromAddress(address);
 
   if (!index) {
-    Kernel::panic("Failed to free page that is out of range");
+    kernel::panic("Failed to free page that is out of range");
   }
 
   bitmap.setFree(index.value());
@@ -205,21 +206,21 @@ auto BitmapAllocator::getBitmapData(size_t i) -> u8 {
 
 auto BitmapAllocator::printInfo() -> void {
 
-  Kernel::println("Bitmap");
+  kernel::println("Bitmap");
 
   for (size_t i = 0; i < 40; i++) {
     const auto data = getBitmapData(i);
 
-    Kernel::print("{} -", i);
+    kernel::print("{} -", i);
     for (u8 j = 0; j < 8; j++) {
-      Kernel::print("{} ", (data >> j) & 1);
+      kernel::print("{} ", (data >> j) & 1);
     }
-    Kernel::println("");
+    kernel::println("");
   }
 
-  Kernel::println("Reserved {}", bitmap.reservedPages);
-  Kernel::println("Used {}", bitmap.usedPages - bitmap.reservedPages);
-  Kernel::println("Capacity {}", bitmap.maxPages);
+  kernel::println("Reserved {}", bitmap.reservedPages);
+  kernel::println("Used {}", bitmap.usedPages - bitmap.reservedPages);
+  kernel::println("Capacity {}", bitmap.maxPages);
 
-  Kernel::println("");
+  kernel::println("");
 }

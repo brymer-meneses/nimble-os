@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <lib/types.h>
 
-namespace x86_64::Interrupt {
+namespace x86_64::interrupt {
 
 // Note: As much as i want this to inherit from `Format::FormatArgument`
 // so we can trivially print it using `Kernel::println`, it kinda messes up the
