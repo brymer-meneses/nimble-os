@@ -163,9 +163,6 @@ dependencies:
 	@echo "Downloading Freestanding C++ Headers ..."
 	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
 
-build/symbols.h:
-	@./scripts/generate_kernel_symbols.py
-
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)
 	@echo "CXX $<"
@@ -177,4 +174,7 @@ $(BUILD_DIR)/%.asm.o: %.asm
 	@$(NASM) $(NASMFLAGS) $< -o $@
 
 .clangd:
-	@./scripts/generate_clangd_config.sh $(MACROS)
+	@./scripts/generate_clangd_config.py
+
+build/symbols.h:
+	@./scripts/generate_kernel_symbols.py

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import subprocess
 import os
@@ -60,8 +60,8 @@ def require_program(program: str) -> None:
         
 
 if __name__ == "__main__":
-    # require_program("nm")
-    # require_program("c++filt")
+    require_program("nm")
+    require_program("c++filt")
 
     print("Generating kernel symbols ...")
     symbols = run_command("nm build/debug/kernel.elf -S")
