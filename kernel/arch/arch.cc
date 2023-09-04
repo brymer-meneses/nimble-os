@@ -1,6 +1,7 @@
 #include "arch.h"
 #include "x86_64/interrupt/pic.h"
-#include "x86_64/timer/pit.h"
+#include "x86_64/interrupt/idt.h"
+#include "x86_64/gdt/gdt.h"
 #include <kernel/utils/logger.h>
 
 auto arch::initialize() -> void {
@@ -17,7 +18,6 @@ auto arch::initialize() -> void {
   interrupt::initialize();
 
   paging::initialize();
-  PIT::initialize();
 
   log::info("Successfully Initialized x86_64 components");
 #endif

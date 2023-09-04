@@ -31,6 +31,7 @@ CXXFLAGS := \
 	-fPIE \
 	-fno-stack-protector \
 	-fno-unwind-tables \
+	-fno-omit-frame-pointer \
 	-fno-asynchronous-unwind-tables \
 	-fno-rtti \
 	-fno-exceptions \
@@ -164,7 +165,7 @@ dependencies:
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)
-	@echo "CC $<"
+	@echo "CXX $<"
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.asm.o: %.asm

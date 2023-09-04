@@ -5,11 +5,14 @@
 #include <kernel/graphics/framebuffer.h>
 #include <kernel/memory/memory.h>
 
+#include <kernel/arch/x86_64/timer/pit.h>
+
 #include <lib/libcxx.h>
 
 #define LOG_LEVEL 0
 
 #include <kernel/utils/logger.h>
+#include <kernel/utils/assert.h>
 
 #ifdef ENABLE_TESTS
 #include "tests/tester.h"

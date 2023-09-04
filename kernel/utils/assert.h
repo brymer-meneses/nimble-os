@@ -2,7 +2,8 @@
 
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
-#include <kernel/graphics/framebuffer.h>
+#include <kernel/utils/logger.h>
+#include <kernel/arch/arch.h>
 
 #include <source_location>
 
@@ -13,15 +14,22 @@ namespace kernel {
   auto assert(bool condition, FormatArg arg, FormatArgs... args, const std::source_location loc = std::source_location::current()) -> void {
     if (condition) [[likely]] return;
 
-    kernel::print("[ Assertion Failed ]: {}:{} {} ", loc.file_name(), loc.function_name(), loc.line());
-    kernel::println(arg, args...);
+    serial::println("Assertion Failed at {}", loc.file_name());
+    serial::println("  {} | {}", loc.line(), loc.function_name());
+    serial::print("  -> ");
+    serial::println(arg, args...);
+
+    arch::debug::performStacktrace();
+
     kernel::halt();
   }
 
   inline auto assert(bool condition, const std::source_location loc = std::source_location::current()) -> void {
     if (condition) [[likely]] return;
 
-    kernel::println("[ Assertion Failed ]: {} {} {}", loc.function_name(), loc.file_name(), loc.line());
+    serial::println("Assertion Failed at {}", loc.file_name());
+    serial::println("  {} | {}", loc.line(), loc.function_name());
+    arch::debug::performStacktrace();
     kernel::halt();
   }
 #else

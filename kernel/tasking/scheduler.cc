@@ -1,6 +1,6 @@
 
-#include <kernel/arch/arch.h>
 #include "scheduler.h"
+#include <kernel/arch/arch.h>
 
 using arch::interrupt::InterruptFrame;
 
@@ -12,24 +12,33 @@ enum class ProcessStatus {
 
 struct Process {
   ProcessStatus status;
-  InterruptFrame* context;
-  Process* next;
+  InterruptFrame *context;
+  Process *next = nullptr;
 };
 
-static Process* firstProcess = nullptr;
-static Process* currentProcess = firstProcess;
+static Process *firstProcess = nullptr;
+static Process *currentProcess = nullptr;
 
-static auto idle_main() -> void {
+static auto idleMain() -> void {
   while (true) {
-    asm volatile ("hlt");
+    asm volatile("hlt");
   }
 }
 
-auto scheduler::schedule() -> void {
+static auto createProcess() -> Process { return {}; }
 
+static auto deleteProcess(Process *) -> void { return; }
+
+static auto addProcess(Process *) -> void { return; }
+
+auto scheduler::schedule() -> void {
+  if (firstProcess == nullptr) {
+
+  } else {
+  }
 }
 
 auto scheduler::initialize() -> void {
 
-}
 
+}
