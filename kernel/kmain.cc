@@ -22,16 +22,19 @@ extern "C" auto kmain(void) -> void {
   serial::initialize();
   libcxx::callGlobalConstructors();
 
+
   arch::initialize();
 
   framebuffer::initialize();
 
   ps2::keyboard::initialize();
-  memory::initialize();
+  // memory::initialize();
 
 #ifdef ENABLE_TESTS
   tester::main();
 #endif
+
+  arch::debug::performStacktrace();
 
   kernel::halt();
 }

@@ -116,7 +116,7 @@ HEADER_DEPS := $(OBJECTS:%.o=%.d)
 
 -include $(HEADER_DEPS)
 
-.PHONY: clean .clangd build
+.PHONY: clean .clangd build build/symbols.h
 
 all: run
 
@@ -135,7 +135,7 @@ debug-address:
 run: build
 	@$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso || true
 
-build: .clangd dependencies $(OBJECTS)
+build: .clangd dependencies $(OBJECTS) build/symbols.h
 	@$(LD) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/kernel.elf
 	@mkdir -p $(BUILD_DIR)/isoroot
 	@cp $(BUILD_DIR)/kernel.elf \
@@ -162,6 +162,9 @@ dependencies:
 	@cp $(DEPS_DIR)/limine/limine.h lib/thirdparty/limine.h
 	@echo "Downloading Freestanding C++ Headers ..."
 	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
+
+build/symbols.h:
+	@./scripts/generate_kernel_symbols.py
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)

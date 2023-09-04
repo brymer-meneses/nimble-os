@@ -80,6 +80,10 @@ SECTIONS
 
     data_end_address = .;
 
+    .symbols : {
+      *(.symbols)
+    }
+
     kernel_end_address  = .;
 
     /* Discard .note.* and .eh_frame since they may cause issues on some hosts. */

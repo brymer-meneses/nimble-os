@@ -1,0 +1,10 @@
+Downloading Limine ...
+make[1]: Entering directory '/Users/brymer-meneses/Projects/nimble-os/build/deps/limine'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/Users/brymer-meneses/Projects/nimble-os/build/deps/limine'
+Downloading Freestanding C++ Headers ...
+CXX kernel/acpi/acpi.cc
+CXX kernel/drivers/ps2.cc
+CXX kernel/memory/pmm.cc
+CXX kernel/memory/vmm.cc
+CXX kernel/memory/memory_map.cc
