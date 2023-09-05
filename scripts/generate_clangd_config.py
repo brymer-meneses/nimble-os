@@ -26,25 +26,26 @@ include_dirs= [
     "",
 ]
 
-def writeline(f, level, string):
+def writeln(f, level, string):
     indents = '  ' * level
     f.write(f"{indents}{string}\n")
 
 with open(".clangd", "w") as f:
-    writeline(f, 0, "Diagnostics:")
-    writeline(f, 1, "ClangTidy:")
+    writeln(f, 0, "Diagnostics:")
+    writeln(f, 1, "ClangTidy:")
 
-    writeline(f, 2, "Add:")
+    writeln(f, 2, "Add:")
     for flag in clangtidy_flags["add"]:
-        writeline(f, 3, f"- {flag}")
+        writeln(f, 3, f"- {flag}")
 
-    writeline(f, 2, "Remove:")
+    writeln(f, 2, "Remove:")
     for flag in clangtidy_flags["remove"]:
-        writeline(f, 3, f"- {flag}")
+        writeln(f, 3, f"- {flag}")
 
-    writeline(f, 0, "CompileFlags:")
-    writeline(f, 1, "Add:")
+    writeln(f, 0, "CompileFlags:")
+    writeln(f, 1, "Add:")
+
     for flag in compile_flags:
-        writeline(f, 2, f"- \"-{flag}\"")
+        writeln(f, 2, f"- \"-{flag}\"")
     for dir in include_dirs:
-        writeline(f, 2, f"- \"-I{os.path.join(os.getcwd(),dir)}\"")
+        writeln(f, 2, f"- \"-I{os.path.join(os.getcwd(),dir)}\"")
