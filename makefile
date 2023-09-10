@@ -10,10 +10,6 @@ DEPS_DIR := build/deps
 LIBS_DIR := lib
 SUPPORTED_ARCHS = x86_64
 
-ifneq ($(CXX), clang++)
-  $(error Only clang++ is supported for now)
-endif
-
 ifeq ($(filter $(ARCH),$(SUPPORTED_ARCHS)),)
   $(error ARCH "$(ARCH)" is not supported. Supported architectures: $(SUPPORTED_ARCHS))
 endif
