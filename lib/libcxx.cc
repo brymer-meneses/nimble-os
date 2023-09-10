@@ -29,12 +29,12 @@ extern "C" {
 }
 
 using ConstructorFn = void(*)();
-extern ConstructorFn start_ctors;
-extern ConstructorFn end_ctors;
+extern ConstructorFn __init_array_start;
+extern ConstructorFn __init_array_end;
 
 namespace libcxx {
   auto callGlobalConstructors() -> void {
-    for (ConstructorFn* i = &start_ctors;i != &end_ctors; i++) {
+    for (ConstructorFn* i = &__init_array_start;i != &__init_array_end; i++) {
       (*i)();
     }
   }
