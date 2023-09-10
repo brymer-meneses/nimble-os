@@ -159,6 +159,8 @@ dependencies:
 	@echo "Downloading Freestanding C++ Headers ..."
 	@-git clone https://github.com/ilobilo/libstdcxx-headers --depth=1 lib/thirdparty/libc++
 
+-include $(HEADER_DEPS)
+
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)
 	@echo "CXX $<"
