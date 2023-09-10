@@ -110,8 +110,6 @@ endif
 
 HEADER_DEPS := $(OBJECTS:%.o=%.d)
 
--include $(HEADER_DEPS)
-
 .PHONY: clean .clangd build build/symbols.h
 
 all: run

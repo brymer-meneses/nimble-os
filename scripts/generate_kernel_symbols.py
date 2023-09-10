@@ -13,7 +13,7 @@ def run_command(command: str) -> Optional[str]:
         return result.stdout
     return None
 
-header = """\
+header = """
 #pragma once
 
 #include <cstdint>
@@ -26,8 +26,7 @@ struct Symbol {
 };
 
 __attribute__((section(".symbols")))
-Symbol symbols[] 
-= {
+Symbol symbols[] = {
 """
 
 def create_output_file(symbols: str) -> None:
@@ -68,5 +67,7 @@ if __name__ == "__main__":
 
     if symbols is not None:
         create_output_file(symbols)
+    else:
+        create_output_file("0 0 T unknown")
 
 
