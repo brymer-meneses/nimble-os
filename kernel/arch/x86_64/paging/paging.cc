@@ -11,19 +11,17 @@
 
 using namespace x86_64;
 using paging::PAGE_SIZE;
-using interrupt::InterruptFrame;
 
-static auto pageFaultHandler(InterruptFrame* frame) -> void {
-  kernel::println("Exception: Page Fault");
-  kernel::println("Accessed Address: {#0x16}", arch::cpu::readCR2());
-  kernel::println("Error Code: {#0x16}", frame->error_code);
+static auto pageFaultHandler(arch::cpu::Context* frame) -> void {
+  serial::println("Exception: Page Fault");
+  serial::println("Accessed Address: {#0x16}", arch::cpu::readCR2());
+  serial::println("Error Code: {#0x16}", frame->error_code);
   kernel::halt();
 }
-
-static auto genPageFaultHandler(InterruptFrame* frame) -> void {
-  kernel::println("Exception: General Page Fault");
-  kernel::println("Accessed Address: {#0x16}", arch::cpu::readCR2());
-  kernel::println("Error Code: {#0x16}", frame->error_code);
+static auto genPageFaultHandler(arch::cpu::Context* frame) -> void {
+  serial::println("Exception: General Page Fault");
+  serial::println("Accessed Address: {#0x16}", arch::cpu::readCR2());
+  serial::println("Error Code: {#0x16}", frame->error_code);
   kernel::halt();
 }
 
@@ -115,8 +113,8 @@ extern uintptr_t rodata_start_addr, rodata_end_addr;
 extern uintptr_t data_start_addr, data_end_addr;
 
 auto paging::initialize() -> void {
-  interrupt::setExceptionHandler(0xE, pageFaultHandler);
-  interrupt::setExceptionHandler(0xD, genPageFaultHandler);
+  interrupt::setInterruptHandler(0xE, pageFaultHandler);
+  interrupt::setInterruptHandler(0xD, genPageFaultHandler);
 
   log::info("Initialized Paging");
 }

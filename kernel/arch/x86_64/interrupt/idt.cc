@@ -67,7 +67,6 @@ auto IDT::initialize() -> void {
   }
 
   asm volatile ("lidt %0" :: "m" (idtptr));
-  asm volatile ("sti");
 
   log::info("Initialized IDT at {#0x16}", idtptr.base);
 }

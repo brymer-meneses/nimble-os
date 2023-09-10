@@ -1,8 +1,13 @@
 #include "arch.h"
+
+#ifdef __x86_64__
 #include "x86_64/interrupt/pic.h"
-#include "x86_64/interrupt/idt.h"
 #include "x86_64/gdt/gdt.h"
+#endif
+
 #include <kernel/utils/logger.h>
+#include <kernel/utils/assert.h>
+
 
 auto arch::initialize() -> void {
 
@@ -13,7 +18,6 @@ auto arch::initialize() -> void {
   PIC::maskAll();
 
   GDT::initialize();
-  IDT::initialize();
 
   interrupt::initialize();
 

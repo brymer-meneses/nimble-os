@@ -25,7 +25,7 @@ namespace sl {
 
 }
 
-namespace {
+namespace sl::internal::format {
 
   struct FormatSpec {
     u8 base = 10;
@@ -60,7 +60,9 @@ namespace {
   }
 
   template <typename T>
-  inline auto formatArg(sl::FormatWriter& writer, const FormatSpec& spec, T arg) -> void { 
+  auto formatArg(sl::FormatWriter& writer, const FormatSpec& spec, T arg) -> void { 
+    static_assert(isFormatArgumentSupported<T>(), "Formatter does not know how to format the argument");
+
     constexpr auto isString = std::is_same_v<T, const char*> or std::is_same_v<T, char*>;
 
     if constexpr (isString) {
@@ -118,81 +120,14 @@ namespace {
         writer.writeChar(buffer[i-1]);
       }
 
-    } else {
-      static_assert(isFormatArgumentSupported<T>(), "Formatter does not know how to format the argument");
     }
+
   }
 
-  inline auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos) -> void { 
-    while (string[strPos] != '\0') {
-      writer.writeChar(string[strPos]);
-      strPos += 1;
-    }
-  }
-  
-  inline auto parseSpec(const char* string, size_t& strPos) -> std::optional<FormatSpec> {
-    static constexpr auto isDigit = [](char character) -> bool {
-      return '0' <= character and character <= '9';
-    };
 
-    // eat the '{'
-    strPos += 1;
-    FormatSpec spec;
+  auto parseSpec(const char* string, size_t& strPos) -> std::optional<FormatSpec>;
 
-    // if we get '{}' return the default spec
-    if (string[strPos] == '}') {
-      strPos += 1;
-      return spec;
-    }
-    
-    if (string[strPos] == '#') {
-      spec.addBasePrefix = true;
-      strPos += 1;
-    }
-
-    const auto paddingChar = string[strPos];
-    if (paddingChar != '}' and paddingChar != '\0') {
-      spec.paddingChar = paddingChar;
-    }
-
-    strPos += 1;
-    const auto base = string[strPos];
-
-    if (base != '}' and base != '\0') {
-      strPos += 1;
-      switch (base) {
-        case 'b':
-          spec.base = 2;
-          break;
-        case 'o':
-          spec.base = 8;
-          break;
-        case 'x':
-          spec.base = 16;
-          break;
-      }
-    } else {
-      return {};
-    }
-
-    if (string[strPos] == '}') {
-      strPos += 1;
-      return spec;
-    }
-
-    while (isDigit(string[strPos])) {
-      const auto digit = string[strPos] - '0';
-      spec.padding = spec.padding * 10 + digit;
-      strPos += 1;
-    }
-
-    if (string[strPos] == '}') {
-      strPos += 1;
-      return spec;
-    }
-
-    return {};
-  }
+  auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos) -> void;
 
   template <typename Arg, typename ...Args>
   auto formatImpl(sl::FormatWriter& writer, const char* string, size_t strPos, Arg arg, Args... args) -> void {
@@ -227,7 +162,6 @@ namespace {
 namespace sl {
   template <typename ...Args>
   auto format(FormatWriter& writer, const char* string, Args... args) -> void {
-    formatImpl(writer, string, 0, args...);
+    internal::format::formatImpl(writer, string, 0, args...);
   }
-
 }

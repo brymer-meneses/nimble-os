@@ -38,11 +38,11 @@ CXXFLAGS := \
 	-mno-sse \
 	-mno-sse2 \
 	-mno-red-zone \
+
+CPPFLAGS := \
 	-MMD \
 	-I lib/thirdparty/libc++/include \
 	-I lib/thirdparty/ \
-	-I lib/ \
-	-I kernel/ \
 	-I . \
 
 NASMFLAGS := \
@@ -53,7 +53,6 @@ LDFLAGS := \
 	-m elf_${ARCH} \
 	-nostdlib \
 	-static \
-	-pie \
 	--no-dynamic-linker \
 	-z max-page-size=0x1000 \
 	-T kernel/arch/$(ARCH)/linker.ld
@@ -124,7 +123,7 @@ slocs:
 	tokei . --exclude=assets/fonts/pixeloperator.cc
 
 debug-address:
-	echo $(address) | x86_64-elf-addr2line -e $(BUILD_DIR)/kernel.elf
+	objdump -D $(BUILD_DIR)/kernel.elf | c++filt | grep -e $(address) -C 4
 
 run: build
 	@$(QEMU) $(QEMUFLAGS) -cdrom $(BUILD_DIR)/nimble-os.iso || true
@@ -162,7 +161,7 @@ dependencies:
 $(BUILD_DIR)/%.cc.o: %.cc
 	@mkdir -p $(dir $@)
 	@echo "CXX $<"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.asm.o: %.asm
 	@mkdir -p $(dir $@)

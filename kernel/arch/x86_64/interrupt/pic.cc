@@ -1,6 +1,6 @@
 #include "pic.h"
 #include <kernel/drivers/io.h>
-#include <kernel/utils/print.h>
+#include <kernel/utils/assert.h>
 #include <lib/types.h>
 
 #define ICW1_ICW4           0x01
@@ -79,7 +79,9 @@ auto PIC::maskAll() -> void {
   IO::outb(PIC1_DATA, 0xff);
 }
 
-auto PIC::sendEndOfInterrupt(u8 irq) -> void {
+auto PIC::sendEOI(u8 irq) -> void {
+  // log::debug("PIC::sendEOI({})", irq);
+
   if (irq >= 8) {
     IO::outb(PIC2_COMMAND, PIC_EOI);
   };
@@ -88,6 +90,12 @@ auto PIC::sendEndOfInterrupt(u8 irq) -> void {
 }
 
 auto PIC::clearMask(u8 irq) -> void {
+  kernel::assert(irq >= PIC1_OFFSET);
+
+  log::debug("PIC::clearMask({})", irq);
+
+  irq -= PIC1_OFFSET;
+
   u16 port;
   u8 value;
 

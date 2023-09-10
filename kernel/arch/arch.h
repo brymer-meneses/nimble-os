@@ -1,5 +1,7 @@
 #pragma once
 
+#include <kernel/arch/cpu.h>
+
 #ifdef __x86_64__
 #include "x86_64/interrupt/interrupt.h"
 #include "x86_64/paging/paging.h"
@@ -17,5 +19,6 @@ namespace arch {
   namespace debug = x86_64::debug;
 #endif
 
+  extern "C" auto switchContext(arch::cpu::Context* context) -> void;
 }
 

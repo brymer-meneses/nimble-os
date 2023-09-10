@@ -2,7 +2,7 @@
 #include <kernel/utils/print.h>
 #include <kernel/utils/halt.h>
 #include <kernel/utils/logger.h>
-#include <array>
+#include <kernel/arch/x86_64/interrupt/pic.h>
 
 #include "idt.h"
 #include "interrupt.h"
@@ -43,14 +43,11 @@ static const char* exceptionMessages[] = {
     "Security Exception",
     "Reserved"};
 
-using interrupt::ExceptionHandler;
-using interrupt::InterruptFrame;
-using interrupt::IrqHandler;
+using interrupt::InterruptHandler;
 
-static ExceptionHandler exceptionHandlers[32];
-static IrqHandler irqHandlers[224];
+static InterruptHandler handlers[256];
 
-static auto dumpInterruptFrame(const InterruptFrame* context) -> void {
+static auto dumpInterruptFrame(const arch::cpu::Context* context) -> void {
   u16 interruptNumber = context->vector_number;
 
   log::warn("----------------------------");
@@ -72,69 +69,74 @@ static auto dumpInterruptFrame(const InterruptFrame* context) -> void {
   log::warn("r13 : {#0x16}", context->r13);
   log::warn("r14 : {#0x16}", context->r14);
   log::warn("r15 : {#0x16}", context->r15);
-  log::warn("rip : {#0x16}", context->iret_rip);
-  log::warn("cs : {#0x16}", context->iret_cs);
-  log::warn("flags : {#0x16}", context->iret_flags);
-  log::warn("rsp: {#0x16}", context->iret_rsp);
-  log::warn("ss : {#0x16}", context->iret_ss);
+  log::warn("rip : {#0x16}", context->iret.rip);
+  log::warn("cs : {#0x16}", context->iret.cs);
+  log::warn("flags : {#0x16}", context->iret.flags);
+  log::warn("rsp: {#0x16}", context->iret.rsp);
+  log::warn("ss : {#0x16}", context->iret.ss);
   log::warn("----------------------------");
-
   kernel::halt();
 }
 
 // this is called from `idt.asm`
-extern "C" auto interruptDispatch(InterruptFrame *context) -> void {
+extern "C" auto interruptDispatch(arch::cpu::Context *context) -> void {
+  // log::debug("interrupt: received interrupt vector {}", context->vector_number);
   u16 interruptNumber = context->vector_number;
 
   if (interruptNumber < 32) {
-    ExceptionHandler handler = exceptionHandlers[interruptNumber];
+    InterruptHandler handler = handlers[interruptNumber];
 
     if (handler == nullptr) {
       dumpInterruptFrame(context);
     } else {
       handler(context);
     }
+
     return;
   }
 
-  IrqHandler handler = irqHandlers[interruptNumber];
+  InterruptHandler handler = handlers[interruptNumber];
 
   // check if there is a handler available
   if (handler == nullptr) {
     log::warn("Received interrupt {} that has no handler.", interruptNumber);
   } else {
-    handler();
+    handler(context);
   }
 
-  return;
 }
 
-auto interrupt::setExceptionHandler(const u16 interruptNumber, ExceptionHandler handler) -> void {
+auto interrupt::setInterruptHandler(const u16 interruptNumber, interrupt::InterruptHandler handler) -> void {
+  if (handlers[interruptNumber] != nullptr) {
+    log::warn("Overriding handler {}", interruptNumber);
+  } 
 
-  if (exceptionHandlers[interruptNumber] != nullptr) {
-    log::warn("Overriding exception interrupt handler {} with a new function.",interruptNumber);
-    return;
+  handlers[interruptNumber] = handler;
+  if (interruptNumber >= 32) {
+    x86_64::PIC::clearMask(interruptNumber);
   }
 
-  exceptionHandlers[interruptNumber] = handler;
-}
-
-auto interrupt::setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> void {
-
-  if (irqHandlers[interruptNumber] != nullptr) {
-    log::warn("Overriding exception interrupt handler {} with a new function.", interruptNumber);
-    return;
-  }
-
-  irqHandlers[interruptNumber] = handler;
+  log::debug("Added handler for interrupt vector {}", interruptNumber);
 }
 
 auto interrupt::initialize() -> void {
-  std::memset(&exceptionHandlers, 0, 32 * sizeof(ExceptionHandler));
-  std::memset(&irqHandlers, 0, 224 * sizeof(ExceptionHandler));
+  std::memset(&handlers, 0, 256 * sizeof(InterruptHandler));
 
+  IDT::initialize();
+  log::debug("IRQ handlers at {#0x16} - {#0x16}", &handlers, &handlers[256]);
+
+  interrupt::enable();
   log::info("Initialized Interrupts");
+}
 
-  log::debug("Exception handlers at {#0x16} - {#0x16}", &exceptionHandlers, &exceptionHandlers[31]);
-  log::debug("IRQ handlers at {#0x16} - {#0x16}", &irqHandlers, &irqHandlers[223]);
+auto interrupt::sendEOI(const u8 interrupt) -> void {
+  PIC::sendEOI(interrupt);
+}
+
+auto interrupt::disable() -> void {
+  asm volatile ("cli");
+}
+
+auto interrupt::enable() -> void {
+  asm volatile ("sti");
 }

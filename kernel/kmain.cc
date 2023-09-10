@@ -4,8 +4,9 @@
 #include <kernel/utils/halt.h>
 #include <kernel/graphics/framebuffer.h>
 #include <kernel/memory/memory.h>
+#include <kernel/tasking/scheduler.h>
 
-#include <kernel/arch/x86_64/timer/pit.h>
+#include <kernel/arch/timer.h>
 
 #include <lib/libcxx.h>
 
@@ -18,23 +19,28 @@
 #include "tests/tester.h"
 #endif
 
+auto helloWorld(void*) -> void {
+  kernel::println("hello scheduler!");
+}
+
 extern "C" auto kmain(void) -> void {
   serial::initialize();
-  libcxx::callGlobalConstructors();
 
+  libcxx::callGlobalConstructors();
 
   arch::initialize();
 
   framebuffer::initialize();
 
   ps2::keyboard::initialize();
-  // memory::initialize();
+  memory::initialize();
+
+  scheduler::createKernelProcess("helloWorld", helloWorld, nullptr);
+  scheduler::initialize();
 
 #ifdef ENABLE_TESTS
   tester::main();
 #endif
-
-  arch::debug::performStacktrace();
 
   kernel::halt();
 }
