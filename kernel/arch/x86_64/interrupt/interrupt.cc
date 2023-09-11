@@ -75,7 +75,6 @@ static auto dumpInterruptFrame(const arch::cpu::Context* context) -> void {
   log::warn("rsp: {#0x16}", context->iret.rsp);
   log::warn("ss : {#0x16}", context->iret.ss);
   log::warn("----------------------------");
-  kernel::halt();
 }
 
 // this is called from `idt.asm`
@@ -133,10 +132,3 @@ auto interrupt::sendEOI(const u8 interrupt) -> void {
   PIC::sendEOI(interrupt);
 }
 
-auto interrupt::disable() -> void {
-  asm volatile ("cli");
-}
-
-auto interrupt::enable() -> void {
-  asm volatile ("sti");
-}

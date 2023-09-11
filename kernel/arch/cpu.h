@@ -39,15 +39,13 @@ namespace arch::cpu {
     u64 vector_number; // 112
     u64 error_code;    // 120
 
-    struct iret {
+    struct {
       u64 rip;
       u64 cs;
       u64 flags;
       u64 rsp;
       u64 ss;
-    };
-
-    iret iret;
+    } iret;
   } __attribute__((packed));
 #endif
 

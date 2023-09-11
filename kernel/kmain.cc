@@ -4,6 +4,7 @@
 #include <kernel/utils/halt.h>
 #include <kernel/graphics/framebuffer.h>
 #include <kernel/memory/memory.h>
+#include <kernel/memory/pmm.h>
 #include <kernel/tasking/scheduler.h>
 
 #include <kernel/arch/timer.h>
@@ -20,7 +21,8 @@
 #endif
 
 auto helloWorld(void*) -> void {
-  kernel::println("hello scheduler!");
+  serial::println("hello scheduler!");
+  process::exit(0);
 }
 
 extern "C" auto kmain(void) -> void {
@@ -34,7 +36,6 @@ extern "C" auto kmain(void) -> void {
 
   ps2::keyboard::initialize();
   memory::initialize();
-
   scheduler::createKernelProcess("helloWorld", helloWorld, nullptr);
   scheduler::initialize();
 

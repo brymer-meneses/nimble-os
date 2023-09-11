@@ -35,7 +35,6 @@ auto arch::timer::wait(u64 nanos) -> void {
 
 auto arch::timer::setInterruptCallback(arch::interrupt::InterruptHandler func, u64 nanos) -> void {
   log::debug("timer: setting timer interrupt callback");
-  arch::interrupt::setInterruptHandler(32, func);
 
   switch (selectedTimer) {
     case Timer::PIT:
@@ -43,4 +42,5 @@ auto arch::timer::setInterruptCallback(arch::interrupt::InterruptHandler func, u
       break;
   }
 
+  arch::interrupt::setInterruptHandler(32, func);
 }

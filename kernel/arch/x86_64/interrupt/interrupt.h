@@ -16,7 +16,12 @@ namespace x86_64::interrupt {
 
   auto initialize() -> void;
 
-  auto disable() -> void;
-  auto enable() -> void;
+  extern inline auto disable() -> void {
+    asm volatile ("cli");
+  }
+
+  extern inline auto enable() -> void {
+    asm volatile ("sti");
+  }
 
 }
