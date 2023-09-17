@@ -7,9 +7,9 @@
 // so commenting out for now.
 TEST(Heap, KernelMalloc) {
   //
-  // auto* p1 = (u64*) Kernel::malloc(8);
+  // auto* p1 = (u64*) kernel::malloc(8);
   // *p1 = 64;
-  // auto* p2 = (u64*) Kernel::malloc(8);
+  // auto* p2 = (u64*) kernel::malloc(8);
   // *p2 = 103;
   //
   // assertEq(*p1, 64);
@@ -17,6 +17,6 @@ TEST(Heap, KernelMalloc) {
   //
   // assertNeq(p1, p2);
   //
-  // Kernel::free(p1);
-  // Kernel::free(p2);
+  // kernel::free(p1);
+  // kernel::free(p2);
 }

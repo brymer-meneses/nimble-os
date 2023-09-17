@@ -87,7 +87,6 @@ auto scheduler::switchTask(Context* context) -> void {
     currentProcess = firstProcess;
   }
 
-
   arch::switchContext(currentProcess->context);
 }
 
