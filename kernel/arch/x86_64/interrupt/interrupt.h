@@ -1,44 +1,27 @@
 #pragma once
 #include <cstdint>
 #include <lib/types.h>
+#include <kernel/arch/cpu.h>
 
 namespace x86_64::interrupt {
 
 // Note: As much as i want this to inherit from `Format::FormatArgument`
 // so we can trivially print it using `Kernel::println`, it kinda messes up the
 // placement if we did so.
-struct InterruptFrame {
-  u64 r15;
-  u64 r14;
-  u64 r13;
-  u64 r12;
-  u64 r11;
-  u64 r10;
-  u64 r9;
-  u64 r8;
-  u64 rdi;
-  u64 rsi;
-  u64 rdx;
-  u64 rcx;
-  u64 rbx;
-  u64 rax;
 
-  u64 vector_number;
-  u64 error_code;
+  using InterruptHandler = void (*)(arch::cpu::Context*);
 
-  u64 iret_rip;
-  u64 iret_cs;
-  u64 iret_flags;
-  u64 iret_rsp;
-  u64 iret_ss;
-};
-
-  using ExceptionHandler = void (*)(InterruptFrame* context);
-  using IrqHandler = void (*)();
-
-  auto setExceptionHandler(const u16 interruptNumber, ExceptionHandler handler) -> void;
-  auto setIrqHandler(const u16 interruptNumber, IrqHandler handler) -> void;
+  auto setInterruptHandler(const u16 interruptNumber, InterruptHandler handler) -> void;
+  auto sendEOI(const u8 interruptNumber) -> void;
 
   auto initialize() -> void;
+
+  extern inline auto disable() -> void {
+    asm volatile ("cli");
+  }
+
+  extern inline auto enable() -> void {
+    asm volatile ("sti");
+  }
 
 }

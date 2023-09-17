@@ -11,15 +11,15 @@ namespace sl {
   class Vector {
 
   private:
-    Allocator& mAllocator;
+    Allocator* mAllocator;
     Data* mData = nullptr;
     size_t mCapacity = 0;
     size_t mSize = 0;
 
   public:
 
-    Vector(Allocator& allocator, size_t capacity) : mAllocator(allocator), mCapacity(capacity) {
-      mData = reinterpret_cast<Data*>(mAllocator.alloc(mCapacity * sizeof(Data)));
+    Vector(Allocator* allocator, size_t capacity) : mAllocator(allocator), mCapacity(capacity) {
+      mData = reinterpret_cast<Data*>(mAllocator->alloc(mCapacity * sizeof(Data)));
     }
 
     auto push(Data data) -> void {
@@ -28,9 +28,9 @@ namespace sl {
       if (mSize > mCapacity) {
         mCapacity += 1;
         
-        Data* newData = reinterpret_cast<Data*>(mAllocator.alloc(mCapacity * sizeof(Data)));
+        Data* newData = reinterpret_cast<Data*>(mAllocator->alloc(mCapacity * sizeof(Data)));
         std::memcpy(newData, mData, mSize * sizeof(Data));
-        mAllocator.free((void*) mData);
+        mAllocator->free((void*) mData);
         mData = newData;
       }
 
@@ -46,7 +46,7 @@ namespace sl {
     }
 
     auto free() -> void {
-      mAllocator.free(mData);
+      mAllocator->free(mData);
     }
 
     auto operator[] (size_t index) const -> std::optional<Data> {

@@ -26,7 +26,7 @@ making one from scratch.
     - [x] Virtual Memory Manager (Bump Allocator for now)
     - [x] Heap Allocation (`malloc` and friends)
         - [ ] Implement Block Coalescing
-- [x] Stack Trace!
+- [x] Stack Trace (with demangling)!
 - [ ] Kernel STL
     - [x] Vector
     - [x] Linked List

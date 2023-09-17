@@ -16,6 +16,7 @@ static constexpr u16 PIC_PERIOD = 838;
 auto PIT::setPeriodic(u64 count) -> void {
   IO::outb(PIC_DATA, count & 0xFF);
   IO::outb(PIC_DATA, (count >> 8) & 0xFF);
+  log::debug("PIT: set periodic {}", count);
 }
 
 auto PIT::read() -> u64 {

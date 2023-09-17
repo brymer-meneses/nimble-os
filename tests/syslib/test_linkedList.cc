@@ -9,7 +9,7 @@
 // TODO: freeing linked list results to segfault somehow :<
 
 TEST(SystemLibrary, LinkedList) {
-  auto& allocator = kernel::getHeapAllocator();
+  auto* allocator = kernel::getHeapAllocator();
   auto list = sl::LinkedList<int, HeapAllocator>(allocator);
 
   const auto size = 1000;
@@ -25,7 +25,7 @@ TEST(SystemLibrary, LinkedList) {
 }
 
 TEST(SystemLibrary, LinkedListIterator) {
-  auto& allocator = kernel::getHeapAllocator();
+  auto* allocator = kernel::getHeapAllocator();
   auto list = sl::LinkedList<int, HeapAllocator>(allocator);
 
   for (size_t i = 0; i < 1000; i++) {

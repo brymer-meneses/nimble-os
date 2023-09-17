@@ -1,6 +1,5 @@
 #include <kernel/drivers/ps2.h>
 #include <kernel/utils/logger.h>
-#include <kernel/arch/x86_64/interrupt/pic.h>
 #include <kernel/drivers/io.h>
 #include <kernel/utils/print.h>
 
@@ -56,18 +55,16 @@ struct Key {
   const char* input = "";
 };
 
-auto keyboardHandler() -> void;
+auto keyboardHandler(arch::cpu::Context* frame) -> void;
 auto parseScancode(u8 scancode) -> std::optional<Key>;
 
 auto ps2::keyboard::initialize() -> void {
-  x86_64::PIC::clearMask(1);
-  arch::interrupt::setIrqHandler(33, keyboardHandler);
+  arch::interrupt::setInterruptHandler(33, keyboardHandler);
   log::info("Initialized PS2 Keyboard");
 }
 
-auto keyboardHandler() -> void {
-  x86_64::PIC::sendEndOfInterrupt(33);
-
+auto keyboardHandler(arch::cpu::Context*) -> void {
+  arch::interrupt::sendEOI(33);
   u8 scancode = IO::inb(0x60);
 
   std::optional<Key> key = parseScancode(scancode);
