@@ -25,6 +25,11 @@ auto helloWorld(void*) -> void {
   process::exit(0);
 }
 
+auto helloThere(void*) -> void {
+  serial::println("hello there!");
+  process::exit(0);
+}
+
 extern "C" auto kmain(void) -> void {
   serial::initialize();
 
@@ -36,7 +41,9 @@ extern "C" auto kmain(void) -> void {
 
   ps2::keyboard::initialize();
   memory::initialize();
+
   scheduler::createKernelProcess("helloWorld", helloWorld, nullptr);
+  scheduler::createKernelProcess("helloThere", helloThere, nullptr);
   scheduler::initialize();
 
 #ifdef ENABLE_TESTS

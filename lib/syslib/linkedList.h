@@ -19,11 +19,11 @@ namespace sl {
 
     Node* mHead = nullptr;
     Node* mCurrent = nullptr;
-    Allocator& mAllocator;
+    Allocator* mAllocator = nullptr;
 
   private:
     auto constructNode(ElementType elem) -> Node* {
-      auto* node = (Node*) mAllocator.alloc(sizeof(Node));
+      auto* node = (Node*) mAllocator->alloc(sizeof(Node));
       node->data = elem;
       node->prev = nullptr;
       node->next = nullptr;
@@ -31,7 +31,20 @@ namespace sl {
     }
 
   public:
-    LinkedList(Allocator& allocator) : mAllocator(allocator) {};
+    LinkedList(Allocator* allocator) : mAllocator(allocator) {};
+    LinkedList() = default;
+
+    auto setAllocator(Allocator* allocator) {
+      mAllocator = allocator;
+    }
+
+    auto head() -> ElementType {
+      return mHead->data;
+    }
+
+    auto tail() -> ElementType {
+      return mCurrent->data;
+    }
 
     auto remove(ElementType elem) -> bool {
       if (mHead == nullptr) {
@@ -46,27 +59,23 @@ namespace sl {
           continue;
         }
 
-        auto* previousNode = node->prev;
+        auto* prevNode = node->prev;
         auto* nextNode = node->next;
 
-        // we are at the beginning of the list
-        if (previousNode == nullptr) {
+        if (prevNode == nullptr) {
+          // we are at the beginning of the list
           mHead = nextNode;
-          mCurrent = nextNode;
-          mAllocator.free(node);
-          return true;
-        }
-        
-        // we are at the last element of the list
-        if (nextNode == nullptr) {
-          mCurrent = previousNode;
-          mAllocator.free(node);
-          return true;
+          mHead->prev = nullptr;
+        } else if (nextNode == nullptr) {
+          // at the end of the list
+          mCurrent = prevNode;
+          mCurrent->next = nullptr;
+        } else {
+          prevNode->next = nextNode;
+          nextNode->prev = prevNode;
         }
 
-        previousNode->next = nextNode;
-        nextNode->prev = previousNode;
-        node = nextNode;
+
       };
 
       return false;
@@ -101,7 +110,7 @@ namespace sl {
     auto free() -> void {
       auto* node = mHead;
       while (node != nullptr) {
-        mAllocator.free(node);
+        mAllocator->free(node);
         node = node->next;
       }
     };

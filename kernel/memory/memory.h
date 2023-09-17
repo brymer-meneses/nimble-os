@@ -19,6 +19,6 @@ namespace memory {
 namespace kernel {
   auto malloc(size_t size) -> void*;
   auto free(void* address) -> void;
-  auto getHeapAllocator() -> HeapAllocator&;
+  auto getHeapAllocator() -> HeapAllocator*;
   auto getKernelVMM() -> VMM&;
 }

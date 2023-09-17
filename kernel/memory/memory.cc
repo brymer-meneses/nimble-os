@@ -92,8 +92,8 @@ auto kernel::free(void* address) -> void {
   return kernelHeap.free(address);
 }
 
-auto kernel::getHeapAllocator() -> HeapAllocator& {
-  return kernelHeap;
+auto kernel::getHeapAllocator() -> HeapAllocator* {
+  return &kernelHeap;
 }
 
 auto kernel::getKernelVMM() -> VMM& {

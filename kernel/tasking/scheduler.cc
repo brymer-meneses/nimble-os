@@ -29,14 +29,36 @@ static auto addProcess(Process* process) -> void {
     currentProcess = process;
   } else {
     currentProcess->next = process;
+    process->prev = currentProcess;
+
     currentProcess = process;
   }
 }
 
 static auto deleteProcess(Process* process) -> void {
-  if (process == firstProcess) {
-    firstProcess = nullptr;
-    currentProcess = nullptr;
+  auto* prevProcess = process->prev;
+  auto* nextProcess = process->next;
+  
+  // are we at the beginning?
+  if (prevProcess == nullptr) {
+    // then we set the first process as the next node
+    // since we're deleting the first one
+    firstProcess = nextProcess;
+
+    if (nextProcess != nullptr) {
+      nextProcess->prev = nullptr;
+      currentProcess = firstProcess;
+    } else {
+      currentProcess = nextProcess;
+    }
+
+  // are we at the end?
+  } else if (nextProcess == nullptr) {
+    currentProcess = prevProcess;
+    currentProcess->next = nullptr;
+  } else {
+    prevProcess->next = nextProcess;
+    nextProcess->prev = prevProcess;
   }
 }
 
@@ -45,8 +67,6 @@ auto scheduler::switchTask(Context* context) -> void {
 
   if (currentProcess != nullptr and currentProcess->status == ProcessStatus::Dead) {
     deleteProcess(currentProcess);
-  } else if (currentProcess != nullptr) {
-    currentProcess->status = ProcessStatus::Running;
   }
 
   // we have no process to run
@@ -54,16 +74,19 @@ auto scheduler::switchTask(Context* context) -> void {
     kernel::halt();
   }
 
-  if (firstProcess == currentProcess) {
-    arch::switchContext(firstProcess->context);
-  } 
-  
-  currentProcess->context = context;
-  if (currentProcess->next == nullptr) {
-    currentProcess = firstProcess;
-  } else {
-    currentProcess = currentProcess->next;
+  // if it is currently running, we save the context
+  if (currentProcess->status == ProcessStatus::Running) {
+    currentProcess->context = context;
+    currentProcess->status = ProcessStatus::Running;
   }
+
+  // move to beginning if we reach the end
+  if (currentProcess->next != nullptr) {
+    currentProcess = currentProcess->next;
+  } else {
+    currentProcess = firstProcess;
+  }
+
 
   arch::switchContext(currentProcess->context);
 }
@@ -77,6 +100,7 @@ auto scheduler::createKernelProcess(const char* name, Function func, FunctionArg
 
   auto* process = (Process*) kernel::malloc(sizeof(Process));
   process->next = nullptr;
+  process->prev = nullptr;
   process->processId = currentProcessId++;
   process->status = ProcessStatus::Ready;
   std::memcpy(process->name, name, PROCESS_NAME_MAX_LENGTH);
