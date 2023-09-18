@@ -32,7 +32,7 @@ public:
   VMM() = default;
 
   auto initialize(uintptr_t* pageMap, uintptr_t baseAddress, VMFlag flags) -> void;
-  auto alloc(size_t length) -> VMObject*;
+  auto alloc(size_t numPages) -> VMObject*;
   auto free(uintptr_t virtualAddress) -> bool;
 
   auto makeMain() -> void;

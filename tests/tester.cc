@@ -32,16 +32,11 @@ auto tester::main() -> void {
             });
 
   serial::println("--------------------------");
-  // TODO: some number casting is going haywire here
   serial::println("Running {} tests...", g_testCount);
   
   const char* currentSuite = "";
   for (int i=0; i<g_testCount; i++) {
 
-    // TODO:
-    // add hooks to println probably using constexpr requires
-    // to define custom structs that can hook into this
-    // so that we can format structs as we like
     const auto suite = g_tests[i].suiteName;
     if (std::strcmp(currentSuite, suite) != 0) {
       serial::println("{}", Colored(g_tests[i].suiteName, Colored::Yellow));

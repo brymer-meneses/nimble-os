@@ -6,8 +6,6 @@
 #include <lib/syslib/allocator.h>
 #include <lib/syslib/math.h>
 
-// TODO: freeing linked list results to segfault somehow :<
-
 TEST(SystemLibrary, LinkedList) {
   auto* allocator = kernel::getHeapAllocator();
   auto list = sl::LinkedList<int, HeapAllocator>(allocator);

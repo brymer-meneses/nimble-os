@@ -77,8 +77,11 @@ auto HeapAllocator::initialize(VMM* vmm) -> void {
 
 auto HeapAllocator::alloc(size_t payloadSize) -> void* {
 
+  // NOTE: Multiplying by 2 seems to fix some obscure bugs
+  // TODO: figure out why this fixes it
+  //
   // ensure that we can fit a freeListNode in the payload
-  payloadSize = std::max(payloadSize, sizeof(FreeListNode));
+  payloadSize = std::max(payloadSize, 2 * sizeof(FreeListNode));
 
   auto* node = mFreeListHead;
   while (node != nullptr) {
