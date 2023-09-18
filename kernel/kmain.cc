@@ -20,6 +20,11 @@
 #include "tests/tester.h"
 #endif
 
+auto helloWorld() -> void {
+  serial::println("hello scheduler!");
+  process::exit(0);
+}
+
 extern "C" auto kmain(void) -> void {
   serial::initialize();
 
@@ -31,6 +36,9 @@ extern "C" auto kmain(void) -> void {
 
   ps2::keyboard::initialize();
   memory::initialize();
+
+  scheduler::createKernelProcess("helloWorld", helloWorld);
+  scheduler::initialize();
 
 #ifdef ENABLE_TESTS
   tester::main();

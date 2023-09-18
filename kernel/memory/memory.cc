@@ -76,11 +76,14 @@ auto memory::createPageMap() -> uintptr_t* {
   return pagemap;
 }
 
-auto memory::allocateStack(uintptr_t* pagemap, VMFlag flags) -> uintptr_t* {
-  auto stackPos = sl::math::alignDown(hhdmOffset, PAGE_SIZE) - 2 * PAGE_SIZE;
+auto memory::allocateStack(uintptr_t* pagemap, VMFlag flags) -> uintptr_t {
+  kernel::assert(pagemap != nullptr, "pagemap must not be a nullptr");
+
+  auto stackTop = 0xFFFFFFFFFFFF0000;
   auto page = (uintptr_t) PMM::allocatePage();
-  arch::paging::map(pagemap, stackPos, page, flags);
-  return (uintptr_t*) stackPos;
+
+  arch::paging::map(pagemap, stackTop - PAGE_SIZE, page, flags);
+  return stackTop;
 }
 
 

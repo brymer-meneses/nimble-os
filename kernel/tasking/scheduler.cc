@@ -94,7 +94,7 @@ auto scheduler::getCurrentProcess() -> Process* {
   return currentProcess;
 }
 
-auto scheduler::createKernelProcess(const char* name, Function func, FunctionArg arg) -> void {
+auto scheduler::createKernelProcess(const char* name, Function func) -> void {
   log::debug("scheduler: creating kernel process `{}` at func {#0x16}", name, func);
 
   auto* process = (Process*) kernel::malloc(sizeof(Process));
@@ -109,7 +109,9 @@ auto scheduler::createKernelProcess(const char* name, Function func, FunctionArg
   process->context->iret.ss = KERNEL_SS;
   process->context->iret.rip = (u64) func;
   process->context->iret.flags = 0x202;
-  process->context->iret.rsp = (u64) kernel::malloc(4096);
+
+  VMFlag flags = {.userAccessible = true, .writeable=true, .executable=true};
+  process->context->iret.rsp = memory::allocateStack(memory::getKernelPageMap(), flags);
   addProcess(process);
 }
 
