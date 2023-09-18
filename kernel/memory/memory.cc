@@ -18,13 +18,16 @@
 
 using arch::PAGE_SIZE;
 
-// this should be defined at `linker.ld`
-
 static HeapAllocator kernelHeap;
 static VMM kernelVMM;
 
-
 static u64 hhdmOffset = 0;
+
+// this should be defined at `linker.ld`
+extern uintptr_t kernel_start_address;
+extern uintptr_t kernel_end_address;
+
+static uintptr_t* kernelPageMap = nullptr;
 
 auto memory::addHHDM(u64 physicalAddress) -> u64 {
   kernel::assert(hhdmOffset, "VMM not initialized");
@@ -37,10 +40,6 @@ auto memory::subHHDM(u64 virtualAddress) -> u64 {
 
   return virtualAddress - hhdmOffset;
 }
-
-extern uintptr_t kernel_start_address;
-extern uintptr_t kernel_end_address;
-static uintptr_t* kernelPageMap = nullptr;
 
 auto memory::getKernelPageMap() -> uintptr_t* {
   return kernelPageMap;

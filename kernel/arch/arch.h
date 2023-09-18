@@ -1,6 +1,7 @@
 #pragma once
 
 #include <kernel/arch/cpu.h>
+#include <kernel/memory/vmm.h>
 
 #ifdef __x86_64__
 #include "x86_64/interrupt/interrupt.h"
@@ -19,6 +20,10 @@ namespace arch {
   namespace debug = x86_64::debug;
 #endif
 
-  extern "C" auto switchContext(arch::cpu::Context* context) -> void;
+  extern "C" auto switchContext(cpu::Context* context) -> void;
+
+  using Function = void(*)();
+
+  auto initializeContext(cpu::Context* ctx, Function func, VMFlag flags) -> void;
 }
 

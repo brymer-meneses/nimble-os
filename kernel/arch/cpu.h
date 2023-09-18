@@ -47,6 +47,7 @@ namespace arch::cpu {
       u64 ss;
     } iret;
   } __attribute__((packed));
+
 #endif
 
 }

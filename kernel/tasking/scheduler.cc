@@ -13,9 +13,6 @@ using process::Process;
 using process::ProcessStatus;
 using process::PROCESS_NAME_MAX_LENGTH;
 
-static constexpr u8 KERNEL_CS = 0x8;
-static constexpr u8 KERNEL_SS = 0x10;
-
 static Process* firstProcess = nullptr;
 static Process* currentProcess = nullptr;
 
@@ -77,16 +74,16 @@ auto scheduler::switchTask(Context* context) -> void {
   // if it is currently running, we save the context
   if (currentProcess->status == ProcessStatus::Running) {
     currentProcess->context = context;
-    currentProcess->status = ProcessStatus::Running;
   }
 
-  // move to beginning if we reach the end
   if (currentProcess->next != nullptr) {
     currentProcess = currentProcess->next;
   } else {
+    // move to beginning if we reach the end
     currentProcess = firstProcess;
   }
 
+  currentProcess->status = ProcessStatus::Running;
   arch::switchContext(currentProcess->context);
 }
 
@@ -105,13 +102,7 @@ auto scheduler::createKernelProcess(const char* name, Function func) -> void {
   std::memcpy(process->name, name, PROCESS_NAME_MAX_LENGTH);
 
   process->context = (arch::cpu::Context*) kernel::malloc(sizeof(arch::cpu::Context));
-  process->context->iret.cs = KERNEL_CS;
-  process->context->iret.ss = KERNEL_SS;
-  process->context->iret.rip = (u64) func;
-  process->context->iret.flags = 0x202;
-
-  VMFlag flags = {.userAccessible = true, .writeable=true, .executable=true};
-  process->context->iret.rsp = memory::allocateStack(memory::getKernelPageMap(), flags);
+  arch::initializeContext(process->context, func, {.userAccessible=false, .writeable=true, .executable=true,});
   addProcess(process);
 }
 
