@@ -23,7 +23,5 @@ namespace arch {
   extern "C" auto switchContext(cpu::Context* context) -> void;
 
   using Function = void(*)();
-
-  auto initializeContext(cpu::Context* ctx, Function func, VMFlag flags) -> void;
 }
 

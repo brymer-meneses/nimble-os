@@ -16,22 +16,6 @@ using process::PROCESS_NAME_MAX_LENGTH;
 static Process* firstProcess = nullptr;
 static Process* currentProcess = nullptr;
 
-static size_t currentProcessId = 0;
-
-static auto addProcess(Process* process) -> void {
-  log::debug("scheduler: added process `{}` with rip at {#0x16}", process->name, process->context->iret.rip);
-
-  if (firstProcess == nullptr and currentProcess == nullptr) {
-    firstProcess = process;
-    currentProcess = process;
-  } else {
-    currentProcess->next = process;
-    process->prev = currentProcess;
-
-    currentProcess = process;
-  }
-}
-
 static auto deleteProcess(Process* process) -> void {
   auto* prevProcess = process->prev;
   auto* nextProcess = process->next;
@@ -56,6 +40,22 @@ static auto deleteProcess(Process* process) -> void {
   } else {
     prevProcess->next = nextProcess;
     nextProcess->prev = prevProcess;
+  }
+
+  delete process;
+}
+
+auto scheduler::addProcess(Process* process) -> void {
+  log::debug("scheduler: added process `{}` with rip at {#0x16}", process->name, process->context->iret.rip);
+
+  if (firstProcess == nullptr and currentProcess == nullptr) {
+    firstProcess = process;
+    currentProcess = process;
+  } else {
+    currentProcess->next = process;
+    process->prev = currentProcess;
+
+    currentProcess = process;
   }
 }
 
@@ -89,21 +89,6 @@ auto scheduler::switchTask(Context* context) -> void {
 
 auto scheduler::getCurrentProcess() -> Process* {
   return currentProcess;
-}
-
-auto scheduler::createKernelProcess(const char* name, Function func) -> void {
-  log::debug("scheduler: creating kernel process `{}` at func {#0x16}", name, func);
-
-  auto* process = (Process*) kernel::malloc(sizeof(Process));
-  process->next = nullptr;
-  process->prev = nullptr;
-  process->processId = currentProcessId++;
-  process->status = ProcessStatus::Ready;
-  std::memcpy(process->name, name, PROCESS_NAME_MAX_LENGTH);
-
-  process->context = (arch::cpu::Context*) kernel::malloc(sizeof(arch::cpu::Context));
-  arch::initializeContext(process->context, func, {.userAccessible=false, .writeable=true, .executable=true,});
-  addProcess(process);
 }
 
 auto scheduler::initialize() -> void {

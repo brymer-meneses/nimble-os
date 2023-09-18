@@ -1,5 +1,6 @@
 #pragma once
 #include <lib/types.h>
+#include <kernel/memory/vmm.h>
 
 namespace arch::cpu {
 
@@ -46,6 +47,10 @@ namespace arch::cpu {
       u64 rsp;
       u64 ss;
     } iret;
+
+    using Function = void(*)();
+
+    Context(Function func, bool isUserAccessible);
   } __attribute__((packed));
 
 #endif

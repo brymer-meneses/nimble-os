@@ -37,8 +37,10 @@ extern "C" auto kmain(void) -> void {
   ps2::keyboard::initialize();
   memory::initialize();
 
-  scheduler::createKernelProcess("helloWorld", helloWorld);
+  auto* process = new process::Process("helloWorld", helloWorld, false);
+  scheduler::addProcess(process);
   scheduler::initialize();
+
 
 #ifdef ENABLE_TESTS
   tester::main();

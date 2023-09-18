@@ -23,6 +23,10 @@ namespace process {
     char name[PROCESS_NAME_MAX_LENGTH];
     Process* next = nullptr;
     Process* prev = nullptr;
+
+    using Function = void(*)();
+
+    Process(const char* name, Function func, bool isUserAccessible);
   };
 
 }

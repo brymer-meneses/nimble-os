@@ -9,8 +9,6 @@
 #include <kernel/utils/logger.h>
 #include <kernel/utils/assert.h>
 
-static constexpr u8 KERNEL_CS = 0x8;
-static constexpr u8 KERNEL_SS = 0x10;
 
 auto arch::initialize() -> void {
 
@@ -34,11 +32,4 @@ auto arch::initialize() -> void {
 
 }
 
-auto arch::initializeContext(cpu::Context* ctx, Function func, VMFlag flags) -> void {
-  ctx->iret.cs = KERNEL_CS;
-  ctx->iret.ss = KERNEL_SS;
-  ctx->iret.rip = (u64) func;
-  ctx->iret.flags = 0x202;
-  ctx->iret.rsp = memory::allocateStack(memory::getKernelPageMap(), flags);
-}
 
