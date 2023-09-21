@@ -70,13 +70,13 @@ auto paging::map(uintptr_t* pml4, uintptr_t virtualAddress, uintptr_t physicalAd
   kernel::assert(physicalAddress % PAGE_SIZE == 0, "physical address should be page-aligned!");
 
   auto pml4Index = (virtualAddress >> 39) & 0x1ff;
-  auto pdpIndex = (virtualAddress >> 30) & 0x1ff;
-  auto pdIndex = (virtualAddress >> 21) & 0x1ff;
-  auto ptIndex = (virtualAddress >> 12) & 0x1ff;
+  auto pml3Index = (virtualAddress >> 30) & 0x1ff;
+  auto pml2Index = (virtualAddress >> 21) & 0x1ff;
+  auto pml1Index = (virtualAddress >> 12) & 0x1ff;
 
-  auto* pdp = getNextLevel(pml4, pml4Index, vmflags, true);
-  auto* pd = getNextLevel(pdp, pdpIndex, vmflags, true);
-  auto* pt = getNextLevel(pd, pdIndex, vmflags, true);
+  auto* pml3 = getNextLevel(pml4, pml4Index, vmflags, true);
+  auto* pml2 = getNextLevel(pml3, pml3Index, vmflags, true);
+  auto* pml1 = getNextLevel(pml2, pml2Index, vmflags, true);
 
   auto entry = physicalAddress;
   entry |= PTE_PRESENT;
@@ -84,7 +84,7 @@ auto paging::map(uintptr_t* pml4, uintptr_t virtualAddress, uintptr_t physicalAd
   entry |= !vmflags.executable ? PTE_NOT_EXECUTABLE : 0;
   entry |= vmflags.userAccessible ? PTE_USER_ACCESSIBLE : 0;
 
-  pt[ptIndex] = entry;
+  pml1[pml1Index] = entry;
   invalidateTLBCache(virtualAddress);
 }
 

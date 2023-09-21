@@ -51,6 +51,7 @@ namespace arch::cpu {
     using Function = void(*)();
 
     Context(Function func, bool isUserAccessible);
+    ~Context() = default;
   } __attribute__((packed));
 
 #endif

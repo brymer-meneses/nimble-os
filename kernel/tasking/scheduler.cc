@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include <kernel/arch/arch.h>
 #include <kernel/utils/halt.h>
+#include <kernel/utils/assert.h>
 #include <kernel/arch/timer.h>
 #include <kernel/memory/memory.h>
 #include <kernel/utils/logger.h>
@@ -19,6 +20,13 @@ static Process* currentProcess = nullptr;
 static auto deleteProcess(Process* process) -> void {
   auto* prevProcess = process->prev;
   auto* nextProcess = process->next;
+
+  if (prevProcess == nullptr and nextProcess == nullptr) {
+    firstProcess = nullptr;
+    currentProcess = nullptr;
+    delete process;
+    return;
+  }
   
   // are we at the beginning?
   if (prevProcess == nullptr) {
@@ -26,12 +34,9 @@ static auto deleteProcess(Process* process) -> void {
     // since we're deleting the first one
     firstProcess = nextProcess;
 
-    if (nextProcess != nullptr) {
-      nextProcess->prev = nullptr;
-      currentProcess = firstProcess;
-    } else {
-      currentProcess = nextProcess;
-    }
+    // we're guaranteed that nextProcess is not a nullptr
+    nextProcess->prev = nullptr;
+    currentProcess = nextProcess;
 
   // are we at the end?
   } else if (nextProcess == nullptr) {
@@ -46,7 +51,7 @@ static auto deleteProcess(Process* process) -> void {
 }
 
 auto scheduler::addProcess(Process* process) -> void {
-  log::debug("scheduler: added process `{}` with rip at {#0x16}", process->name, process->context->iret.rip);
+  log::debug("scheduler: adding new process");
 
   if (firstProcess == nullptr and currentProcess == nullptr) {
     firstProcess = process;
@@ -66,10 +71,8 @@ auto scheduler::switchTask(Context* context) -> void {
     deleteProcess(currentProcess);
   }
 
-  // we have no process to run
-  if (firstProcess == nullptr) {
-    kernel::halt();
-  }
+  // firstProcess will not be a nullptr since we have an `idleMain`
+  kernel::assert(firstProcess != nullptr);
 
   // if it is currently running, we save the context
   if (currentProcess->status == ProcessStatus::Running) {
@@ -91,7 +94,12 @@ auto scheduler::getCurrentProcess() -> Process* {
   return currentProcess;
 }
 
+static auto idleMain() -> void {
+  kernel::halt();
+}
+
 auto scheduler::initialize() -> void {
+  scheduler::addProcess(new Process("idle main", idleMain, false));
   arch::timer::setInterruptCallback(switchTask, 1000000000000000000);
   log::info("scheduler: successfully initialized");
 }

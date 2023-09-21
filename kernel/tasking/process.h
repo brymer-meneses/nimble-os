@@ -27,6 +27,7 @@ namespace process {
     using Function = void(*)();
 
     Process(const char* name, Function func, bool isUserAccessible);
+    ~Process();
   };
 
 }

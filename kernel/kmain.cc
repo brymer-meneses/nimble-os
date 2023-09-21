@@ -16,35 +16,29 @@
 #include <kernel/utils/logger.h>
 #include <kernel/utils/assert.h>
 
-#ifdef ENABLE_TESTS
-#include "tests/tester.h"
-#endif
+using process::Process;
 
-auto helloWorld() -> void {
-  serial::println("hello scheduler!");
-  process::exit(0);
-}
+auto kmain() -> void;
 
-extern "C" auto kmain(void) -> void {
+extern "C" auto init() -> void {
   serial::initialize();
-
   libcxx::callGlobalConstructors();
 
   arch::initialize();
 
   framebuffer::initialize();
 
-  ps2::keyboard::initialize();
   memory::initialize();
+  ps2::keyboard::initialize();
 
-  auto* process = new process::Process("helloWorld", helloWorld, false);
-  scheduler::addProcess(process);
+  scheduler::addProcess(new Process("kmain", kmain, false));
   scheduler::initialize();
+}
 
+auto kmain() -> void {
+  log::info("entering kmain");
+  
 
-#ifdef ENABLE_TESTS
-  tester::main();
-#endif
+  process::exit(0);
 
-  kernel::halt();
 }

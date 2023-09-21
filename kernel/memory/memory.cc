@@ -78,10 +78,16 @@ auto memory::createPageMap() -> uintptr_t* {
 auto memory::allocateStack(uintptr_t* pagemap, bool isUserAccessible) -> uintptr_t {
   kernel::assert(pagemap != nullptr, "pagemap must not be a nullptr");
 
-  auto stackTop = 0xFFFFFFFFFFFF0000;
-  auto page = (uintptr_t) PMM::allocatePage();
+  constexpr auto stackTop = 0xFFFFFFFFFFFFF000;
+  constexpr auto stackBottom = stackTop - 4 * PAGE_SIZE;
+
   VMFlag flags = {.userAccessible=isUserAccessible, .writeable=true, .executable=true};
-  arch::paging::map(pagemap, stackTop - PAGE_SIZE, page, flags);
+
+  for (int i = 0; i < 4; i++) {
+    auto page = (uintptr_t) PMM::allocatePage();
+    arch::paging::map(pagemap, stackBottom + i * PAGE_SIZE, page, flags);
+  }
+
   return stackTop;
 }
 
